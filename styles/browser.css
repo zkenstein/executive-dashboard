@@ -1,0 +1,183 @@
+﻿/* This file contains the mobile specific style settings for "Executive Dashboard" template */
+/*
+ | Copyright 2012 Esri
+ |
+ | Licensed under the Apache License, Version 2.0 (the "License");
+ | you may not use this file except in compliance with the License.
+ | You may obtain a copy of the License at
+ |
+ |    http://www.apache.org/licenses/LICENSE-2.0
+ |
+ | Unless required by applicable law or agreed to in writing, software
+ | distributed under the License is distributed on an "AS IS" BASIS,
+ | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ | See the License for the specific language governing permissions and
+ | limitations under the License.
+ */
+/* The common settings for the styles are defined in "dashboard.css" */
+/* Use this file to perform the following: */
+/* 1.  Set the body styles                      - { Style(s) to look for: html, body } */
+/* 2.  Set the styles for animations            - { Style(s) to look for: divPod,divPodGreen,divPodRed,imgOptions,imgLocate}*/
+/* 3.  Set styles for conatiners                - { Style(s) to look for: divWelcomeContent,tblLoginScreenContainer,.tblApplicationHeader,
+                                                                          .tblMapApplicationHeader,.tblBottomContainer,.tblInfoContainer } */
+/* 4.  Set the styles for text controls         - { Style(s) to look for: inputText,textarea}*/
+/* 5.  Set the styles for settings page contents- { Style(s) to look for: tdLabel,tdSettingsHeader,divRSSFeedContent,divTwitterFeedContent,errMargin}*/
+/* 6. Set the styles for Address Container,
+      Bookmark Container and More Container
+      Styles                                    - { Style(s) to look for: tdHeader,imgOptions,divBookMarksResultsContent,divMoreResultsContent,bottomborder,imgLocate}*/
+/* 7. Set the styles for news and pod containers- { Style(s) to look for: divNAEDisplayContainer,divNAEDisplayContent,divLayerContainer,divLayerContent}*/
+/* 8.  Set the styles for customized buttons    - { Style(s) to look for: customButton,customDisabledButton}*/
+/* 9.  Set the styles for share container       - { Style(s) to look for: imgShare}*/
+
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* Styles for body*/
+
+body
+{
+   font-size: 11px;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/*animations */
+
+.divPod,.divPodGreen,.divPodRed,.imgOptions,.imgLocate
+{
+    transition:all ease 1000ms;
+   -webkit-transition:all ease 1000ms;
+   -moz-transition:all ease 1000ms;
+}
+.imgOptions:hover,.imgLocate:hover,.divPod:hover,.divPodGreen:hover,.divPodRed:hover
+{
+   transform: scale(1.1);
+  -webkit-transform: scale(1.1);
+  -moz-transform: scale(1.1);
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Styles for containers*/
+
+.divWelcomeContent
+{
+    height:270px;
+}
+
+.tblLoginScreenContainer,.tblApplicationHeader,.tblMapApplicationHeader,.tblBottomContainer,.tblInfoContainer
+{
+   width:100%;
+   height:100%
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Styles for text controls*/
+
+.inputText
+{
+    height:25px;
+    font-size:11px !important;
+}
+.textarea
+{
+    font-size:11px !important;
+    font-family: Verdana !important;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Styles for settings page contents*/
+
+.tdLabel
+{
+    width:140px;
+}
+.tdSettingsHeader
+{
+    height:30px;
+}
+.divRSSFeedContent,.divTwitterFeedContent
+{
+    height:165px;
+}
+.errMargin
+{
+    padding-left:150px;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/*AddressContainer,BookmarkContainer and MoreContainer Styles*/
+
+.tdHeader
+{
+    width: 50px;
+    font-weight: bolder;
+}
+.imgOptions
+{
+    width:30px;
+    height:30px;
+}
+.divBookMarksResultsContent
+{
+    height:182px;
+}
+.divMoreResultsContent
+{
+    height:240px;
+}
+.bottomborder
+{
+    height:20px;
+}
+.imgLocate
+{
+    height: 30px !important;
+    width: 30px !important;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Styles for News and pods containers*/
+
+.divLayerContainer,.divLayerContent
+{
+    height:590px;
+}
+.divNAEDisplayContainer,.divNAEDisplayContent
+{
+    height:480px;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Styles for customized buttons*/
+
+.customButton
+{
+   height: 30px;
+   background-size:85px 30px;
+}
+.customDisabledButton
+{
+     height: 30px;
+     background-size:85px 30px;
+}
+.customButton:hover
+{
+    background-image: url("../images/button_over.png");
+    background-size: 85px 30px;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/*Share Container Styles*/
+
+.imgShare
+{
+    height: 30px !important;
+    width: 30px !important;
+    cursor:pointer;
+}
+
+
+@media screen and (min-width: 1024px)
+{
+    .tblLoginScreenContainer,.tblApplicationHeader,.tblMapApplicationHeader,.tblInfoContainer,.imgMap,.tblBookmark,.tblSettingsContainer,.tblBottomContainer
+    {
+        width:75% !important;
+    }
+}

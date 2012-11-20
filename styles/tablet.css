@@ -1,0 +1,164 @@
+﻿/* This file contains the tablet specific style settings for "Executive Dashboard" template */
+/*
+ | Copyright 2012 Esri
+ |
+ | Licensed under the Apache License, Version 2.0 (the "License");
+ | you may not use this file except in compliance with the License.
+ | You may obtain a copy of the License at
+ |
+ |    http://www.apache.org/licenses/LICENSE-2.0
+ |
+ | Unless required by applicable law or agreed to in writing, software
+ | distributed under the License is distributed on an "AS IS" BASIS,
+ | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ | See the License for the specific language governing permissions and
+ | limitations under the License.
+ */
+/* The common settings for the styles are defined in "dashboard.css" */
+/* Use this file to perform the following: */
+/* 1.  Set the body styles                      - { Style(s) to look for: body } */
+/* 2.  Set styles for conatiners                - { Style(s) to look for: tblLoginScreenContainer,tblApplicationHeader,tblMapApplicationHeader,tblBottomContainer,
+                                                                          tblInfoContainer,tdLayerContainer,tdFeedContainer,divNAEDisplayContent } */
+/* 3.  Set the styles for text controls         - { Style(s) to look for: inputText,textarea}*/
+/* 4.  Set the styles for Address Container,
+       Bookmark Container and More Container
+       Styles                                   - { Style(s) to look for: tdLabel,errMargin,tdSettingsHeader,tdHeader,imgOptions,divBookMarksResultsContent,
+                                                                          divMoreResultsContent,imgLocate,bottomborder}*/
+/* 5.  Set the styles for customized buttons    - { Style(s) to look for: customButton,customDisabledButton}*/
+/* 6.  Set the styles for share container       - { Style(s) to look for: imgShare}*/
+
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/* Styles for body*/
+
+body
+{
+   font-size: 14px;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Styles for containers*/
+
+.tblLoginScreenContainer,.tblApplicationHeader,.tblMapApplicationHeader,.tblBottomContainer,.tblInfoContainer
+{
+    width:100%;
+    height:100%
+}
+
+.tdLayerContainer
+{
+   width:67% !important;
+}
+
+.tdFeedContainer
+{
+   width:33% !important;
+}
+
+.divNAEDisplayContent
+{
+    width:100% !important;
+}
+
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Styles for text controls*/
+
+.inputText
+{
+   font-size: 14px;
+   height:44px;
+}
+
+.textarea
+{
+    font-size:14px !important;
+    font-family: Verdana !important;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/*AddressContainer,BookmarkContainer and MoreContainer Styles*/
+
+.tdLabel
+{
+    width:180px;
+}
+
+.errMargin
+{
+    padding-left:190px;
+}
+
+.tdSettingsHeader
+{
+    height:44px;
+}
+
+.tdHeader
+{
+    width: 60px;
+    font-weight: bolder;
+}
+
+.imgOptions
+{
+    width:44px;
+    height:44px;
+}
+
+.divBookMarksResultsContent
+{
+    height:152px;
+}
+
+.divMoreResultsContent
+{
+    height:210px;
+}
+
+.imgLocate
+{
+    height: 44px !important;
+    width: 44px !important;
+}
+
+.bottomborder
+{
+    height :30px;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Styles for customized buttons*/
+
+.customButton
+{
+    height: 44px;
+    background-size:85px 44px;
+}
+
+.customDisabledButton
+{
+    height: 44px;
+    background-size:85px 44px;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/*Share Container Styles*/
+
+.imgShare
+{
+    height: 44px !important;
+    width: 44px !important;
+    vertical-align: middle;
+}
+
+ @media screen and (max-width: 768px) and (orientation : portrait)
+{
+    .tdLayerContainer
+    {
+        width:60% !important;
+    }
+    .tdFeedContainer
+    {
+        width:40% !important;
+    }
+}

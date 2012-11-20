@@ -1,0 +1,705 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset=utf-8>
+    <!--
+     | Copyright 2012 Esri
+     |
+     | Licensed under the Apache License, Version 2.0 (the "License");
+     | you may not use this file except in compliance with the License.
+     | You may obtain a copy of the License at
+     |
+     |    http://www.apache.org/licenses/LICENSE-2.0
+     |
+     | Unless required by applicable law or agreed to in writing, software
+     | distributed under the License is distributed on an "AS IS" BASIS,
+     | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     | See the License for the specific language governing permissions and
+     | limitations under the License.
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="shortcut icon" href="images/appIcon.ico" />
+    <link rel="apple-touch-icon" href="images/appIcon.png" />
+    <link href="styles/dashBoard.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/esri/dijit/css/Popup.css">
+    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.1/js/dojo/dijit/themes/claro/claro.css">
+    <link rel="Stylesheet" id="dynamicStyleSheet" />
+    <title>Dashboard</title>
+    <script type="text/javascript">
+           var dojoConfig = {
+            async: false,
+            parseOnLoad: true,
+            mblHideAddressBar: false,
+            packages:[
+                {name:"js",location:location.pathname.replace(/\/[^/]+$/, '') + '/js'}
+            ]
+        };
+    </script>
+    <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.1compact">
+    </script>
+    <script src="js/config.js" type="text/javascript"></script>
+    <script src="js/utils.js" type="text/javascript"></script>
+    <script src="js/locator.js" type="text/javascript"></script>
+    <script src="js/loginPage.js" type="text/javascript"></script>
+    <script src="js/homePage.js" type="text/javascript"></script>
+    <script src="js/mapPage.js" type="text/javascript"></script>
+    <script src="js/settingsPage.js" type="text/javascript"></script>
+</head>
+<body onorientationchange="orientationChanged();" class="claro">
+    <div id="map" class="imgMap">
+    </div>
+    <div id="divTextContainer" class="container" style="display: none">
+        <div class="divApplicationHeader" id="divApplicationHeader">
+            <table cellpadding="0" cellspacing="0" id="tblApplicationHeader" class="tblApplicationHeader"
+                align="center">
+                <tr>
+                    <td class="tdOptions">
+                        <table class="tblLeftOptions" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td class="tblRightOptions">
+                                    <div style="width: 85px; cursor: default" class="customDisabledButton" id="btnSettings">
+                                        <table style="width: 100%; height: 100%;">
+                                            <tr>
+                                                <td align="center" valign="middle">
+                                                    Settings
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="width: 85px;" class="customButton" id="btnHelp">
+                                        <table style="width: 100%; height: 100%;">
+                                            <tr>
+                                                <td align="center" valign="middle">
+                                                    Help
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td id="lblAppName" class="lblAppName" align="center">
+                    </td>
+                    <td class="tdOptions" align="right">
+                        <table class="tblRightOptions" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td class="tblRightOptions">
+                                    <div style="width: 85px; cursor: pointer" class="customButton" id="btnSign">
+                                        <table style="width: 100%; height: 100%;">
+                                            <tr>
+                                                <td align="center" valign="middle" id="tdPanelSign" onclick="AuthenticateUser()">
+                                                    Sign In
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="width: 85px; cursor: default" class="customDisabledButton" id="btnMap">
+                                        <table style="width: 100%; height: 100%;">
+                                            <tr>
+                                                <td align="center" valign="middle">
+                                                    Map
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="divLoginScreenContainer" class="divLoginScreenContainer">
+            <table align="center" id="tblLoginScreenContainer" class="tblLoginScreenContainer">
+                <tr align="center" valign="middle">
+                    <td align="left" class="tdWelcomeContent" id="tdWelcomeContent">
+                        <table class="tblWelcomeContent" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td class="tdWelcomeHeader">
+                                    <span class="formLabel">Welcome</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="vertical-align: top">
+                                    <div id="divWelcomeContainer" class="divWelcomeContainer">
+                                        <div id="divWelcomeContent" class="divWelcomeContent" style="margin-right: 15px">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="height: 300px">
+                        <table class="tblGallery">
+                            <tr>
+                                <td align="left">
+                                    <table>
+                                        <tr>
+                                            <td align="left">
+                                                <span class="formLabel" id="span0Welcome"></span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="rounded" style="overflow: hidden">
+                                                    <img class="imgFrame" id="img0Welcome" />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td align="center">
+                                    <table>
+                                        <tr>
+                                            <td align="left">
+                                                <span class="formLabel" id="span1Welcome"></span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="rounded" style="overflow: hidden">
+                                                    <img class="imgFrame" id="img1Welcome" />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td align="right">
+                                    <table>
+                                        <tr>
+                                            <td align="left">
+                                                <span class="formLabel" id="span2Welcome"></span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="rounded" style="overflow: hidden">
+                                                    <img class="imgFrame" id="img2Welcome" />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="divInfoContainer" class="divInfoContainer" style="display: none;">
+            <table id="tblInfoContainer" class="tblInfoContainer" align="center" cellpadding="0"
+                cellspacing="0">
+                <tr>
+                    <td class="tdLayerContainer" id="tdLayerContainer">
+                        <div id="divLayerContainer" class="divLayerContainer">
+                            <div id="divLayerContent" class="divLayerContent" style="padding-left: 5px">
+                            </div>
+                        </div>
+                    </td>
+                    <td class="tdFeedContainer" id="tdFeedContainer">
+                        <div id="divNAEContainer" class="divNAEContainer" style="margin-top: 10px">
+                            <table style="width: 100%" align="middle">
+                                <tr>
+                                    <td align="middle" style="height: 30px">
+                                        <span class="spnNewsHeader">News and Events</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div id="divNAEDisplayContainer" class="divNAEDisplayContainer">
+                                            <div id="divNAEDisplayContent" class="divNAEDisplayContent rounded">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding-top: 10px">
+                                        <table>
+                                            <tr>
+                                                <td style="padding-right: 15px">
+                                                    <div style="width: 85px; cursor: default" class="customButton" id="btnNews" onclick="PopulateNews(this)">
+                                                        <table style="width: 100%; height: 100%;">
+                                                            <tr>
+                                                                <td align="center" valign="middle">
+                                                                    News
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width: 85px;" class="customDisabledButton" id="btnTrends" onclick="PopulateNews(this)">
+                                                        <table style="width: 100%; height: 100%;">
+                                                            <tr>
+                                                                <td align="center" valign="middle">
+                                                                    Trends
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="divSettingsContainer" class="divSettingsContainer" style="display: none;">
+            <table id="tblSettingsContainer" class="tblSettingsContainer" align="center" cellpadding="0"
+                cellspacing="0">
+                <tr>
+                    <td style="padding-top: 60px">
+                        <div id="divRSSFeeds">
+                            <table id="tblRSS" class="tblRSS" align="center">
+                                <tr>
+                                    <td>
+                                        <div class="rounded" style="overflow: hidden; border: #000000 1px solid">
+                                            <table id="tblRSSFeeds" style="width: 100%;" cellpadding="0" cellspacing="0">
+                                                <tr>
+                                                    <td>
+                                                        <table style="width: 100%;" cellpadding="0" cellspacing="0">
+                                                            <tr>
+                                                                <td style="width: 93%;" class="tdSettingsHeader">
+                                                                    <div class="divSettingsHeader" style="width: 100%; height: 100%">
+                                                                        <table style="width: 100%; height: 100%;">
+                                                                            <tr>
+                                                                                <td valign="middle">
+                                                                                    <span style="padding-left: 3px;">RSS Feeds</span>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </div>
+                                                                </td>
+                                                                <td style="width: 7%; border-left: white 1px solid" class="tdSettingsHeader">
+                                                                    <div class="divSettingsHeader" style="width: 100%; height: 100%">
+                                                                        <table style="width: 100%; height: 100%;">
+                                                                            <tr>
+                                                                                <td valign="middle">
+                                                                                    <span style="padding-left: 10px;">On</span>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <table id="tblRSSControl">
+                                                            <tr>
+                                                                <td style="font-weight: bolder;" class="tdLabel">
+                                                                    New Feed
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" placeholder="RSS Feed Name" title="RSS Feed Name" id="txtRSSFeedName"
+                                                                        class="inputText" />
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" placeholder="RSS Feed URL" title="RSS Feed URL" id="txtRSSFeedURL"
+                                                                        class="inputText" />
+                                                                </td>
+                                                                <td>
+                                                                    <img style="cursor: pointer" title="Add" class="imgOptions" src="images/add.png"
+                                                                        id="imgRSSAdd" />
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="height: 20px; border-bottom: #000000 1px solid" class="errMargin">
+                                                        <span id="RSSErrorMessage"></span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="tdRSSContainer">
+                                                        <div id="divRSSFeedContainer" class="divRSSFeedContainer">
+                                                            <div id="divRSSFeedContent" class="divRSSFeedContent rounded" style="color: black">
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div id="divTwitterTrends" style="margin-top: 20px">
+                            <table id="tblTwitter" class="tblTwitter" style="width: 100%; padding-left: 10px;
+                                padding-right: 10px" align="center">
+                                <tr>
+                                    <td>
+                                        <div class="rounded" style="overflow: hidden; border: #000000 1px solid">
+                                            <table id="tblTwitterTrends" style="width: 100%;" cellpadding="0" cellspacing="0">
+                                                <tr>
+                                                    <td>
+                                                        <table style="width: 100%;" cellpadding="0" cellspacing="0">
+                                                            <tr>
+                                                                <td style="width: 100%;" class="tdSettingsHeader">
+                                                                    <div class="divSettingsHeader" style="width: 100%; height: 100%">
+                                                                        <table style="width: 100%; height: 100%;">
+                                                                            <tr>
+                                                                                <td valign="middle">
+                                                                                    <span style="padding-left: 3px">Twitter Trends</span>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <table id="tblTwitterControl">
+                                                            <tr>
+                                                                <td style="font-weight: bolder;" class="tdLabel">
+                                                                    New #Tag/Keyword
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" placeholder="Twitter trend name" title="Twitter trend name" id="txtTwitterTrendName"
+                                                                        class="inputText" />
+                                                                </td>
+                                                                <td>
+                                                                    <img style="cursor: pointer" title="Add" class="imgOptions" src="images/add.png"
+                                                                        id="imgTwiiterAdd" />
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="height: 20px; border-bottom: #000000 1px solid" class="errMargin">
+                                                        <span id="twitterErrorMessage"></span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="tdTwitterContainer">
+                                                        <div id="divTwitterFeedContainer" class="divTwitterFeedContainer">
+                                                            <div id="divTwitterFeedContent" class="divTwitterFeedContent rounded" style="color: black">
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div id="divSettingsControl" style="margin-top: 5px">
+                            <table id="tblSettingsControl" class="tblSettingsControl" align="center">
+                                <tr>
+                                    <td align="right" style="padding-right: 10px">
+                                        <table>
+                                            <tr>
+                                                <td style="padding-right: 15px">
+                                                    <div style="width: 85px;" class="customButton" id="btnCancel" onclick="CancelSettings();">
+                                                        <table style="width: 100%; height: 100%;">
+                                                            <tr>
+                                                                <td align="center" valign="middle">
+                                                                    Cancel
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width: 85px;" class="customButton" id="btnSave" onclick="SaveSettings();">
+                                                        <table style="width: 100%; height: 100%;">
+                                                            <tr>
+                                                                <td align="center" valign="middle">
+                                                                    Save
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div id="divMapContainer" class="container" style="display: none;">
+        <div class="divApplicationHeader" id="divMapApplicationHeader">
+            <table cellpadding="0" cellspacing="0" id="tblMapApplicationHeader" style="height: 100%;
+                background-image: url(images/background90.png);" class="tblApplicationHeader"
+                align="center">
+                <tr>
+                    <td>
+                        <div id="holder" style="width: 1px; height: 1px; position: absolute;">
+                        </div>
+                    </td>
+                    <td style="vertical-align: middle; width: 300px">
+                        <table style="padding-left: 15px" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="padding-right: 15px">
+                                    <div style="width: 85px;" class="customButton" id="btnBack" onclick="BackToPods()">
+                                        <table style="width: 100%; height: 100%;">
+                                            <tr>
+                                                <td align="center" valign="middle">
+                                                    Back
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="width: 85px;" class="customButton" id="btnMapHelp">
+                                        <table style="width: 100%; height: 100%;">
+                                            <tr>
+                                                <td align="center" valign="middle">
+                                                    Help
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td id="tdEventName" class="lblAppName" align="center">
+                    </td>
+                    <td style="width: 300px" align="right">
+                        <table style="width: 100%; height: 100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td align="right">
+                                    <table>
+                                        <tr>
+                                            <td align="center" id="tdLocate" class="tdHeader">
+                                                <img alt="Settings" src="images/locate.png" id="imgSearch" class="imgOptions" title="Search"
+                                                    onclick="ShowLocateContainer();" style="cursor: pointer" />
+                                            </td>
+                                            <td align="center" id="tdGeolocation" class="tdHeader">
+                                                <img src="images/imgGeolocation.png" id="imgGeolocation" class="imgOptions" title="Locate"
+                                                    onclick="ShowMyLocation();" style="cursor: pointer" />
+                                            </td>
+                                            <td align="center" id="tdBookmark" class="tdHeader">
+                                                <img src="images/imgBookmark.png" id="imgBookmark" class="imgOptions" title="Bookmarks"
+                                                    onclick="ShowBookmarkContainer();" style="cursor: pointer" />
+                                            </td>
+                                            <td align="center" id="tdNotes" class="tdHeader">
+                                                <img src="images/imgNotes.png" id="imgNotes" class="imgOptions" title="Add Notes"
+                                                    style="cursor: pointer" state="unSelected" onclick="PopulateNotes(this)" />
+                                            </td>
+                                            <td align="center" id="tdShare" class="tdHeader">
+                                                <img src="images/imgSocialMedia.png" id="imgSocialMedia" class="imgOptions" title="Share"
+                                                    onclick="ShareLink(true);" style="cursor: pointer" />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="divBookmarkContent" class="divBookmarkContent hideContainerHeight">
+            <table class="tblHeader" style="width: 100%;">
+                <tr style="height: 30px;" align="center" valign="top">
+                    <td class="tdHeader" id="tdHeaderBookmark" align="left" valign="middle" style="padding-left: 8px;
+                        color: white">
+                    </td>
+                    <td style="width: 10%;" align="right">
+                        <img src="images/close.png" class="imgOptions" title="Close" style="cursor: pointer;
+                            padding: 0px" onclick="HideContainer('bookmark');" />
+                    </td>
+                </tr>
+            </table>
+            <div id="divBookMarksResults" style="margin: 5px;">
+                <div id="divBookmarkControlHolder" align="left">
+                    <table>
+                        <tr>
+                            <td>
+                                <input type="text" id="txtBookmark" title="Add bookmark" placeholder="Add bookmark"
+                                    class="inputText" />
+                            </td>
+                            <td>
+                                <img style="cursor: pointer" class="imgOptions" title="Add" src="images/add.png"
+                                    id="imgAddBookmark" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="left" colspan="2" id="bookmarkErrorMessage" class="bookmarkErrorMessage">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="divBookMarksResultsContainer" class="divBookMarksResultsContainer">
+                    <div id="divBookMarksResultsContent" class="divBookMarksResultsContent" style="margin-left: 4px;
+                        color: black">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="divAddressContent" class="divAddressContent hideContainerHeight">
+            <table class="tblHeader" style="width: 100%;">
+                <tr style="height: 30px;" align="center" valign="top">
+                    <td class="tdHeader" align="left" valign="middle" style="padding-left: 8px; color: white">
+                        Search Address
+                    </td>
+                    <td style="width: 10%;" align="right">
+                        <img src="images/close.png" class="imgOptions" title="Close" style="cursor: pointer;
+                            padding: 0px" onclick="HideContainer('locate');" />
+                    </td>
+                </tr>
+            </table>
+            <div id="divAddressResultContainer" style="margin: 5px;">
+                <table style="color: #fff; width: 100%;">
+                    <tr>
+                        <td>
+                            <input type="text" id="txtAddress" title="Enter address to locate" placeholder="Enter address to locate"
+                                class="inputText" onfocus="if(this.setSelectionRange)this.setSelectionRange(this.value.length, this.value.length);" />
+                            <img src="images/locate.png" id="imgLocate" class="imgLocate" style="cursor: pointer"
+                                title="Locate" onclick="LocateAddress();" />
+                            <div id="divAddressList" class="divAddressList">
+                                <div id="divAddressScrollContainer" class="divAddressScrollContainer" align="left">
+                                    <div id="divAddressScrollContent" class="divAddressScrollContent" style="color: black">
+                                        <table id="tblAddressResults" cellpadding="0" cellspacing="2" style="width: 100%;">
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div id="divServiceDetails" class="divServiceDetails" style="display: none">
+            <div style="height: 200px">
+                <table style="height: 100%; width: 100%;" align="center" class="tblBottomPanelConatiner">
+                    <tr>
+                        <td align="left" style="width: 37px;" id="tdServiceLeftArrow">
+                            <div id="ServiceLeftArrow" style="z-index: 1000; display: none;">
+                                <img src="images/arrLeft.png" style="cursor: pointer; vertical-align: middle;" onclick="SlideLeft();"
+                                    class="imgShare" />
+                            </div>
+                        </td>
+                        <td>
+                            <div id="divServiceData" class="divServiceData">
+                                <div id="carouselscroll" class="carouselscroll">
+                                    <div id="divServiceContainer" style="padding-top: 15px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td align="right" style="width: 37px;" id="tdServiceRightArrow">
+                            <div id="ServiceRightArrow" style="z-index: 1000; display: none">
+                                <img src="images/arrRight.png" style="cursor: pointer; vertical-align: middle;" onclick="SlideRight();"
+                                    class="imgShare" />
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div id="divBottomContainer" class="divBottomContainer">
+            <table cellpadding="0" cellspacing="0" id="tblBottomContainer" style="height: 100%;
+                background-image: url(images/bottomBackground.png);" class="tblBottomContainer"
+                align="center">
+                <tr>
+                    <td style="height: 100%" align="center">
+                        <div style="height: 100%; width: 100%; overflow: hidden; position: relative" id="divGroupHolder">
+                            <div style="position: absolute; width: 100%; height: 100%">
+                                <table style="height: 100%; padding-left: 15px" id="tblBottomHeaders" cellpadding="0"
+                                    cellspacing="0">
+                                    <tr id="trBottomHeaders">
+                                    </tr>
+                                    <tr id="trBottomTags">
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="divMoreContent" class="divMoreContent hideContainerHeight">
+            <table class="tblHeader" style="width: 100%;">
+                <tr style="height: 30px;" align="center" valign="top">
+                    <td class="tdHeader" id="tdHeaderMore" align="left" valign="middle" style="padding-left: 8px;
+                        color: white">
+                        More...
+                    </td>
+                    <td style="width: 10%;" align="right">
+                        <img src="images/close.png" class="imgOptions" title="Close" style="cursor: pointer;
+                            padding: 0px" onclick="HideContainer('more');" />
+                    </td>
+                </tr>
+            </table>
+            <div id="divMoreResults" style="margin: 5px;">
+                <div id="divMoreResultsContainer" class="divMoreResultsContainer">
+                    <div id="divMoreResultsContent" class="divMoreResultsContent" style="margin-left: 4px;
+                        color: black">
+                        <table cellpadding="0" cellspacing="0" style="width: 97%;" id="tblMoreResults">
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="divGraphComponent" class="divGraphComponent hideContainerHeight" style="height: 0px">
+            <table cellpadding="0" cellspacing="0" style="width: 100%; height: 100%;">
+                <tr>
+                    <td id="tdMetricHeader" style="color: White; font-weight: bolder; font-size: 16px;
+                        padding-top: 3px" align="center">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div id="divGraphContent">
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="showHide" class="showHide" style="right: 15px; top: 59px">
+            <table cellpadding="0" cellspacing="0">
+                <tr>
+                    <td>
+                        <div id="divGraphHeader" align="center" class="divDefaultHeader" onclick="ShowGraphDetails();">
+                            <table style="height: 100%; width: 100px;">
+                                <tr>
+                                    <td id="tdGraphTab">
+                                        Trends
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div id="divLoadingIndicator" class="divLoadingIndicator" style="display: none;">
+        <table style="width: 100%; height: 100%;">
+            <tr align="left" valign="bottom">
+                <td>
+                    <img src="images/loader.gif" />
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

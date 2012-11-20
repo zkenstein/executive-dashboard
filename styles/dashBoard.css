@@ -1,0 +1,910 @@
+﻿/* This file contains the common style settings for "Executive Dashboard" template */
+/*
+ | Copyright 2012 Esri
+ |
+ | Licensed under the Apache License, Version 2.0 (the "License");
+ | you may not use this file except in compliance with the License.
+ | You may obtain a copy of the License at
+ |
+ |    http://www.apache.org/licenses/LICENSE-2.0
+ |
+ | Unless required by applicable law or agreed to in writing, software
+ | distributed under the License is distributed on an "AS IS" BASIS,
+ | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ | See the License for the specific language governing permissions and
+ | limitations under the License.
+ */
+/* Use this file to perform the following: */
+
+/* 1.  Set the body styles                      - { Style(s) to look for: html, body } */
+/* 2.  Set the styles for animations            - { Style(s) to look for: hideContainerHeight,showContainerHeight,opacityHideAnimation}*/
+/* 3.  Set the styles for application header    - { Style(s) to look for: lblAppName,divApplicationHeader,tblApplicationHeader}*/
+/* 4.  Set styles for conatiners                - { Style(s) to look for: divLoginScreenContainer,divLoginScreenContent,divInfoContainer,divSettingsConatiner,
+                                                                          divWelcomeContainer,divRSSFeedContainer,divTwitterFeedContainer,divBookMarksResultsContainer,
+                                                                          divLayerContainer,divAddressScrollContainer,divMoreResultsContainer,divWelcomeContent,
+                                                                          divRSSFeedContent,divTwitterFeedContent,divBookMarksResultsContent,divLayerContent,
+                                                                          divAddressScrollContent,divMoreResultsContent}*/
+/* 5.  Set the styles for text controls         - { Style(s) to look for: formLabel,inputText,textarea}*/
+/* 6.  Set the styles for settings page header  - { Style(s) to look for: divSettingsHeader,tdSettingsHeader}*/
+/* 7.  Set the styles for Info Pods             - { Style(s) to look for: divPod,divPodInner,divPodGreen,divPodInnerGreen,divPodRed,divPodInnerRed}*/
+/* 8.  Set the styles for customized buttons    - { Style(s) to look for: customButton,customDisabledButton}*/
+/* 9.  Set the styles for custom scrollbar      - { Style(s) to look for: scrollbar_track,scrollbar_handle}*/
+/* 10. Set the styles for news containers       - { Style(s) to look for: divNAEContainer,divNAEDisplayContainer,divNAEDisplayContent}*/
+/* 11. Set the styles for Address Container,
+       Bookmark Container and More Container
+       Styles                                   - { Style(s) to look for: divAddressScrollContainer,divAddressScrollContent,tblHeader,divAddressPlaceHolder,txtAddress,
+                                                                          imgLocate,divAddressList,bottomborder,divBookmarkContent,divAddressContent,divMoreContent,
+                                                                          rounded,bookmarkErrorMessage,listDarkColor,listLightColor}*/
+/* 12.  Set the styles for share container      - { Style(s) to look for: divAppContainer,divAppHolder}*/
+/* 13.  Set the styles for carousel scroll      - { Style(s) to look for: divServiceDetails,carouselscroll,divServiceData}*/
+/* 14.  Set the styles for info window          - { Style(s) to look for: tdInfoHeader,infoOptions,spanContentText,title,divBottomContainer,tdBreak,tdBreakWord}*/
+/* 15.  Set the styles for identity manager
+        and esri popup                          - { Style(s) to look for: esriSignInDialog,claro .dijitDialog,claro .dijitDialogTitleBar,
+                                                                          claro .dijitDialogPaneContent claro .dijitDialogPaneActionBar,claro .dijitButton .dijitButtonNode,
+                                                                          claro .dijitToggleButton .dijitButtonNode,claro .dijitDialogTitle,claro .dijitButtonContents,
+                                                                          esriSignInDialog,claro .dijitTextBox,claro .dijitTextBox .dijitButtonNode,claro .dijitTooltip,
+                                                                          esriPopup,esriPopup .titleButton,esriPopup .titlePane,esriPopup .titleButton.close,
+                                                                          esriPopup .titleButton.maximize,esriPopup .titleButton.next,esriPopup .titleButton.prev,
+                                                                          esriPopup,esriPopup .titleButton.close,esriPopup .titleButton.maximize,
+                                                                          esriPopup .titleButton.restore }*/
+/* 16  Set the styles for login page            - {Style(s) to look for:  tdOptions,tblLeftOptions,tblRightOptions,tblLoginScreenContainer,tdWelcomeContent,tblWelcomeContent
+                                                                          tdWelcomeHeader,tblGallery,imgFrame,tblInfoContainer,tdLayerContainer}*/
+/* 17  Set the styles for settings page         - {Style(s) to look for:  tdFeedContainer,spnNewsHeader,tblSettingsContainer,tblRSS,tblSettingsControl}*/
+/* 18. Set the styles for graph container       - {Style(s) to look for:  divGraphComponent,divDefaultHeader}*/
+/* 19. Set the style for map                    - {Style(s) to look for:  imgMap}*/
+/* 20. Set the styles for esri slider           - { Style(s) to look for: esriSimpleSlider,esriLogo}*/
+/* 21. Set the styles for loading indicator     - { Style(s) to look for: divLoadingIndicator}*/
+
+
+
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+/* Styles for body*/
+
+body,html
+{
+    font-family: verdana !important;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 11px;
+    overflow:hidden;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/*animations */
+
+.showHide
+{
+    color: #ffffff;
+    position: absolute;
+    z-index: 1005;
+    overflow: hidden;
+    -webkit-transition: top 0.5s ease-in;
+    -moz-transition: top 0.5s ease-in;
+    -o-transition: top 0.5s ease-in;
+    transition: top 0.5s ease-in;
+}
+
+.hideContainerHeight
+{
+    overflow: hidden;
+    -webkit-transition: height 0.5s ease-in;
+    -moz-transition: height 0.5s ease-in;
+    -o-transition: height 0.5s ease-in;
+    transition: height 0.5s ease-in;
+    height: 0px;
+}
+
+.showContainerHeight
+{
+    overflow: hidden;
+    -webkit-transition: height 0.5s ease-in;
+    -moz-transition: height 0.5s ease-in;
+    -o-transition: height 0.5s ease-in;
+    transition: height 0.5s ease-in;
+    height: 100%;
+}
+.opacityHideAnimation
+{
+    visibility: hidden;
+    opacity: 0;
+    -webkit-transition: visibility 0s linear 0.5s, opacity 0.5s ease-in;
+    -moz-transition: visibility 0s linear 0.5s, opacity 0.5s ease-in;
+    -o-transition: visibility 0s linear 0.5s, opacity 0.5s ease-in;
+    transition: visibility 0s linear 0.5s, opacity 0.5s ease-in;
+}
+.showContainer
+{
+    -webkit-transition: All 0.5s ease-in;
+    -moz-transition: All 0.5s ease-in;
+    -o-transition: All 0.5s ease-in;
+    transition: All 0.5s ease-in;
+    -webkit-transform: scale(1);
+    -moz-transform: scale(1);
+    -o-transform: scale(1);
+    transform: scale(1);
+}
+
+.hideContainer
+{
+    -webkit-transition: All 0.5s ease-in;
+    -moz-transition: All 0.5s ease-in;
+    -o-transition: All 0.5s ease-in;
+    transition: All 0.5s ease-in;
+    -webkit-transform: scale(0);
+    -moz-transform: scale(0);
+    -o-transform: scale(0);
+    transform: scale(0);
+}
+
+.opacityShowAnimation
+{
+    visibility: visible;
+    opacity: 1;
+    -webkit-transition: opacity 0.5s ease-in;
+    -moz-transition: opacity 0.5s ease-in;
+    -o-transition: opacity 0.5s ease-in;
+}
+
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Styles for application header*/
+
+.divApplicationHeader
+{
+   vertical-align: middle;
+   top: 0px;
+   left: 0px;
+   position: absolute;
+   height: 60px;
+   width: 100%;
+   z-index: 1005;
+   overflow: hidden;
+}
+.lblAppName
+{
+  font-size: 24px;
+  color:White;
+  font-weight:bold;
+}
+.tblApplicationHeader
+{
+    height: 100%;
+    background-image: url('../images/background90.png');
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Styles for containers*/
+
+.divLoginScreenContainer,.divInfoContainer,.divSettingsContainer
+{
+   top: 0px;
+   left:0px;
+   position: absolute;
+   width: 100%;
+   height: 100%;
+   overflow: hidden
+}
+
+#divLoginScreenContent
+{
+    text-align: left;
+    color: black;
+    z-index: 1000;
+}
+
+.divWelcomeContainer,.divRSSFeedContainer,.divTwitterFeedContainer,.divBookMarksResultsContainer,.divLayerContainer,.divAddressScrollContainer,.divMoreResultsContainer
+{
+    overflow: hidden;
+    position: relative;
+}
+
+.divWelcomeContent,.divRSSFeedContent,.divTwitterFeedContent,.divBookMarksResultsContent,.divLayerContent,.divAddressScrollContent,.divMoreResultsContent
+{
+    overflow: hidden;
+}
+.container
+{
+    width:100%;
+    height:100%;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Styles for text controls*/
+
+.formLabel
+{
+    font-weight: bold;
+    border-bottom: gray 2px solid
+}
+
+.inputText
+{
+     background-color: white;
+     padding: 2px;
+     width: 230px;
+     margin: 2px;
+     vertical-align: middle;
+     -moz-border-radius: 5px;
+     -webkit-border-radius: 5px;
+     border-radius: 5px;
+     line-height: 20px;
+     font-family: verdana !important;
+}
+
+.txtArea
+{
+    border: 1px solid #242424;
+    padding: 1px;
+    background-color: #F7F7F7;
+    color: #000000;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    resize: none;
+    height: 100px;
+    overflow:auto;
+    width:97%;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Styles for settings page header*/
+
+.divSettingsHeader
+{
+   border: none;
+   color: #fff;
+   background-image: url("../images/background90.png");
+}
+.tdSettingsHeader
+{
+     font-weight: bolder;
+     color: white;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Styles for info pods*/
+.divPod
+{
+   border: none;
+   color: #fff;
+   cursor: pointer;
+   background-image: url("../images/blue_bg.png");
+   -moz-border-radius: 10px;
+   -webkit-border-radius: 10px;
+   border-radius: 10px;
+   overflow: hidden;
+   float:left;
+}
+
+.divPodInner
+{
+   width: 100%;
+   height: 100%;
+}
+
+.divPodGreen
+{
+   border: none;
+   color: #fff;
+   cursor: pointer;
+   background-image: url("../images/green_bg.png");
+   -moz-border-radius: 10px;
+   -webkit-border-radius: 10px;
+   border-radius: 10px;
+   overflow: hidden;
+   float:left;
+}
+
+.divPodInnerGreen
+{
+   width: 100%;
+   height: 100%;
+}
+
+.divPodGreenSelected
+{
+    -webkit-box-shadow: 0 0 25px #008800;
+    -moz-box-shadow: 0 0 25px #008800;
+    box-shadow: 0 0 25px #008800;
+}
+
+.divPodRed
+{
+   border: none;
+   color: #fff;
+   cursor: pointer;
+   background-image: url("../images/red_bg.png");
+   -moz-border-radius: 10px;
+   -webkit-border-radius: 10px;
+   border-radius: 10px;
+   overflow: hidden;
+   float:left;
+}
+
+.divPodInnerRed
+{
+   width: 100%;
+   height: 100%;
+}
+
+.divPodRedSelected
+{
+    -webkit-box-shadow: 0 0 25px #FF0000;
+    -moz-box-shadow: 0 0 25px #FF0000;
+    box-shadow: 0 0 25px #FF0000;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Styles for customized buttons*/
+
+.customButton
+{
+   border: none;
+   color: #FFFFFF;
+   cursor: pointer;
+   background-image: url("../images/button.png");
+   overflow: hidden;
+}
+
+.customDisabledButton
+{
+   border: none;
+   color: gray;
+   cursor: pointer;
+   background-image: url("../images/button.png");
+   overflow: hidden;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Styles for custom scrollbar*/
+
+.scrollbar_track
+{
+    position: absolute;
+    right: 0;
+    top: 2px;
+    background-color: transparent;
+    cursor: default;
+    display: block;
+}
+
+.scrollbar_handle
+{
+    position: relative;
+    width: 10px;
+    background-color: gray;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius:5px;
+    opacity: 0.9;
+    -moz-opacity: 0.9;
+    cursor: default;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* Styles for News containers*/
+
+.divNAEContainer
+{
+     background-color:#000000;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius:10px;
+    padding:0px 10px 10px 10px;
+}
+
+.divNAEDisplayContainer
+{
+    position:relative;
+    overflow:hidden;
+    background-color:White;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius:10px;
+    background-color:#CCCCCC;
+}
+
+.divNAEDisplayContent
+{
+    overflow:hidden;
+    color:Black;
+    width:100%;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/*AddressContainer,BookmarkContainer and MoreContainer Styles*/
+
+.divAddressScrollContainer
+{
+    overflow: hidden;
+    position: relative;
+}
+
+.divAddressScrollContent
+{
+    overflow: hidden;
+    width: 95%;
+    color:black;
+}
+
+.tblHeader
+{
+    background-color: #000000;
+    -moz-border-radius-topleft: 10px;
+    -moz-border-radius-topright: 10px;
+    -moz-border-radius-bottomleft: 0px;
+    -moz-border-radius-bottomright: 0px;
+    -webkit-border-top-left-radius: 10px;
+    -webkit-border-top-right-radius: 10px;
+    -webkit-border-bottom-left-radius: 0px;
+    -webkit-border-bottom-right-radius: 0px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-bottom:gray 1px solid;
+}
+
+.divAddressPlaceHolder
+{
+    border: 1px solid #000000;
+    background-color: #000000;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    position: relative;
+}
+
+.txtAddress
+{
+    background-color: white;
+    color: black;
+    width: 240px;
+    border: none !important;
+    outline:none;
+    padding:0px !important;
+    vertical-align:middle;
+}
+
+.imgLocate
+{
+    position: absolute;
+    cursor: pointer;
+}
+
+.divAddressList
+{
+    margin-top: 5px;
+    margin-left:4px;
+    color: #fff;
+    z-index: 101;
+    background-color: transparent;
+    border: none;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+}
+
+.divBookmarkContent,.divAddressContent
+{
+    z-index: 1100;
+    position:absolute;
+    top: 65px;
+    width: 300px;
+    right:15px;
+    background-color: #CCCCCC;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    border-radius: 8px;
+}
+
+.divMoreContent
+{
+    z-index: 1100;
+    position:absolute;
+    bottom: 75px;
+    width: 300px;
+    right:15px;
+    background-color: #CCCCCC;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    border-radius: 8px;
+}
+
+.rounded
+{
+   -moz-border-radius: 10px;
+   -webkit-border-radius: 10px;
+   border-radius:10px;
+}
+
+.bookmarkErrorMessage
+{
+    color: black;
+    height: 20px;
+    border-bottom: black 1px solid;
+}
+
+.listDarkColor
+{
+    background-color : #BBBBBB;
+}
+
+.listLightColor
+{
+    background-color : #CCCCCC;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/*Styles for carousel scroll*/
+
+.divServiceDetails
+{
+    bottom: 75px;
+    position: absolute;
+    z-index: 1005;
+    text-align: middle;
+}
+
+.carouselscroll
+{
+    float: left;
+    height: 100%;
+    position: absolute;
+    left: 0px;
+    vertical-align: middle;
+}
+
+.divServiceData
+{
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+    float: left;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/*InfoWindow Styles*/
+
+.tdInfoHeader
+{
+    font-weight: bolder;
+}
+
+.infoOptions
+{
+    height: 30px !important;
+    width: 30px !important;
+    vertical-align: middle;
+    padding:2px 3px 2px 2px;
+    cursor:pointer;
+}
+.spanContentText
+{
+    margin-left:5px;
+    margin-top:5px;
+}
+.title
+{
+   font-weight:bolder;
+}
+
+.divBottomContainer
+{
+    position:absolute;
+    bottom:0px;
+    left:0px;
+    width:100%;
+    height:75px;
+}
+
+.tdBreak
+{
+    word-wrap: break-word;
+}
+
+.tdBreakWord
+{
+    display:inline-block;
+    word-break:break-all;
+    word-wrap: break-word;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* styles for identity manager and esri popup*/
+
+.esriSignInDialog
+{
+    z-index:2100 !important;
+}
+
+.claro .dijitDialog
+{
+    border:1px solid #BBBBBB !important
+}
+
+.claro .dijitDialogTitleBar
+{
+    background-color:#000000 !important;
+    border:1px solid #CCCCCC !important
+}
+
+.claro .dijitDialogPaneContent {
+    background: #CCCCCC repeat-x top left !important;
+    border-top: 1px solid #CCCCCC !important;
+}
+
+.claro .dijitDialogPaneActionBar
+{
+    border:none !important;
+    background-color:#CCCCCC !important;
+}
+
+.claro .dijitButton .dijitButtonNode,.claro .dijitToggleButton .dijitButtonNode
+{
+     background-color:#000000 !important;
+     border:1px solid #CCCCCC !important;
+     color:#FFFFFF !important;
+     min-width:80px !important;
+     height:22px !important;
+}
+
+.claro .dijitDialogTitle
+{
+    color:White !important;
+    font-size:12px !imporatnt;
+    font-weight:bolder;
+}
+
+.claro .dijitButtonContents
+{
+    margin-top:2px;
+}
+
+.esriSignInDialog
+{
+    width:300px !important;
+}
+
+.claro .dijitTextBox, .claro .dijitTextBox .dijitButtonNode
+{
+    height:25px !important;
+}
+
+.claro .dijitTooltip
+{
+    z-index:2200 !important;
+}
+
+.esriPopup
+{
+    z-index:2100 !important;
+}
+
+.esriPopup .titleButton
+{
+    background-image: url('../images/imgPopup.png') !important;
+    top:8px !important;
+}
+
+.esriPopup .titlePane
+{
+    line-height:40px !important;
+}
+
+.esriPopup .titleButton.close,.esriPopup .titleButton.maximize,.esriPopup .titleButton.next,.esriPopup .titleButton.prev,.esriPopup .titleButton.restore
+{
+    width:20px !important;
+    height:20px !important;
+}
+
+.esriPopup .titleButton.close
+{
+    right:8px !important;
+}
+
+.esriPopup .titleButton.maximize
+{
+    top:12px !important;
+    background-position:0 -251px !important;
+    right:45px !important;
+}
+
+.esriPopup .titleButton.restore
+{
+    background-position: 0 -779px !important;
+    right: 45px !important;
+    top:9px !important;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* styles for login page*/
+
+.tdOptions
+{
+    vertical-align: middle;
+    width: 200px;
+}
+
+.tblLeftOptions
+{
+    padding-left: 15px;
+}
+
+.tblRightOptions
+{
+    padding-right: 15px;
+}
+
+.tblLoginScreenContainer
+{
+   border: #000000 1px solid;
+   background-color: #CCCCCC;
+}
+
+.tdWelcomeContent
+{
+    width: 100%;
+    vertical-align: top;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 80px;
+}
+
+.tblWelcomeContent
+{
+    width: 100%;
+    height: 100%;
+}
+
+.tdWelcomeHeader
+{
+    height: 25px;
+}
+
+.tblGallery
+{
+    width: 100%;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.imgFrame
+{
+    width: 220px;
+    height: 200px;
+}
+
+.tblInfoContainer
+{
+    width: 100%;
+    border: #000000 1px solid;
+    background-color: #CCCCCC;
+    padding-top: 5px;
+}
+
+.tdLayerContainer
+{
+    width: 72%;
+    vertical-align: top;
+    padding-top: 60px;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* styles for settings page*/
+
+.tdFeedContainer
+{
+    width: 28%;
+    padding-right: 15px;
+    padding-left: 15px;
+    vertical-align: top;
+    padding-top: 60px;
+}
+
+.spnNewsHeader
+{
+    color: White;
+    font-size: 16px;
+    font-weight: bolder;
+}
+
+.tblSettingsContainer
+{
+    width: 100%;
+    height: 100%;
+    border: #000000 1px solid;
+    background-color: #CCCCCC;
+}
+
+.tblRSS
+{
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.tblSettingsControl
+{
+    width: 100%;
+    padding-bottom: 5px;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* styles for graph container*/
+
+.divGraphComponent
+{
+    width: 380px;
+    height: 300px;
+    z-index: 1100 !important;
+    top: 59px;
+    background-color: #000000;
+    position:absolute;
+    right:15px;
+    -moz-border-radius: 0px 0px 0px 10px;
+    -webkit-border-radius: 0px 0px 0px 10px;
+    border-radius: 0px 0px 0px 10px;
+}
+
+.divDefaultHeader
+{
+    -moz-border-radius: 0px 0px 10px 10px;
+    -webkit-border-radius: 0px 0px 10px 10px;
+    border-radius: 0px 0px 10px 10px;
+    overflow:hidden;
+    font-weight: bolder;
+    height: 36px;
+    width: 100px;
+    z-index: 1050;
+    color:White;
+    text-align: center;
+    background-image: url('../images/blackGradient.png');
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* style for map*/
+.imgMap
+{
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/* esri slider style*/
+
+.esriSimpleSlider
+{
+    top: 90px !important;
+}
+
+.esriLogo
+{
+    bottom:75px !important;
+    z-index:999 !important;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/*Styles for Loading indicator container*/
+
+.divLoadingIndicator
+{
+    height: 100%;
+    width: 100%;
+    display: none;
+    font-family: Verdana;
+    z-index: 2000;
+    position: absolute;
+    bottom: 0px;
+    filter: alpha(opacity = 55);
+    -moz-opacity: 0.55;
+    -khtml-opacity: 0.55;
+    opacity: 0.55;
+    top: 0px;
+    left: 0px;
+    background-image: url("../images/background65.png");
+}

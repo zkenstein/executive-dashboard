@@ -1,5 +1,4 @@
 # executive-dashboard
-**from [Esri's ArcGIS for Local Government team](http://resources.arcgis.com/en/communities/local-government/)**
 
 The Executive Dashboard is a configuration of ArcGIS Online and a HTML 5 / JavaScript application used by local government leaders to proactively view critical metrics, identify trends, raise questions, and devise new management strategies.  It supports community-wide efforts to increase accountability and transparency within government and with the citizens they serve.   The Dashboard is a single application that can be deployed by local governments and used by decision-makers on a tablet device and desktop PC.
 
@@ -56,6 +55,8 @@ decide. (The tryit branch only uses a list of predefined URLs, so this tradeoff 
 * Microsoft ASP.NET Framework 4.0 available from the [Microsoft website](http://www.microsoft.com/en-us/download/details.aspx?id=17851)
 
 ## Resources
+
+Learn more about Esri's [ArcGIS for Local Government maps and apps](http://resources.arcgis.com/en/communities/local-government/).
 
 Additional [information and sample data](http://www.arcgis.com/home/item.html?id=9c31136ff6f54dfb90edbc74f08573ed)
 are available for the application.

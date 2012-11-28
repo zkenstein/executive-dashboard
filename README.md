@@ -44,10 +44,8 @@ you limit your users to whatever RSS feed URLs are configured. If instead you ch
 might be used by unexpected sources. This is a security tradeoff that you and your organization must
 decide. (The tryit branch only uses a list of predefined URLs, so this tradeoff is not an issue for it.)
 
-
 ### General Help
 [New to Github? Get started here.](http://htmlpreview.github.com/?https://github.com/Esri/esri.github.com/blob/master/help/esri-getting-to-know-github.html)
-
 
 ## Requirements
 

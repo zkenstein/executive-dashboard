@@ -338,6 +338,13 @@ body,html
     box-shadow: 0 0 25px #FF0000;
 }
 
+.divPodGraySelected
+{
+    -webkit-box-shadow: 0 0 25px #AAAAAA;
+    -moz-box-shadow: 0 0 25px #AAAAAA;
+    box-shadow: 0 0 25px #AAAAAA;
+}
+
 /*---------------------------------------------------------------------------------------------------------*/
 /* Styles for customized buttons*/
 
@@ -908,4 +915,11 @@ body,html
     top: 0px;
     left: 0px;
     background-image: url("../images/background65.png");
+}
+
+.imgSearchLoader
+{
+    vertical-align: middle;
+    display: none;
+    cursor: default;
 }

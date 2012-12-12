@@ -21,10 +21,11 @@ var infoContentFocus = null; //variable for storing the info content value when 
 var infoContentBlur = null; //variable for storing the info content value when it is focused out
 var infoContentClose = null; //variable for storing the info content value when info window was closed
 var charCount; //variable for storing the remaining characters count for note
-var RSSCounter = 0;
-var trendCounter = 0;
+var RSSCounter = 0; //variable for storing the count of RSS feeds
+var trendCounter = 0; //variable for storing the count of twitter trends
 
-//function for creating the info pods for services
+//Function to create the info pods for subject groups(eg:Public Safety,Transportation,Capital Projects etc.)
+//For each webmap this function determines subject group, Key indicator, Increase or decrease indicator, Color of pod. This function also handles on click event for each pod.
 function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
     RemoveChildren(dojo.byId("divLayerContent"));
     RemoveChildren(dojo.byId("divNAEDisplayContent"));
@@ -69,7 +70,8 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
         }
 
         divPod.onclick = function (evt) {
-            ShowProgressIndicator();
+            //Upon clicking/tapping on the pod, the data for selected pod will be transferred to function to create map page and pods for selected pod.
+             ShowProgressIndicator();
             if (map) {
                 for (var e in map._layers) {
                     if (e.match("eventLayerId")) {
@@ -111,6 +113,7 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
         spanText.innerHTML = p;
         td2.appendChild(spanText);
 
+        // Create pods for each subject group
         for (var g in arrSubjectGroups[p]) {
             for (var j in indicatorState) {
                 if (arrSubjectGroups[p][g].title == indicatorState[j].key) {
@@ -149,6 +152,7 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
                     spanText.innerHTML = arrSubjectGroups[p][g].title;
                     td1.appendChild(spanText);
 
+                    //Decide color of pod using Increase or decrease indicator, Current and Past observation
                     var diff = (dojo.string.substitute(infoPodStatics[0].CurrentObservation, indicatorState[j].value) - dojo.string.substitute(infoPodStatics[0].LatestObservation, indicatorState[j].value));
                     if (diff > 0) {
                         imgArr.src = "images/up.png";
@@ -183,6 +187,7 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
         count++;
     }
     CreateScrollbar(dojo.byId('divLayerContainer'), dojo.byId('divLayerContent'));
+    //Below code block will get executed when a shared link for the app is invoked.
     if (share != "") {
         ShowProgressIndicator();
         if (map) {
@@ -200,9 +205,9 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
             group = window.location.href.split("$t=")[1];
         }
         group = group.replace(/%20/g, " ");
+        group = group.replace("@", "&");
         if (group != baseMapLayer[0].MapValue) {
             var flagBreak = false;
-
             for (var subjectGroup in arrSubjectGroups) {
                 for (var t in arrSubjectGroups[subjectGroup]) {
                     if (group == arrSubjectGroups[subjectGroup][t].title) {
@@ -215,10 +220,8 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
                             webMapId += arrSubjectGroups[subjectGroup][r].webMapId + ",";
                             webMapTitle += arrSubjectGroups[subjectGroup][r].title + ",";
                         }
-
                         webMapId = webMapId.split(",");
                         webMapTitle = webMapTitle.split(",");
-
 
                         var visibility = "";
                         for (var lay in layerImages) {
@@ -242,7 +245,8 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
     HideProgressIndicator();
 }
 
-//function to get data for the group metric pods
+//Function to get data for the sub group(metric) pods(eg:Thefts,Ems Runs etc)
+//This function creates info pods for the webmapid
 function createDataforPods(group, tag, webMapId, webMapTitle, visibility, token, arrSubjectGroups, groupdata, indicatorState) {
     var webInfo = [];
     var counter = 0;
@@ -270,6 +274,7 @@ function createDataforPods(group, tag, webMapId, webMapTitle, visibility, token,
                 webmapInfo.baseMap = response.itemInfo.itemData.baseMap.baseMapLayers;
                 webInfo.push(webmapInfo);
                 if ((webMapId.length - 1) == counter) {
+                    //function to sort the metric pods in alphabetical order
                     webInfo.sort(function (a, b) {
                         var nameA = a.key.toLowerCase(), nameB = b.key.toLowerCase()
                         if (nameA < nameB) //sort string ascending
@@ -294,14 +299,17 @@ function createDataforPods(group, tag, webMapId, webMapTitle, visibility, token,
                         }
                     }
 
+                    //visibility(isPodVisible) flag is used to determine creation and display of info pod. The pods will be created and displayed only if this flag is set to true.
                     if (visibility) {
                         var webStats = [];
                         for (var z in webInfo) {
                             for (var y in webInfo[z].operationalLayers) {
-                                var str = webInfo[z].operationalLayers[y].url;
-                                var ss = str.substring(((str.lastIndexOf("/")) + 1), (str.length))
-                                if (!isNaN(ss)) {
-                                    webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url });
+                                if (webInfo[z].operationalLayers[y].url) {
+                                    var str = webInfo[z].operationalLayers[y].url;
+                                    var ss = str.substring(((str.lastIndexOf("/")) + 1), (str.length))
+                                    if (!isNaN(ss)) {
+                                        webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url, statsTitle: webInfo[z].operationalLayers[y].title });
+                                    }
                                 }
                             }
                         }
@@ -310,15 +318,7 @@ function createDataforPods(group, tag, webMapId, webMapTitle, visibility, token,
                     }
                     else {
                         dojo.byId("divServiceDetails").style.display = "none";
-                        dojo.replaceClass("divGraphComponent", "hideContainerHeight", "showContainerHeight");
-                        dojo.byId('divGraphComponent').style.height = '0px';
-                        dojo.byId('showHide').style.top = '59px';
-                        dojo.byId("divGraphHeader").style.color = "gray";
-                        dojo.byId("divGraphHeader").setAttribute("state", "disabled");
-                        dojo.byId("divGraphHeader").style.cursor = "default";
-                        if (share != "") {
-                            shareOnLoad = false;
-                        }
+                        HideGraphContainer();
                     }
                 }
             });
@@ -326,11 +326,9 @@ function createDataforPods(group, tag, webMapId, webMapTitle, visibility, token,
     }
 }
 
-//function for fetching the statistical data for the info pods
+//Function to fetch the statistical data for the metric pods
+//This function queries each statistics layer and creates infopods for each webmap of subject group
 function FetchStatData(webStats, inc, statsData, webInfo, groupdata, token) {
-    dojo.byId("divGraphHeader").style.color = "#FFFFFF";
-    dojo.byId("divGraphHeader").setAttribute("state", "enabled");
-    dojo.byId("divGraphHeader").style.cursor = "pointer";
     if (webStats.length) {
         if (webStats[inc]) {
             if (webStats[inc].url) {
@@ -341,12 +339,13 @@ function FetchStatData(webStats, inc, statsData, webInfo, groupdata, token) {
                 queryCounty.outFields = ["*"];
                 queryCounty.spatialRelationship = esri.tasks.Query.SPATIAL_REL_WITHIN;
                 queryTask.execute(queryCounty, function (featureSet) {
-                    statsData.push({ title: webStats[inc].title, data: featureSet.features[0].attributes, fields: featureSet.fields });
+                    statsData.push({ title: webStats[inc].title, data: featureSet.features[0].attributes, fields: featureSet.fields, statsTitle: webStats[inc].statsTitle });
                     inc++;
                     if (webStats.length == statsData.length) {
                         CreateGroupPods(webInfo, groupdata, token, statsData);
                         dojo.disconnect(handlePoll);
                         CreateHorizontalScrollbar(dojo.byId('divServiceData'), dojo.byId("carouselscroll"));
+                        return;
                     }
                     FetchStatData(webStats, inc, statsData, webInfo, groupdata, token);
                 }, function (err) {
@@ -362,7 +361,7 @@ function FetchStatData(webStats, inc, statsData, webInfo, groupdata, token) {
     }
 }
 
-//function for fetching the RSS feeds news and twitter trends through local storage
+//Function fetches data from RSS feeds and Twitter trends for default keywords and the keywords stored in local storage
 function PopulateNews(evt) {
     ShowProgressIndicator();
     RSSCounter = 0;
@@ -398,10 +397,8 @@ function PopulateNews(evt) {
                     rss = dojo.fromJson(localStorage.getItem("RSSFeedCollection"));
                 }
             }
-
             var chkfeedCount = 0;
             var lastOrder = 0;
-
             if (rss) {
                 for (var c = 0; c < rss.length; c++) {
                     if (rss[c].checked) {
@@ -431,7 +428,7 @@ function PopulateNews(evt) {
     }, 500);
 }
 
-//function to fetch the news and events
+//Function to fetch the data for each RSS feed name and twitter trend name.
 function FetchNews(chkCount, lastOrder, news, chkfeedCount) {
     if (chkCount != null) {
         var q = news;
@@ -442,6 +439,7 @@ function FetchNews(chkCount, lastOrder, news, chkfeedCount) {
             chkCount++;
         }
         if (rss[q].checked) {
+        //Fetch data for rss feeds
             esri.request({
                 url: rss[q].url,
                 handleAs: "xml",
@@ -495,6 +493,7 @@ function FetchNews(chkCount, lastOrder, news, chkfeedCount) {
         }
     }
     else {
+    //Fetch data for twitter trends
         var trend = news;
         esri.request({
             url: twitterDetails[0].TwitterURL,
@@ -546,7 +545,7 @@ function FetchNews(chkCount, lastOrder, news, chkfeedCount) {
     }
 }
 
-//function to call when all the feeds are loaded completely
+//Function to create scroll bar for RSS feeds and twitter trends.
 function OnNewsFeedsUpdateEnd(chkfeedCount) {
     if (chkfeedCount) {
         if (RSSCounter == chkfeedCount) {
@@ -563,7 +562,7 @@ function OnNewsFeedsUpdateEnd(chkfeedCount) {
 }
 
 
-//function for creating structure for news and trends
+//Function to display list of RSS feeds and Twitter trends
 function CreateNewsDataTemplate(Header, Link, Content, tBody, feed, lastVal) {
     var tr = document.createElement("tr");
     tBody.appendChild(tr);
@@ -623,7 +622,9 @@ function CreateNewsDataTemplate(Header, Link, Content, tBody, feed, lastVal) {
     tr1.appendChild(td2);
 }
 
-//function to display the map page with the animation effects
+
+//Function to display the map page with the animation effects
+//This function displays the webmap using webmap ID
 function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdata, token, state, podsVisibility, bottomOffset) {
     if (dojo.byId("btnMap").className != "customDisabledButton") {
         dojo.byId("imgSocialMedia").setAttribute("subjectGroup", header);
@@ -649,6 +650,7 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
             dojo.byId("divTextContainer").style.width = dojo.window.getBox().w + "px";
             dojo.byId("divTextContainer").style.height = dojo.window.getBox().h + "px";
 
+            //Fade In and Fade Out animations
             FadeOut(dojo.byId('divApplicationHeader'));
             FadeOut(dojo.byId('divInfoContainer'));
             FadeOut(dojo.byId('divSettingsContainer'));
@@ -711,6 +713,7 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
             mapDeferred.addCallback(function (response) {
                 map = response.map;
                 startExtent = map.extent;
+                baseMapExtent = response.itemInfo.itemData.baseMap.baseMapLayers[0].layerObject.fullExtent;
 
                 dojo.connect(map, "onExtentChange", function (evt) {
                     startExtent = map.extent;
@@ -732,7 +735,7 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
     }
 }
 
-//function calls when map object initialized
+//Function to create graphics layer and graphics from session storage
 function MapInitFunction(groupdata, token, webmapInfo, podsVisibility, id) {
     if (dojo.query('.logo-med', dojo.byId('map')).length > 0) {
         dojo.query('.logo-med', dojo.byId('map'))[0].id = "imgESRILogo";
@@ -791,6 +794,7 @@ function MapInitFunction(groupdata, token, webmapInfo, podsVisibility, id) {
         dojo.byId("imgSocialMedia").setAttribute("shareNotesLink", null);
     }
 
+    //Create graphics using data from URL when a shared link for the app is invoked
     if (share != "") {
         var group;
         if (window.location.href.split("$n=").length > 1) {
@@ -800,6 +804,7 @@ function MapInitFunction(groupdata, token, webmapInfo, podsVisibility, id) {
             group = window.location.href.split("$t=")[1];
         }
         group = group.replace(/%20/g, " ");
+        group = group.replace("@", "&");
         if (!sessionStorage.getItem("notes" + webmapInfo.key)) {
             if (webmapInfo.key == group) {
                 var nStore = [];
@@ -832,26 +837,28 @@ function MapInitFunction(groupdata, token, webmapInfo, podsVisibility, id) {
                         }
                         var internalNote = internalStr.split(",");
                         var counter = 0;
-                        var displayNote = internalStr.split(internalNote[1])[1];
-                        displayNote = displayNote.substring(4, (displayNote.length - 3));
+                        if (internalStr) {
+                            var displayNote = internalStr.split(internalNote[1])[1];
+                            displayNote = displayNote.substring(4, (displayNote.length - 3));
 
-                        for (var z = 0; z < displayNote.length; z++) {
-                            try {
-                                displayNote = decodeURIComponent(displayNote);
-                                for (var y = 0; y < counter; y++) {
-                                    displayNote = displayNote.concat(".");
-                                    displayNote = decodeURIComponent(displayNote.replace(/\+/g, " "));
+                            for (var z = 0; z < displayNote.length; z++) {
+                                try {
+                                    displayNote = decodeURIComponent(displayNote);
+                                    for (var y = 0; y < counter; y++) {
+                                        displayNote = displayNote.concat(".");
+                                        displayNote = decodeURIComponent(displayNote.replace(/\+/g, " "));
+                                    }
+                                    break;
                                 }
-                                break;
+                                catch (err) {
+                                    displayNote = displayNote.substring(0, (displayNote.length - 1));
+                                    counter++;
+                                }
                             }
-                            catch (err) {
-                                displayNote = displayNote.substring(0, (displayNote.length - 1));
-                                counter++;
-                            }
-                        }
 
-                        displayNote = ReplaceWithSpecialCharacters(displayNote);
-                        nStore.push([{ rings: [parseFloat(internalNote[0]), parseFloat(internalNote[1])], notes: displayNote, sr: map.spatialReference, key: window.location.href.split("$t=")[1].split("$n=")[0].replace(/%20/g, " "), count: (c + 1)}]);
+                            displayNote = ReplaceWithSpecialCharacters(displayNote);
+                            nStore.push([{ rings: [parseFloat(internalNote[0]), parseFloat(internalNote[1])], notes: displayNote, sr: map.spatialReference, key: window.location.href.split("$t=")[1].split("$n=")[0].replace(/%20/g, " "), count: (c + 1)}]);
+                        }
                     }
                     CreateGraphic(nStore, webmapInfo, false);
                 }
@@ -869,7 +876,7 @@ function MapInitFunction(groupdata, token, webmapInfo, podsVisibility, id) {
         dojo.byId("imgNotes").title = "Add Notes";
     }
 
-
+    //Function to create notes graphics on the map when user clicks on the map
     dojo.connect(map, "onClick", function (evt) {
         if (dojo.byId("imgNotes").getAttribute("state") != "unSelected") {
             HideInfoContainer();
@@ -888,17 +895,17 @@ function MapInitFunction(groupdata, token, webmapInfo, podsVisibility, id) {
         else if (!notesLayerClicked) {
             if (dojo.query(".esriPopup .actionsPane .action").length > 0) {
                 dojo.query(".esriPopup .actionsPane .action")[0].style.display = "block";
+                dojo.query(".esriPopup .actionsPane .action")[0].style.width = "57px";
             }
             RemoveGraphic(null, noteCount, webmapInfo.key, null);
         }
     });
 }
 
-//function to add the existing note graphics on the map
+//Function to add the existing note graphics on the map
 function CreateGraphic(nStore, webmapInfo, content) {
     var iconSize = ((isBrowser) ? 30 : 44);
     var symbol = new esri.symbol.PictureMarkerSymbol("images/notesGraphic.png", iconSize, iconSize);
-
 
     for (var n = 0; n < nStore.length; n++) {
         if (nStore[n][0].key == webmapInfo.key) {
@@ -917,11 +924,10 @@ function CreateGraphic(nStore, webmapInfo, content) {
     dojo.byId("imgSocialMedia").setAttribute("noteGraphics", sessionStorage.getItem("notes" + webmapInfo.key));
     var attrData = [];
     attrData = PopulateNotesData(webmapInfo.key);
-
     dojo.byId("imgSocialMedia").setAttribute("shareNotesLink", dojo.toJson(attrData));
 }
 
-//function to get the data with the latest added notes
+//Function to populate updated notes
 function PopulateNotesData(key) {
     var nArray = [];
     var shareNotes = [];
@@ -938,8 +944,7 @@ function PopulateNotesData(key) {
     return nArray;
 }
 
-
-//function to display info window for notes
+//This function creates and displays info window with existing notes for each note graphic
 function ShowNotesInfo(feature, geometry, key, render, note) {
     mapExtent = GetMapExtent();
     var url = esri.urlToObject(window.location.toString());
@@ -981,7 +986,6 @@ function ShowNotesInfo(feature, geometry, key, render, note) {
         notesLength = (val - urlStr.length) + " character(s) remain";
     }
 
-
     var divContainer = document.createElement("div");
     divContainer.id = "noteContainer";
 
@@ -1022,6 +1026,7 @@ function ShowNotesInfo(feature, geometry, key, render, note) {
 
 
     infoContentBlur = dojo.connect(txtArea, "onblur", function () {
+        //Calculate remaining number of characters to be entered
         if (this.getAttribute("value") != this.value.trim()) {
             var store = dojo.toJson(this.value.trim()).substring(1, (dojo.toJson(this.value.trim()).length - 1));
             store = ReplaceWithSpecialCharacters(store);
@@ -1091,6 +1096,9 @@ function ShowNotesInfo(feature, geometry, key, render, note) {
                     dojo.byId("imgSocialMedia").setAttribute("shareNotesLink", encodeURIComponent(dojo.toJson(nArray)));
                 }
             }
+            else {
+                dojo.byId("spnResultContainer").innerHTML = (charCount + this.getAttribute("dVal").length) + " character(s) remain";
+            }
         }
     });
 
@@ -1152,6 +1160,7 @@ function ShowNotesInfo(feature, geometry, key, render, note) {
                         map.infoWindow.setContent(divContainer);
                         if (dojo.query(".esriPopup .actionsPane .action").length > 0) {
                             dojo.query(".esriPopup .actionsPane .action")[0].style.display = "none";
+                            dojo.query(".esriPopup .actionsPane .action")[0].style.width = "0px";
                         }
                         map.infoWindow.show(geometry, map.getInfoWindowAnchor(map.toScreen(geometry)));
                         break;
@@ -1171,7 +1180,7 @@ function ShowNotesInfo(feature, geometry, key, render, note) {
     });
 }
 
-//function to replace encode values with special characters
+//Function to encode values with special characters
 function ReplaceWithSpecialCharacters(str) {
     str = str.replace(/\\n/g, "\n");
     str = str.replace(/\\r/g, "\r");
@@ -1183,8 +1192,7 @@ function ReplaceWithSpecialCharacters(str) {
     return str;
 }
 
-
-//function to save the notes
+//Function to save the notes in session storage
 function SaveNotes(geometry, key, note, store) {
     var attributes = [];
     attributes.push({ note: store, count: note });
@@ -1220,7 +1228,7 @@ function SaveNotes(geometry, key, note, store) {
     dojo.byId("imgSocialMedia").setAttribute("shareNotesLink", encodeURIComponent(dojo.toJson(nArray)));
 }
 
-//function to remove the note graphic from the map
+//Function to remove the note graphic from the map
 function RemoveGraphic(render, note, key, btnclick) {
     if (dojo.byId("txtArea")) {
         if ((dojo.byId("txtArea").value.trim() == "") || (btnclick)) {

@@ -16,7 +16,7 @@
  */
 var shareOnLoad = true; //flag set for shared link
 
-//function for creating the bottom bar for services
+//Create bottom panel for subject groups with respective images
 function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, bottomOffset) {
     RemoveChildren(dojo.byId("trBottomHeaders"));
     RemoveChildren(dojo.byId("trBottomTags"));
@@ -78,11 +78,15 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
         }
 
         imgHeader.onclick = function () {
+            //Upon clicking/tapping on the subject group image; the data for selected subject group will be transferred to function PopulateEventDetails to create map page.
             if (this.style.cursor == "pointer") {
                 if (dojo.coords("divMoreContent").h > 0) {
                     dojo.byId("imgMore").src = "images/more.png";
                     dojo.replaceClass("divMoreContent", "hideContainerHeight", "showContainerHeight");
                     dojo.byId('divMoreContent').style.height = '0px';
+                }
+                if (share != "") {
+                    shareOnLoad = false;
                 }
                 var tag = this.getAttribute("WebTag");
                 var webMapId = this.getAttribute("WebId").split(",");
@@ -119,9 +123,9 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
                             }
                         });
                         mapDeferred.addCallback(function (response) {
+
                             map = response.map;
                             map.destroy();
-
                             var webmapInfo = {};
                             webmapInfo.id = response.itemInfo.item.id;
                             webmapInfo.key = response.itemInfo.item.title;
@@ -164,20 +168,20 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
                                     RemoveChildren(dojo.byId("trBottomHeaders"));
                                     RemoveChildren(dojo.byId("trBottomTags"));
                                     RemoveChildren(dojo.byId("tblMoreResults"));
-
                                     PopulateEventDetails(webInfo[0].id, swappedLayer, tag.split(",")[0], webInfo[0], groupdata, token, false, visibility, dojo.byId("trBottomHeaders").getAttribute("offset"));
                                 } else {
                                     PopulateEventDetails(webInfo[0].id, null, tag.split(",")[0], webInfo[0], groupdata, token, false, visibility, null);
                                 }
-
                                 if (visibility) {
                                     var webStats = [];
                                     for (var z in webInfo) {
                                         for (var y in webInfo[z].operationalLayers) {
-                                            var str = webInfo[z].operationalLayers[y].url;
-                                            var ss = str.substring(((str.lastIndexOf("/")) + 1), (str.length))
-                                            if (!isNaN(ss)) {
-                                                webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url });
+                                            if (webInfo[z].operationalLayers[y].url) {
+                                                var str = webInfo[z].operationalLayers[y].url;
+                                                var ss = str.substring(((str.lastIndexOf("/")) + 1), (str.length))
+                                                if (!isNaN(ss)) {
+                                                    webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url, statsTitle: webInfo[z].operationalLayers[y].title });
+                                                }
                                             }
                                         }
                                     }
@@ -186,15 +190,7 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
                                 }
                                 else {
                                     dojo.byId("divServiceDetails").style.display = "none";
-
-                                    if (dojo.coords("divGraphComponent").h > 0) {
-                                        dojo.replaceClass("divGraphComponent", "hideContainerHeight", "showContainerHeight");
-                                        dojo.byId('divGraphComponent').style.height = '0px';
-                                        dojo.byId('showHide').style.top = '59px';
-                                    }
-                                    dojo.byId("divGraphHeader").style.color = "gray";
-                                    dojo.byId("divGraphHeader").setAttribute("state", "disabled");
-                                    dojo.byId("divGraphHeader").style.cursor = "default";
+                                    HideGraphContainer();
                                 }
                             }
                         });
@@ -206,7 +202,7 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
                 }
             }
         }
-
+        //Display more button if the number of subject groups can not be accommodated in the bottom panel
         if ((((bottomOffset) ? bottomOffset : dojo.byId("divGroupHolder").offsetWidth) - ((lay == ord) ? 0 : 100)) > (lay * 100)) {
             dojo.byId("trBottomHeaders").appendChild(td);
         } else {
@@ -294,7 +290,20 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
     dojo.byId("trBottomTags").appendChild(tdMoreText);
 }
 
-//function to display the home page with the animation effects
+//Display container to show images in bottom panel
+function ShowMoreContainer() {
+    ToggleHeaderPanels();
+    if (dojo.coords("divMoreContent").h <= 0) {
+        dojo.byId("imgMore").src = "images/more_hover.png";
+        dojo.byId('divMoreContent').style.height = "300px";
+        dojo.byId('divMoreContent').style.right = (dojo.coords("holder").l + 15) + "px";
+        dojo.replaceClass("divMoreContent", "showContainerHeight", "hideContainerHeight");
+
+        CreateScrollbar(dojo.byId("divMoreResultsContainer"), dojo.byId("divMoreResultsContent"));
+    }
+}
+
+//Go back to the dashboard page with the animation effects
 function BackToPods() {
     dojo.byId("divServiceDetails").style.display = "none";
     newLeft = 0;
@@ -305,7 +314,9 @@ function BackToPods() {
     HideInfoContainer();
     map.removeAllLayers();
     map.destroy();
-
+    if (share != "") {
+        shareOnLoad = false;
+    }
     FadeIn(dojo.byId('divApplicationHeader'));
     FadeIn(dojo.byId('divInfoContainer'));
     FadeIn(dojo.byId('divSettingsContainer'));
@@ -314,6 +325,7 @@ function BackToPods() {
     FadeOut(dojo.byId('map'));
     FadeOut(dojo.byId('divServiceDetails'));
     FadeOut(dojo.byId('showHide'));
+    //retainState variable is used to store the state of header containers
     if (retainState) {
         FadeOut(dojo.byId('divGraphComponent'));
         FadeOut(dojo.byId('divBookmarkContent'));
@@ -331,10 +343,11 @@ function BackToPods() {
             SetHomePageHeight();
         }
         CreateScrollbar(dojo.byId('divLayerContainer'), dojo.byId('divLayerContent'));
+        CreateScrollbar(dojo.byId('divNAEDisplayContainer'), dojo.byId('divNAEDisplayContent'));
     }, 500);
 }
 
-//function to hide Info request container
+//Hide info window
 function HideInfoContainer() {
     RemoveHiglightGraphic();
     if (map.infoWindow) {
@@ -342,7 +355,7 @@ function HideInfoContainer() {
     }
 }
 
-//function to remove highlighted graphic for notes
+//Remove note graphic on map
 function RemoveHiglightGraphic() {
     if (map.getLayer("tempNotesLayerId")) {
         if (map.getLayer("tempNotesLayerId").graphics.length != 0) {
@@ -358,7 +371,7 @@ function RemoveHiglightGraphic() {
     selectedPoint = null;
 }
 
-//function to show address container
+//Show bookmark container with wipe-in animation
 function ShowBookmarkContainer() {
     ToggleHeaderPanels();
     if (dojo.coords("divBookmarkContent").h <= 0) {
@@ -395,21 +408,7 @@ function ShowBookmarkContainer() {
     }
 }
 
-//function to show customize container
-function ShowMoreContainer() {
-    ToggleHeaderPanels();
-    if (dojo.coords("divMoreContent").h <= 0) {
-        dojo.byId("imgMore").src = "images/more_hover.png";
-        dojo.byId('divMoreContent').style.height = "300px";
-        dojo.byId('divMoreContent').style.right = (dojo.coords("holder").l + 15) + "px";
-        dojo.replaceClass("divMoreContent", "showContainerHeight", "hideContainerHeight");
-
-        CreateScrollbar(dojo.byId("divMoreResultsContainer"), dojo.byId("divMoreResultsContent"));
-    }
-}
-
-
-//function for creating the list of bookmarks through local storage
+//Create list of bookmarks from local storage
 function PopulateBookmarkList() {
     dojo.byId("bookmarkErrorMessage").innerHTML = "";
     RemoveChildren(dojo.byId("divBookMarksResultsContent"));
@@ -461,9 +460,11 @@ function PopulateBookmarkList() {
             }
 
             td.onclick = function (evt) {
+                //Upon clicking/tapping on this cell map will pan to the respective stored extent of this bookmark
                 for (var b = 0; b < arrayBookmarks.length; b++) {
                     if (this.getAttribute("bookmarkName") == arrayBookmarks[b].name) {
-                        map.setExtent(new esri.geometry.Extent(arrayBookmarks[b].extent.xmin, arrayBookmarks[b].extent.ymin, arrayBookmarks[b].extent.xmax, arrayBookmarks[b].extent.ymax, map.spatialReference));
+                        map.setExtent(new esri.geometry.Extent(arrayBookmarks[b].extent.xmin, arrayBookmarks[b].extent.ymin,
+                                                               arrayBookmarks[b].extent.xmax, arrayBookmarks[b].extent.ymax, map.spatialReference));
                         break;
                     }
                 }
@@ -539,53 +540,32 @@ function PopulateBookmarkList() {
     }
 }
 
-//function to show address container
+//Display address container
 function ShowLocateContainer() {
     ToggleHeaderPanels();
-    dojo.byId('txtAddress').blur();
     if (dojo.coords("divAddressContent").h <= 0) {
         dojo.byId("showHide").style.display = "none";
-
         dojo.byId("imgSearch").src = "images/locate_hover.png";
         dojo.byId('divAddressContent').style.height = "300px";
         dojo.byId('divAddressContent').style.right = (dojo.coords("holder").l + 15) + "px";
         dojo.replaceClass("divAddressContent", "showContainerHeight", "hideContainerHeight");
-        setTimeout(function () {
-            dojo.byId('txtAddress').focus();
-        }, 500);
         dojo.byId("txtAddress").value = dojo.byId("txtAddress").getAttribute("defaultAddress");
+        if (dojo.byId("txtAddress").getAttribute("defaultAddress") != dojo.byId("txtAddress").getAttribute("defaultAddressTitle")) {
+            dojo.byId("txtAddress").style.color = "#000";
+        }
     }
     RemoveChildren(dojo.byId('tblAddressResults'));
     SetAddressResultsHeight();
 }
 
-//Function to get map Extent
+//Get current map Extent
 function GetMapExtent() {
-    var str = "";
-    if (map.extent.xmin.toString().split(".")[1].length != 9) {
-        str = map.extent.xmin.toString().concat("0");
-    }
-    var extents = ((!str) ? map.extent.xmin.toString() : str) + ",";
-    str = "";
-
-    if (map.extent.ymin.toString().split(".")[1].length != 9) {
-        str = map.extent.ymin.toString().concat("0");
-    }
-    extents += ((!str) ? map.extent.ymin.toString() : str) + ",";
-    str = "";
-    if (map.extent.xmax.toString().split(".")[1].length != 9) {
-        str = map.extent.xmax.toString().concat("0");
-    }
-    extents += ((!str) ? map.extent.xmax.toString() : str) + ",";
-    str = "";
-    if (map.extent.ymax.toString().split(".")[1].length != 9) {
-        str = map.extent.ymax.toString().concat("0");
-    }
-    extents += (!str) ? map.extent.ymax.toString() : str;
+    var extents = map.extent.xmin.toString().split(".")[0] + "," + map.extent.ymin.toString().split(".")[0] + "," +
+                  map.extent.xmax.toString().split(".")[0] + "," + map.extent.ymax.toString().split(".")[0];
     return (extents);
 }
 
-//Function to open Email client with the link
+//Open Email client with shared link
 function ShareLink(ext) {
     dojo.byId("imgSocialMedia").src = "images/imgSocialMedia_hover.png";
     tinyUrl = null;
@@ -598,11 +578,11 @@ function ShareLink(ext) {
             urlStr = encodeURI(url.path) + shareContent + dojo.byId("imgSocialMedia").getAttribute("shareNotesLink");
         }
         else {
-            urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$t=" + dojo.byId("imgSocialMedia").getAttribute("mapName");
+            urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$t=" + dojo.byId("imgSocialMedia").getAttribute("mapName").replace("&", "@");
         }
     }
     else {
-        urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$t=" + dojo.byId("imgSocialMedia").getAttribute("mapName");
+        urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$t=" + dojo.byId("imgSocialMedia").getAttribute("mapName").replace("&", "@");
     }
     url = dojo.string.substitute(mapSharingOptions.TinyURLServiceURL, [urlStr]);
     setTimeout(function () {
@@ -619,7 +599,7 @@ function ShareLink(ext) {
                 tinyUrl = tinyUrl[attr[x]];
             }
             if (tinyUrl) {
-                parent.location = dojo.string.substitute(mapSharingOptions.ShareByMailLink, [dojo.byId("imgSocialMedia").getAttribute("mapName") + " - " + tinyUrl]);
+                parent.location = dojo.string.substitute(mapSharingOptions.ShareByMailLink, [dojo.byId("imgSocialMedia").getAttribute("mapName").replace("&", "and") + " - " + tinyUrl]);
 
             } else {
                 alert(messages.getElementsByTagName("tinyURLEngine")[0].childNodes[0].nodeValue);
@@ -638,26 +618,27 @@ function ShareLink(ext) {
     }, 6000);
 }
 
-//function to set height and create scrollbar for address results
+//Set height for address results list and create scrollbar
 function SetAddressResultsHeight() {
     var height = dojo.coords(dojo.byId('divAddressContent')).h;
     if (height > 0) {
-        dojo.byId('divAddressScrollContent').style.height = (height - ((isTablet) ? 120 : 100)) + "px";
+        dojo.byId('divAddressScrollContent').style.height = (height - ((isTablet) ? 150 : 130)) + "px";
     }
     CreateScrollbar(dojo.byId("divAddressScrollContainer"), dojo.byId("divAddressScrollContent"));
 }
 
-//function to show progress indicator
+//Show progress indicator
 function ShowProgressIndicator() {
     dojo.byId('divLoadingIndicator').style.display = "block";
 }
 
-//function to hide progress indicator
+//Hide progress indicator
 function HideProgressIndicator() {
     dojo.byId('divLoadingIndicator').style.display = "none";
 }
 
-//function for creating the pods for related groups
+//Create metric pods for subject groups
+//For each pod this function determines Key indicator, Increase or decrease indicator, Color of pod. This function also handles on click event for each pod.
 function CreateGroupPods(webInfo, groupdata, token, statsData) {
     dojo.byId('carouselscroll').style.paddingLeft = "0px";
     dojo.byId("divServiceDetails").style.display = "block";
@@ -706,7 +687,8 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         divPod.setAttribute("info", p);
 
         divPod.onclick = function (evt) {
-            if (!((dojo.hasClass("div" + this.getAttribute("layer") + "Pod", "divPodRedSelected")) || (dojo.hasClass("div" + this.getAttribute("layer") + "Pod", "divPodGreenSelected")))) {
+            //Upon clicking/tapping on the pod, the data for selected pod will be transferred to function to create map page.
+            if (!((dojo.hasClass("div" + this.getAttribute("layer") + "Pod", "divPodRedSelected")) || (dojo.hasClass("div" + this.getAttribute("layer") + "Pod", "divPodGreenSelected")) || (dojo.hasClass("div" + this.getAttribute("layer") + "Pod", "divPodGraySelected")))) {
                 ShowProgressIndicator();
                 RemoveChildren(dojo.byId("divGraphContent"));
                 if (map) {
@@ -719,16 +701,20 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
                 for (var w in webInfo) {
                     dojo.removeClass("div" + w + "Pod", "divPodRedSelected");
                     dojo.removeClass("div" + w + "Pod", "divPodGreenSelected");
+                    dojo.removeClass("div" + w + "Pod", "divPodGraySelected");
                 }
+                //Highlight selected pod depending on its pod color
                 if (this.className == "divPodRed") {
                     dojo.addClass("div" + this.getAttribute("layer") + "Pod", "divPodRedSelected");
                 }
                 else if (this.className == "divPodGreen") {
                     dojo.addClass("div" + this.getAttribute("layer") + "Pod", "divPodGreenSelected");
+                } else {
+                    dojo.addClass("div" + this.getAttribute("layer") + "Pod", "divPodGraySelected");
                 }
 
                 for (var r in webInfo) {
-                    if ((dojo.hasClass("div" + r + "Pod", "divPodRedSelected")) || (dojo.hasClass("div" + r + "Pod", "divPodGreenSelected"))) {
+                    if ((dojo.hasClass("div" + r + "Pod", "divPodRedSelected")) || (dojo.hasClass("div" + r + "Pod", "divPodGreenSelected")) || (dojo.hasClass("div" + r + "Pod", "divPodGraySelected"))) {
                         dojo.byId("imgSocialMedia").setAttribute("key", webInfo[r].key);
                         break;
                     }
@@ -764,6 +750,7 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
                 }
             }
             else if (infoClicked) {
+                //infoClicked variable determines whether pod is selected or not
                 if (!dojo.byId("divSummary" + this.getAttribute("layer") + "Pod")) {
                     CreateSummaryData(statsData, this.getAttribute("layer"), webInfo[this.getAttribute("layer")].key);
                 }
@@ -829,7 +816,6 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         var trInner = document.createElement("tr");
         tbodyInner.appendChild(trInner);
 
-
         var td2 = document.createElement("td");
         td2.align = "left";
         td2.style.paddingLeft = "10px";
@@ -855,6 +841,7 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         imgInfo.style.height = "30px";
         imgInfo.src = "images/info.png";
         imgInfo.id = "img" + p;
+        imgInfo.style.display = "block";
         imgInfo.onclick = function () {
             if ((dojo.hasClass("div" + this.id.split("img")[1] + "Pod", "divPodRedSelected")) || (dojo.hasClass("div" + this.id.split("img")[1] + "Pod", "divPodGreenSelected"))) {
                 infoClicked = true;
@@ -888,6 +875,7 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         var imgArr = document.createElement("img");
         imgArr.style.width = "50px";
         imgArr.style.height = "30px";
+        imgArr.style.display = "block";
         spanImg.appendChild(imgArr);
 
         var tdText = document.createElement("td");
@@ -899,45 +887,75 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         spanText.style.fontSize = "38px";
         spanText.style.fontWeight = "bolder";
 
+        var featureCollection = true;
+
         if (statsData) {
             for (var c in statsData) {
                 if (webInfo[p].key == statsData[c].title) {
-                    spanText.innerHTML = dojo.string.substitute(infoPodStatics[0].CurrentObservation, statsData[c].data);
-                    var diff = (dojo.string.substitute(infoPodStatics[0].CurrentObservation, statsData[c].data) - dojo.string.substitute(infoPodStatics[0].LatestObservation, statsData[c].data));
-                    if (diff > 0) {
-                        imgArr.src = "images/up.png";
-                        if (dojo.string.substitute(infoPodStatics[0].StaticsPosition, statsData[c].data) == "Yes") {
-                            divPod.className = "divPodGreen";
-                            divPodInner.className = "divPodInnerGreen";
+                    featureCollection = false;
+                    //If stats keyword mentioned in config file is available in layer then show color, indicator and value for the pod
+                    if (statsData[c].statsTitle.indexOf(statisticsKeyword) >= 0) {
+                        if (webInfo[0].key) {
+                            dojo.byId("divGraphHeader").style.color = "#FFFFFF";
+                            dojo.byId("divGraphHeader").setAttribute("state", "enabled");
+                            dojo.byId("divGraphHeader").style.cursor = "pointer";
+                        }
+
+
+                        spanText.innerHTML = dojo.string.substitute(infoPodStatics[0].CurrentObservation, statsData[c].data);
+                        var diff = (dojo.string.substitute(infoPodStatics[0].CurrentObservation, statsData[c].data) - dojo.string.substitute(infoPodStatics[0].LatestObservation, statsData[c].data));
+                        // Calculate increase or decrease indicator; Accordingly set the color and arrow symbol for the pod
+                        if (diff > 0) {
+                            imgArr.src = "images/up.png";
+                            if (dojo.string.substitute(infoPodStatics[0].StaticsPosition, statsData[c].data) == "Yes") {
+                                divPod.className = "divPodGreen";
+                                divPodInner.className = "divPodInnerGreen";
+                            }
+                            else {
+                                divPod.className = "divPodRed";
+                                divPodInner.className = "divPodInnerRed";
+                            }
+                        }
+                        else if (diff < 0) {
+                            imgArr.src = "images/down.png";
+                            if (dojo.string.substitute(infoPodStatics[0].StaticsPosition, statsData[c].data) == "Yes") {
+                                divPod.className = "divPodRed";
+                                divPodInner.className = "divPodInnerRed";
+                            }
+                            else {
+                                divPod.className = "divPodGreen";
+                                divPodInner.className = "divPodInnerGreen";
+                            }
                         }
                         else {
-                            divPod.className = "divPodRed";
-                            divPodInner.className = "divPodInnerRed";
+                            divPod.className = "divPod";
+                            divPodInner.className = "divPodInner";
                         }
-                    }
-                    else if (diff < 0) {
-                        imgArr.src = "images/down.png";
-                        if (dojo.string.substitute(infoPodStatics[0].StaticsPosition, statsData[c].data) == "Yes") {
-                            divPod.className = "divPodRed";
-                            divPodInner.className = "divPodInnerRed";
-                        }
-                        else {
-                            divPod.className = "divPodGreen";
-                            divPodInner.className = "divPodInnerGreen";
-                        }
+                        break;
                     }
                     else {
-                        divPod.className = "divPod";
-                        divPodInner.className = "divPodInner";
+                        imgArr.style.display = "none";
+                        CreateNeutralPod(divPod, divPodInner, p);
+                        if (p == 0) {
+                            if (dojo.byId("divChartPod")) {
+                                RemoveChildren(dojo.byId("divChartPod"));
+                            }
+                            HideGraphContainer();
+                        }
                     }
-                    break;
                 }
             }
+            if (featureCollection) {
+                imgArr.style.display = "none";
+                CreateNeutralPod(divPod, divPodInner, p);
+            }
         } else {
-            spanText.innerHTML = showNullValueAs;
+            imgArr.style.display = "none";
+            CreateNeutralPod(divPod, divPodInner, p);
         }
         tdText.appendChild(spanText);
 
+        //When a shared link for the app is invoked, highlight the respective pod
         if (share != "") {
             var group;
             if (window.location.href.split("$n=").length > 1) {
@@ -954,6 +972,9 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
                     }
                     else if (divPod.className == "divPodGreen") {
                         dojo.addClass("div" + p + "Pod", "divPodGreenSelected");
+                    } else {
+                        dojo.addClass("div" + p + "Pod", "divPodGraySelected");
+                        HideGraphContainer();
                     }
                 }
             }
@@ -967,12 +988,13 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         count++;
     }
     for (var r in webInfo) {
-        if ((dojo.hasClass("div" + r + "Pod", "divPodRedSelected")) || (dojo.hasClass("div" + r + "Pod", "divPodGreenSelected"))) {
+        if ((dojo.hasClass("div" + r + "Pod", "divPodRedSelected")) || (dojo.hasClass("div" + r + "Pod", "divPodGreenSelected")) || (dojo.hasClass("div" + r + "Pod", "divPodGraySelected"))) {
             dojo.byId("imgSocialMedia").setAttribute("key", webInfo[r].key);
             dojo.byId("tdMetricHeader").innerHTML = webInfo[r].key;
             break;
         }
     }
+
     dojo.byId("imgSocialMedia").setAttribute("statistical", dojo.toJson(statsData));
 
     if (share != "") {
@@ -999,8 +1021,33 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
     }, 500);
 }
 
-//function to highlight the metric pod
+//Create neutral pod for layers without statistical information
+function CreateNeutralPod(divPod, divPodInner, p) {
+    divPod.className = "divPod";
+    divPodInner.className = "divPodInner";
+    dojo.byId("img" + p).style.display = "none";
+    if (dojo.byId("divChartPod")) {
+        RemoveChildren(dojo.byId("divChartPod"));
+    }
+    HideGraphContainer();
+}
+
+//Hide graph container
+function HideGraphContainer() {
+    dojo.replaceClass("divGraphComponent", "hideContainerHeight", "showContainerHeight");
+    dojo.byId('divGraphComponent').style.height = '0px';
+    dojo.byId('showHide').style.top = '59px';
+    dojo.byId("divGraphHeader").style.color = "gray";
+    dojo.byId("divGraphHeader").setAttribute("state", "disabled");
+    dojo.byId("divGraphHeader").style.cursor = "default";
+    if (share != "") {
+        shareOnLoad = false;
+    }
+}
+
+//Highlight the first metric pod in the subject group
 function HighlightMetricPod(divPod, count, p) {
+    //count parameter to check the order of metric
     if (count == 0) {
         if (divPod.className == "divPodRed") {
             dojo.addClass("div" + p + "Pod", "divPodRedSelected");
@@ -1008,10 +1055,14 @@ function HighlightMetricPod(divPod, count, p) {
         else if (divPod.className == "divPodGreen") {
             dojo.addClass("div" + p + "Pod", "divPodGreenSelected");
         }
+        else {
+            dojo.addClass("div" + p + "Pod", "divPodGraySelected");
+            HideGraphContainer();
+        }
     }
 }
 
-//function to populate information for the selected metric
+//Populate information for the selected metric
 function PopulateInfoPodDetails(store, value, graph) {
     if (value) {
         if (!graph) {
@@ -1020,9 +1071,10 @@ function PopulateInfoPodDetails(store, value, graph) {
         dojo.byId("divContainer" + store + "Pod").style.display = "block";
     }
     else {
-
         if (graph) {
-            dojo.byId("divChartPod").style.display = "block";
+            if (dojo.byId("divChartPod")) {
+                dojo.byId("divChartPod").style.display = "block";
+            }
         }
         else {
             dojo.byId("divContainer" + store + "Pod").style.display = "none";
@@ -1031,7 +1083,7 @@ function PopulateInfoPodDetails(store, value, graph) {
     }
 }
 
-//function for  populating the data according to their info pods
+//Create and display information for metric pod based on format defined in configuration file
 function CreateSummaryData(statsData, layer, title) {
     if (layer) {
         var divSummary = document.createElement("div");
@@ -1097,48 +1149,67 @@ function CreateSummaryData(statsData, layer, title) {
     }
 }
 
-//function for  populating the chart according to their info data
+//Create chart for metric pod data and style graph container
 function CreateLineChart(statsData, title) {
-    for (var y = 0; y < statsData.length; y++) {
-        if (statsData[y].title == title) {
-            var chartData = [];
-            chartData.push(Number(dojo.string.substitute(infoPodStatics[0].CurrentObservation, statsData[y].data)));
-            chartData.push(Number(dojo.string.substitute(infoPodStatics[0].LatestObservation, statsData[y].data)));
-            for (var z = 0; z < infoPodStatics[0].PreviousObservations.length; z++) {
-                chartData.push(Number(dojo.string.substitute(infoPodStatics[0].PreviousObservations[z], statsData[y].data)));
-            }
-            var date = new js.date();
-            var xAxisData = [];
-            for (var a = 0; a < infoPodStatics[1].DateObservations.length; a++) {
-                var utcMilliseconds = Number(dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data));
-                xAxisData.push(dojo.date.locale.format(date.utcTimestampFromMs(utcMilliseconds), { datePattern: infoPodStatics[1].DatePattern, selector: "date" }));
+    //statsData to check whether it has layer data or not
+    if (statsData) {
+        for (var y = 0; y < statsData.length; y++) {
+            if (statsData[y].title == title) {
+                if (statsData[y].statsTitle.indexOf(statisticsKeyword) >= 0) {
+                    var chartData = [];
+                    chartData.push(Number(dojo.string.substitute(infoPodStatics[0].CurrentObservation, statsData[y].data)));
+                    chartData.push(Number(dojo.string.substitute(infoPodStatics[0].LatestObservation, statsData[y].data)));
+                    for (var z = 0; z < infoPodStatics[0].PreviousObservations.length; z++) {
+                        chartData.push(Number(dojo.string.substitute(infoPodStatics[0].PreviousObservations[z], statsData[y].data)));
+                    }
+                    var date = new js.date();
+                    var xAxisData = [];
+                    for (var a = 0; a < infoPodStatics[1].DateObservations.length; a++) {
+                        var utcMilliseconds = Number(dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data));
+                        xAxisData.push(dojo.date.locale.format(date.utcTimestampFromMs(utcMilliseconds), { datePattern: infoPodStatics[1].DatePattern, selector: "date" }));
+                    }
+                }
             }
         }
     }
+    else {
+        if (dojo.byId("divChartPod")) {
+            RemoveChildren(dojo.byId("divChartPod"));
+        }
+        HideGraphContainer();
+    }
+    //chartData determines whether the layer has statistical data or not
+    if (chartData) {
+        var divChart;
+        if (dojo.byId("divChartPod")) {
+            RemoveChildren(dojo.byId("divChartPod"));
+            divChart = dojo.byId("divChartPod");
+        }
+        else {
+            divChart = document.createElement("div");
+            divChart.id = "divChartPod";
+            divChart.style.height = "80%";
+            divChart.style.width = "90%";
+            divChart.style.margin = "10px";
+            dojo.byId("divGraphContent").appendChild(divChart);
+        }
 
-    var divChart;
-    if (dojo.byId("divChartPod")) {
-        RemoveChildren(dojo.byId("divChartPod"));
-        divChart = dojo.byId("divChartPod");
+        var chartNode = document.createElement("div");
+        chartNode.style.width = "380px";
+        chartNode.style.height = "250px";
+        chartNode.id = "chartNodePod";
+        divChart.appendChild(chartNode);
+        setTimeout("PopulateChart(" + dojo.toJson(chartData) + "," + dojo.toJson(chartData) + "," + dojo.toJson(xAxisData) + ")", 1000);
     }
     else {
-        divChart = document.createElement("div");
-        divChart.id = "divChartPod";
-        divChart.style.height = "80%";
-        divChart.style.width = "90%";
-        divChart.style.margin = "10px";
-        dojo.byId("divGraphContent").appendChild(divChart);
+        if (dojo.byId("divChartPod")) {
+            RemoveChildren(dojo.byId("divChartPod"));
+        }
+        HideGraphContainer();
     }
-
-    var chartNode = document.createElement("div");
-    chartNode.style.width = "380px";
-    chartNode.style.height = "250px";
-    chartNode.id = "chartNodePod";
-    divChart.appendChild(chartNode);
-    setTimeout("PopulateChart(" + dojo.toJson(chartData) + "," + dojo.toJson(chartData) + "," + dojo.toJson(xAxisData) + ")", 1000);
 }
 
-//function to populate chart for the metric
+//Populate chart for the metric pod
 function PopulateChart(chartData, data, xAxisData) {
     var arrsort = chartData;
     arrsort.sort();
@@ -1146,6 +1217,7 @@ function PopulateChart(chartData, data, xAxisData) {
     var maxVal = Number(arrsort[(chartData.length - 1)]) + 10;
 
     var chart = new dojox.charting.Chart2D("chartNodePod");
+    //style the chart
     chart.margins.l = 0;
     chart.margins.t = 18;
     chart.margins.r = 0;
@@ -1164,7 +1236,7 @@ function PopulateChart(chartData, data, xAxisData) {
     });
 
     chart.addAxis("x", {
-        stroke: "white", min: 0, max: 6, fontColor: "white", minorTicks: false, minorLabels: false, microTicks: false,font: "normal normal normal 9pt verdana",
+        stroke: "white", min: 0, max: 6, fontColor: "white", minorTicks: false, minorLabels: false, microTicks: false, font: "normal normal normal 9pt verdana",
         hMajorLines: false, hMinorLines: false, fixLower: "major", fixUpper: "major", includeZero: false, title: "Reporting Period", titleGap: 10, titleFontColor: "#FFF", titleOrientation: "away",
         labels: [
             { value: 0, text: "" },
@@ -1180,13 +1252,15 @@ function PopulateChart(chartData, data, xAxisData) {
     chart.addAxis("y", { stroke: "white", min: minVal, max: maxVal, vertical: true, hMajorLines: false, fontColor: "white", font: "normal normal normal 9pt verdana",
         hMinorLines: false, fixLower: "major", fixUpper: "major", title: "Historical Observations", titleGap: 10, titleFontColor: "#FFF"
     });
-
-
     chart.addSeries("dashboard", data);
     chart.render();
+    //Enable the graph container tab
+    dojo.byId("divGraphHeader").style.color = "#FFFFFF";
+    dojo.byId("divGraphHeader").setAttribute("state", "enabled");
+    dojo.byId("divGraphHeader").style.cursor = "pointer";
 }
 
-//function to populate notes
+//Toggle notes icon
 function PopulateNotes(evt) {
     if (dojo.byId("imgNotes").title == "Add Notes") {
         if (evt.getAttribute("state") == "unSelected") {
@@ -1200,7 +1274,7 @@ function PopulateNotes(evt) {
     }
 }
 
-//function to display graph details
+//Display graph container with Wipe-in animation
 function ShowGraphDetails() {
     if (dojo.byId("divGraphHeader").getAttribute("state") == "enabled") {
         ToggleHeaderPanels();
@@ -1213,10 +1287,11 @@ function ShowGraphDetails() {
     }
 }
 
-//function to wipe out header panels
+//Wipe-out panels for Address,Graph,More,Bookmark
 function ToggleHeaderPanels() {
     if (dojo.coords("divAddressContent").h > 0) {
         dojo.byId("imgSearch").src = "images/locate.png";
+        dojo.byId("imgLocate").src = "images/locate.png";
         dojo.replaceClass("divAddressContent", "hideContainerHeight", "showContainerHeight");
         dojo.byId('divAddressContent').style.height = '0px';
     }
@@ -1238,7 +1313,7 @@ function ToggleHeaderPanels() {
     dojo.byId("showHide").style.display = "block";
 }
 
-//function to hide containers
+//Hide containers
 function HideContainer(value) {
     switch (value) {
         case 'locate':

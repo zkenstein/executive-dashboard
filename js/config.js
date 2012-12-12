@@ -37,26 +37,24 @@ dojo.declare("js.config", null, {
     //
     // 9. Customize data formatting                   - [ Tag(s) to look for: ShowNullValueAs, FormatDateAs ]
     //
-    // 10. Customize address search settings          - [ Tag(s) to look for: LocatorURL, LocatorFields, LocatorDefaultAddress, LocatorMarkupSymbolPath, LocatorRippleSize,ZoomLevel ]
+    // 10. Customize address search settings          - [ Tag(s) to look for: LocatorSettings ]
     //
-    // 11. Set URL for geometry service               - [ Tag(s) to look for: GeometryService ]
+    // 11. Set Fields for RSS                         - [ Tag(s) to look for: RSSFields ]
     //
-    // 12. Set Fields for RSS                         - [ Tag(s) to look for: RSSFields ]
+    // 12. Set Fields for Trends                      - [ Tag(s) to look for: TwitterDetails ]
     //
-    // 13. Set Fields for Trends                      - [ Tag(s) to look for: TwitterDetails ]
+    // 13. Specify images for welcome screen          - [ Tag(s) to look for: WelcomeScreenImages ]
     //
-    // 14. Specify images for welcome screen          - [ Tag(s) to look for: WelcomeScreenImages ]
+    // 14. Specify images for subject groups           - [ Tag(s) to look for: LayerImages ]
     //
-    // 15. Specify images for subject groups           - [ Tag(s) to look for: LayerImages ]
+    // 15. Set Fields for Metric pods                 - [ Tag(s) to look for: InfoPodStatics ]
     //
-    // 16. Set Fields for Metric pods                 - [ Tag(s) to look for: InfoPodStatics ]
+    // 16. Set Fields for Metric pods information     - [ Tag(s) to look for: PodInformation ]
     //
-    // 17. Set Fields for Metric pods information     - [ Tag(s) to look for: PodInformation ]
+    // 17. Set keyword to detect statistics layer     - [ Tag(s) to look for: StatisticsKeyword ]
     //
-    // 18. Set keyword to detect statistics layer     - [ Tag(s) to look for: StatisticsKeyword ]
-    //
-    // 19. Specify URLs for map sharing               - [ Tag(s) to look for:  ShareByMailLink ]
-    // 20.In case of changing the TinyURL service
+    // 18. Specify URLs for map sharing               - [ Tag(s) to look for:  ShareByMailLink ]
+    // 19.In case of changing the TinyURL service
     //     Specify URL for the new service            - [ Tag(s) to look for: MapSharingOptions (set TinyURLServiceURL, TinyURLResponseAttribute) ]
     //
     //
@@ -64,7 +62,7 @@ dojo.declare("js.config", null, {
     // ------------------------------------------------------------------------------------------------------------------------
     // GENERAL SETTINGS
     // ------------------------------------------------------------------------------------------------------------------------
-    // Set application title.
+    //Set application title.
     ApplicationName: "Executive Dashboard",
 
     //Message that appears when the application starts.
@@ -102,23 +100,20 @@ dojo.declare("js.config", null, {
     // Set string value to be shown for null or blank values.
     ShowNullValueAs: "N/A",
 
-    // Set Locator service URL.
-    LocatorURL: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Locators/TA_Address_NA_10/GeocodeServer",
-
-    // Set Locator fields. (fields to be used for searching)
-    LocatorFields: "SingleLine",
-
-    // Set default address to search.
-    LocatorDefaultAddress: "321 Redbud Dr Naperville IL 60540",
-
-    // Set pushpin image path.
-    LocatorMarkupSymbolPath: "images/RedPushpin.png",
-
-    //Set Zoom level.
-    ZoomLevel: 14,
-
-    // Set geometry service URL.
-    GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
+    //Set locator settings
+    LocatorSettings: {
+        DefaultLocatorSymbol: "images/Pushpin.png",
+        MarkupSymbolSize: { width: 35, height: 35 },
+        DefaultValue: "1848 N Mill St Naperville IL 60563",
+        LocatorParamaters: ["SingleLine"],
+        LocatorURL: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Locators/TA_Address_NA_10/GeocodeServer",
+        CandidateFields: "Loc_name, Score, Match_addr",
+        DisplayField: "${Match_addr}",
+        ZoomLevel: 14,
+        AddressMatchScore: 80,
+        LocatorFieldName: 'Loc_name',
+        LocatorFieldValues: ["US_RoofTop", "US_StreetName"]
+    },
 
     //Fields for RSS Feed.
     RSSFields: ["item", "title", "link", "description"],

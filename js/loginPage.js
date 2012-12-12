@@ -29,37 +29,36 @@ dojo.require("esri.arcgis.Portal");
 var authenticatedGroup; //variable for storing the group link for authentication
 var authenticatedLinks; //variable for storing the links for token generation
 var baseMapLayer; //variable for storing the basemap value
-var defaultNewsFields;
+var defaultNewsFields; //variable to store default news feeds for twitter and RSS
 var formatDateAs; //variable to store the date format
 var geometryService; //variable for storing the geometry service URL
 var infoPodStatics; //variable for storing statistics data of the layers
 var infoWindow; //variable for storing the info window object
-var isBrowser = false; //flag set to know the browser
-var isTablet = false; //flag set to know the tablet
+var isBrowser = false; //This variable will be set to 'true' when application is accessed from desktop browsers
+var isTablet = false; //This variable will be set to 'true' when application is accessed from tablet device
 var layerImages; //variable for storing the images for subject groups
-var locatorFields; //variable for storing the locator fields
-var locatorMarkupSymbolPath; //variable for storing the source path of the image to place it on the map
-var locatorURL; //variable for storing the locator URL
+var locatorSettings; //variable to store the locator settings
+
 var map; //variable for storing the map object
 var mapClick; //variable for storing the click event handling for map
 var mapPoint; //variable for storing the point geometry
 var mapSharingOptions; //variable for storing the tiny URL links
 var messages; //variable for the error messages
-var retainState; //flag set for retain state to containers
+var retainState; //flag set to retain state of containers
 var rssFields; //variable for storing the rss fields
-var showNullValueAs; //variable for storing the default null value
+var showNullValueAs; //variable for storing values to be shown for null values
 var startExtent; //variable for storing the default extent
-var statisticsKeyword;
+var statisticsKeyword; // variable for identifying statistics layer
 var tempGraphicsLayerId = 'tempGraphicsLayerID';  //variable to store graphics layer ID
 var twitterDetails; //variable for storing twitter link and fields
-var podInformation; //variable for storing the update information of pods
-var welcomeScreenImages; //variable for storing the images for welcome screen
-var zoomLevel;
+var podInformation; //variable for storing information of pods
+var welcomeScreenImages; //variable for storing images for welcome screen
 var portal, portalUrl = document.location.protocol + '//www.arcgis.com';
 var portalUser = null;
-var share;
+var share; //flag to determine whether the application is shared or not
 
-//function to call when the application starts
+
+//This initialization function is called when the DOM elements are ready
 function Init() {
     esri.config.defaults.io.proxyUrl = "proxy.ashx";
     esriConfig.defaults.io.alwaysUseProxy = false;
@@ -68,6 +67,7 @@ function Init() {
     // Create the portal
     portal = new esri.arcgis.Portal(portalUrl);
 
+    // Set error messages from xml file
     dojo.xhrGet({
         url: "errorMessages.xml",
         handleAs: "xml",
@@ -132,8 +132,10 @@ function Init() {
                 SetLoginPageHeight();
             }
 
+            // Read config.js file to set appropriate values
             var responseObject = new js.config();
-            dojo.byId("lblAppName").innerHTML = responseObject.ApplicationName;
+            dojo.byId("lblAppName").innerHTML = responseObject.ApplicationName.trimString(19);
+            dojo.byId("lblAppName").title = responseObject.ApplicationName;
             dojo.byId("divWelcomeContent").innerHTML = responseObject.WelcomeScreenMessage;
             welcomeScreenImages = responseObject.WelcomeScreenImages;
             authenticatedGroup = responseObject.AuthenticatedGroup;
@@ -146,25 +148,48 @@ function Init() {
             layerImages = responseObject.LayerImages;
             geometryService = new esri.tasks.GeometryService("http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
             rssFields = responseObject.RSSFields;
-            zoomLevel = responseObject.ZoomLevel;
             statisticsKeyword = responseObject.StatisticsKeyword;
-            dojo.byId("tdGraphTab").innerHTML = responseObject.GraphTabName;
+            dojo.byId("tdGraphTab").innerHTML = responseObject.GraphTabName.trimString(10);
+            dojo.byId("tdGraphTab").title = responseObject.GraphTabName;
             defaultNewsFields = responseObject.DefaultNewsFields;
             dojo.byId("tdHeaderBookmark").innerHTML = responseObject.BookmarkHeader;
+            locatorSettings = responseObject.LocatorSettings;
 
-            locatorURL = responseObject.LocatorURL;
-            locatorMarkupSymbolPath = responseObject.LocatorMarkupSymbolPath;
-            locatorFields = responseObject.LocatorFields.split(",");
+            // Set address search parameters
+            dojo.byId("txtAddress").setAttribute("defaultAddress", responseObject.LocatorSettings.DefaultValue);
+            dojo.byId('txtAddress').value = responseObject.LocatorSettings.DefaultValue;
+            dojo.byId("txtAddress").setAttribute("defaultAddressTitle", responseObject.LocatorSettings.DefaultValue);
+            dojo.byId("txtAddress").style.color = "gray";
+            dojo.connect(dojo.byId('txtAddress'), "onfocus", ClearDefaultText);
+            dojo.connect(dojo.byId('txtAddress'), "onblur", ReplaceDefaultText);
 
-            dojo.byId("txtAddress").setAttribute("defaultAddress", responseObject.LocatorDefaultAddress);
-            dojo.byId('txtAddress').value = responseObject.LocatorDefaultAddress;
-            dojo.connect(dojo.byId("txtAddress"), 'onkeydown', function (evt) {
+            // Identify the key presses while implementing auto-complete and assign appropriate actions
+            dojo.connect(dojo.byId("txtAddress"), 'onkeyup', function (evt) {
                 if (evt) {
-                    var key = evt.which || evt.keyCode;
-                    if (key == 13) {
-                        if (dojo.coords("divAddressContent").h > 0) {
-                            dojo.byId("txtAddress").blur();
+                    if (evt.keyCode == dojo.keys.ENTER) {
+                        if (dojo.byId("txtAddress").value != '') {
+                            dojo.byId("imgSearchLoader").style.display = "block";
                             LocateAddress();
+                            return;
+                        }
+                    }
+                    if (!((evt.keyCode > 46 && evt.keyCode < 58) || (evt.keyCode > 64 && evt.keyCode < 91) || (evt.keyCode > 95 && evt.keyCode < 106) || evt.keyCode == 8 || evt.keyCode == 110 || evt.keyCode == 188)) {
+                        evt = (evt) ? evt : event;
+                        evt.cancelBubble = true;
+                        if (evt.stopPropagation) evt.stopPropagation();
+                        return;
+                    }
+
+                    if (dojo.coords("divAddressContent").h > 0) {
+                        if (dojo.byId("txtAddress").value.trim() != '') {
+                            setTimeout(function () {
+                                dojo.byId("imgSearchLoader").style.display = "block";
+                                LocateAddress();
+                            }, 500);
+                        } else {
+                            dojo.byId("imgSearchLoader").style.display = "none";
+                            RemoveChildren(dojo.byId('tblAddressResults'));
+                            CreateScrollbar(dojo.byId("divAddressScrollContainer"), dojo.byId("divAddressScrollContent"));
                         }
                     }
                 }
@@ -174,20 +199,20 @@ function Init() {
             twitterDetails = responseObject.TwitterDetails;
             baseMapLayer = responseObject.BaseMapLayer;
 
-
             for (var i = 0; i < welcomeScreenImages.length; i++) {
                 dojo.byId("span" + i + "Welcome").innerHTML = welcomeScreenImages[i].Name;
                 dojo.byId("img" + i + "Welcome").src = welcomeScreenImages[i].Image;
             }
 
-
-
+            // Open help page upon clicking help button on dashboard page
             dojo.connect(dojo.byId('btnHelp'), "onclick", function () {
                 window.open(responseObject.HelpURL);
             });
+            // Open help page upon clicking help button on map page
             dojo.connect(dojo.byId('btnMapHelp'), "onclick", function () {
                 window.open(responseObject.HelpURL);
             });
+            // Create scroll bar for welcome text on home page
             setTimeout(function () {
                 CreateScrollbar(dojo.byId('divWelcomeContainer'), dojo.byId('divWelcomeContent'));
             }, 500);
@@ -196,8 +221,7 @@ function Init() {
 }
 dojo.addOnLoad(Init);
 
-
-//function to authenticate the user
+//This function is used to authenticate the user
 function AuthenticateUser() {
     ShowProgressIndicator();
     var signInLink = dojo.byId('tdPanelSign');
@@ -206,7 +230,6 @@ function AuthenticateUser() {
             portalUser = loggedInUser;
             sessionStorage.clear();
             FindArcGISGroup();
-            // update results
         });
         if (dojo.query(".dijitDialogPaneContentArea")[0]) {
             dojo.query(".dijitDialogPaneContentArea")[0].childNodes[0].innerHTML = "Enter your Username and Password";
@@ -231,7 +254,8 @@ function AuthenticateUser() {
     });
 }
 
-//function to find the authenticated group
+//Function to find the authenticated group
+//This function is used to find the group by its groupId; It also identifies webmaps for each subject group
 function FindArcGISGroup() {
     var params = {
         q: 'group:' + authenticatedGroup,
@@ -281,6 +305,7 @@ function FindArcGISGroup() {
                     }
                 }
 
+                //Arrange dashboard pods as per the order specified in configuration file
                 var orderedLayer = [];
                 for (var u in layerImages) {
                     for (var v in arrSubjectGroups) {
@@ -290,6 +315,8 @@ function FindArcGISGroup() {
                         }
                     }
                 }
+
+                //For each group, identify webmaps having key indicators and get it's statistical information
                 var keyCounter = 0;
                 var responseCounter = 0;
                 var keyIndicators = [];
@@ -299,7 +326,6 @@ function FindArcGISGroup() {
                         for (var h in orderedLayer[p][g].tags) {
                             if (orderedLayer[p][g].tags[h] == "Key Indicator") {
                                 keyCounter++;
-
                                 var mapDeferred = esri.arcgis.utils.createMap(orderedLayer[p][g].webMapId, "map", {
                                     mapOptions: {
                                         slider: false
@@ -308,7 +334,6 @@ function FindArcGISGroup() {
                                 mapDeferred.addCallback(function (response) {
                                     map = response.map;
                                     map.destroy();
-
                                     responseCounter++;
                                     var webmapInfo = {};
                                     webmapInfo.key = response.itemInfo.item.title
@@ -327,19 +352,20 @@ function FindArcGISGroup() {
                         }
                     }
                 }
-
-
+                //Display News and Events panel when none groups have key indicator
                 if (keyCounter == 0) {
                     CreateLayerPods(orderedLayer, data.token, groupdata, null);
                     PopulateNews(dojo.byId("btnNews"));
                 }
-
+                //Create basemap when clicked on Map button on dashboard page
                 mapClick = dojo.connect(dojo.byId('btnMap'), "onclick", function (evt) {
                     ShowProgressIndicator();
-                    map.destroy();
+                    if (map) {
+                        map.destroy();
+                    }
                     CreateBasemap(orderedLayer, groupdata, data);
                 });
-
+                //Decode the shared URL when shared application is accessed
                 if (share != "") {
                     var group;
                     if (window.location.href.split("$n=").length > 1) {
@@ -349,6 +375,7 @@ function FindArcGISGroup() {
                         group = window.location.href.split("$t=")[1];
                     }
                     group = group.replace(/%20/g, " ");
+                    group = group.replace("@", "&");
                     if (group == baseMapLayer[0].MapValue) {
                         CreateBasemap(orderedLayer, groupdata, data);
                     }
@@ -356,7 +383,7 @@ function FindArcGISGroup() {
             }
         }, { useProxy: true });
         dojo.byId("map").style.display = "none";
-
+        //Open Setting page upon clicking 'Settings' on dashboard page
         dojo.byId("btnSettings").onclick = function () {
             if (dojo.byId("btnSettings").className != "customDisabledButton") {
                 if (dojo.byId("divSettingsContainer").style.display != "block") {
@@ -373,7 +400,7 @@ function FindArcGISGroup() {
     });
 }
 
-//function for creating the basemap
+//Function to create the basemap
 function CreateBasemap(orderedLayer, groupdata, data) {
     for (var q = 0; q < groupdata.items.length; q++) {
         for (i = 0; i < groupdata.items[q].tags.length; i++) {
@@ -393,12 +420,10 @@ function CreateBasemap(orderedLayer, groupdata, data) {
                     webmapInfo.operationalLayers = response.itemInfo.itemData.operationalLayers;
                     webmapInfo.baseMap = response.itemInfo.itemData.baseMap.baseMapLayers;
 
-
                     dojo.byId("divServiceDetails").style.display = "none";
                     RemoveChildren(dojo.byId("trBottomHeaders"));
                     RemoveChildren(dojo.byId("trBottomTags"));
                     RemoveChildren(dojo.byId("tblMoreResults"));
-
 
                     dojo.replaceClass("divGraphComponent", "hideContainerHeight", "showContainerHeight");
                     dojo.byId('divGraphComponent').style.height = '0px';
@@ -418,7 +443,7 @@ function CreateBasemap(orderedLayer, groupdata, data) {
     }
 }
 
-//function calls when user wants to log out
+//When user logs out, Clear session storage and redirect to home page
 function SignOut() {
     sessionStorage.clear();
     startExtent = "";
@@ -434,7 +459,6 @@ function SignOut() {
     dojo.byId("imgBookmark").src = "images/imgBookmark.png";
     dojo.replaceClass("divBookmarkContent", "hideContainerHeight", "showContainerHeight");
     dojo.byId('divBookmarkContent').style.height = '0px';
-
 
     dojo.byId("imgSearch").src = "images/locate.png";
     dojo.replaceClass("divAddressContent", "hideContainerHeight", "showContainerHeight");
@@ -463,7 +487,7 @@ function SignOut() {
     }
 }
 
-//function to populate indicators according to data
+//For every subject group query statistics layer that consists of key indicators then transfer the data to create pods for subject groups
 function PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer, token, groupdata) {
     if (keyIndicators[val]) {
         for (var b = 0; b < keyIndicators[val].operationalLayers.length; b++) {
@@ -483,15 +507,15 @@ function PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer,
                     }
                     PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer, token, groupdata);
                 },
-                function (err) {
-                    alert(err.message);
-                    val++;
-                    if (keyIndicators.length == val) {
-                        CreateLayerPods(orderedLayer, token, groupdata, indicatorState);
-                        PopulateNews(dojo.byId("btnNews"));
-                    }
-                    PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer, token, groupdata);
-                });
+                        function (err) {
+                            alert(err.message);
+                            val++;
+                            if (keyIndicators.length == val) {
+                                CreateLayerPods(orderedLayer, token, groupdata, indicatorState);
+                                PopulateNews(dojo.byId("btnNews"));
+                            }
+                            PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer, token, groupdata);
+                        });
             }
         }
     }

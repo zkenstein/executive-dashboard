@@ -1,5 +1,5 @@
 ﻿/** @license
- | Version 10.1.1
+ | Version 10.1.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,6 @@ var handlePoll;
 var selectedPoint; //variable for storing the selected point geometry
 var tinyUrl; //variable for storing the tiny URL link
 
-//function to create scroll-bar
 function CreateScrollbar(container, content) {
     var yMax;
     var pxLeft, pxTop, xCoord, yCoord;
@@ -434,8 +433,8 @@ function SlideLeft() {
 function ResetSlideControls() {
     dojo.byId("divServiceDetails").style.left = (dojo.coords("holder").l) + "px";
 
-    if (dojo.byId("carouselscroll").offsetWidth > (dojo.coords("divGroupHolder").w - 90)) {
-        dojo.byId("divServiceData").style.width = (dojo.coords("divGroupHolder").w - 90) + "px";
+    if (dojo.byId("carouselscroll").offsetWidth > (dojo.coords("divGroupHolder").w - 104)) {
+        dojo.byId("divServiceData").style.width = (dojo.coords("divGroupHolder").w - 104) + "px";
     }
     else {
         dojo.byId("divServiceData").style.width = dojo.byId("carouselscroll").offsetWidth + "px";
@@ -444,15 +443,17 @@ function ResetSlideControls() {
 
 
     if (newLeft > dojo.byId("divServiceData").offsetWidth - dojo.byId("carouselscroll").offsetWidth) {
-        dojo.byId('tdServiceRightArrow').style.width = "37px";
-        dojo.byId('tdServiceLeftArrow').style.width = "37px";
+        dojo.byId('tdServiceRightArrow').style.width = "45px";
+        dojo.byId('tdServiceLeftArrow').style.width = "45px";
 
         dojo.byId('ServiceRightArrow').style.display = "block";
         dojo.byId('ServiceRightArrow').style.cursor = "pointer";
     }
     else {
-        dojo.byId('tdServiceRightArrow').style.width = "1px";
-        dojo.byId('tdServiceLeftArrow').style.width = "1px";
+        if ((dojo.byId("ServiceLeftArrow").style.display == "none") && (dojo.byId("ServiceRightArrow").style.display == "none")) {
+            dojo.byId('tdServiceRightArrow').style.width = "1px";
+            dojo.byId('tdServiceLeftArrow').style.width = "1px";
+        }
 
         dojo.byId('ServiceRightArrow').style.display = "none";
         dojo.byId('ServiceRightArrow').style.cursor = "default";
@@ -562,3 +563,5 @@ function ResetTargetValue(target, title, color) {
 String.prototype.bool = function () {
     return (/^true$/i).test(this);
 };
+
+

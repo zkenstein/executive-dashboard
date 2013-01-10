@@ -1,5 +1,5 @@
 ﻿/** @license
- | Version 10.1.1
+ | Version 10.1.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -103,7 +103,7 @@ function Init() {
 
             var userAgent = window.navigator.userAgent;
 
-            if (userAgent.indexOf("iPad") >= 0) {
+            if ((userAgent.indexOf("iPad") >= 0)||(userAgent.indexOf("Android") >= 0)) {
                 isTablet = true;
                 dojo.byId('dynamicStyleSheet').href = "styles/tablet.css";
             }
@@ -160,7 +160,10 @@ function Init() {
             dojo.byId('txtAddress').value = responseObject.LocatorSettings.DefaultValue;
             dojo.byId("txtAddress").setAttribute("defaultAddressTitle", responseObject.LocatorSettings.DefaultValue);
             dojo.byId("txtAddress").style.color = "gray";
-            dojo.connect(dojo.byId('txtAddress'), "onfocus", ClearDefaultText);
+            dojo.connect(dojo.byId('txtAddress'), "ondblclick", ClearDefaultText);
+            dojo.connect(dojo.byId('txtAddress'), "onfocus", function (evt) {
+                this.style.color = "#000";
+            });
             dojo.connect(dojo.byId('txtAddress'), "onblur", ReplaceDefaultText);
 
             // Identify the key presses while implementing auto-complete and assign appropriate actions
@@ -520,3 +523,4 @@ function PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer,
         }
     }
 }
+

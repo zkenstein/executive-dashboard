@@ -1,5 +1,5 @@
 ﻿/** @license
- | Version 10.1.1
+ | Version 10.1.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,7 @@
  | See the License for the specific language governing permissions and
  | limitations under the License.
  */
+var baseMapExtent; //variable to store the basemap extent
 var notesArray = []; //array to store the notes
 var noteCount = 0; //variable to count the notes symbols
 var notesLayerClicked = false; //flag set to know whether notes layer is clicked or not
@@ -745,7 +746,7 @@ function MapInitFunction(groupdata, token, webmapInfo, podsVisibility, id) {
     }
 
     if (dojo.query('.esriControlsBR').length > 0) {
-        dojo.query('.esriControlsBR')[0].style.bottom = "75px";
+        dojo.query('.esriControlsBR')[0].style.bottom = "80px";
     }
     dojo.addClass("imgESRILogo", "esriLogo");
     var gLayer = new esri.layers.GraphicsLayer();

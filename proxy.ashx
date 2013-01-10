@@ -1,6 +1,6 @@
 <%@ WebHandler Language="C#" Class="proxy" %>
 /*
- | Version 10.1.1
+ | Version 10.1.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,9 +34,11 @@ using System.Web.Caching;
 /// Forwards requests to an ArcGIS Server REST resource. Uses information in
 /// the proxy.config file to determine properties of the server.
 /// </summary>
-public class proxy : IHttpHandler {
+public class proxy : IHttpHandler
+{
 
-    public void ProcessRequest (HttpContext context) {
+    public void ProcessRequest(HttpContext context)
+    {
 
         HttpResponse response = context.Response;
 
@@ -71,11 +73,13 @@ public class proxy : IHttpHandler {
             req.ContentLength = bytes.Length;
 
             string ctype = context.Request.ContentType;
-            if (String.IsNullOrEmpty(ctype)) {
-              req.ContentType = "application/x-www-form-urlencoded";
+            if (String.IsNullOrEmpty(ctype))
+            {
+                req.ContentType = "application/x-www-form-urlencoded";
             }
-            else {
-              req.ContentType = ctype;
+            else
+            {
+                req.ContentType = ctype;
             }
 
             using (Stream outputStream = req.GetRequestStream())
@@ -100,7 +104,8 @@ public class proxy : IHttpHandler {
         }
 
         // Set up the response to the client
-        if (serverResponse != null) {
+        if (serverResponse != null)
+        {
             response.ContentType = serverResponse.ContentType;
             using (Stream byteStream = serverResponse.GetResponseStream())
             {
@@ -136,8 +141,10 @@ public class proxy : IHttpHandler {
         response.End();
     }
 
-    public bool IsReusable {
-        get {
+    public bool IsReusable
+    {
+        get
+        {
             return false;
         }
     }

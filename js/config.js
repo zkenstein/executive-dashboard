@@ -1,5 +1,5 @@
 ﻿/** @license
- | Version 10.1.1
+ | Version 10.1.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -91,13 +91,13 @@ dojo.declare("js.config", null, {
     //Flag for retaining the state of containers.(Bookmark,Address)
     RetainState: true,
 
-    //Title for the graph container tab.
-    GraphTabName: "Trend",
+    //Title for the graph container tab
+    GraphTabName: "Trends",
 
-    // Set date format
+    //Set date format
     FormatDateAs: "MMM dd, yyyy",
 
-    // Set string value to be shown for null or blank values.
+    //Set string value to be shown for null or blank values.
     ShowNullValueAs: "N/A",
 
     //Set locator settings
@@ -112,7 +112,7 @@ dojo.declare("js.config", null, {
         ZoomLevel: 14,
         AddressMatchScore: 80,
         LocatorFieldName: 'Loc_name',
-        LocatorFieldValues: ["US_RoofTop", "US_StreetName"]
+        LocatorFieldValues: ["US_Streets", "US_StreetName"]
     },
 
     //Fields for RSS Feed.
@@ -139,15 +139,15 @@ dojo.declare("js.config", null, {
 
     //Layer Images for the subject groups.
     LayerImages: [
-    { Tag: "Public Safety", Images: ["images/safety.png", "images/safety_hover.png"], isPodVisible: true },
-    { Tag: "Special Events", Images: ["images/special_events.png", "images/special_events_hover.png"] },
-    { Tag: "Health", Images: ["images/health.png", "images/health_hover.png"], isPodVisible: true },
-    { Tag: "City Services", Images: ["images/city.png", "images/city_hover.png"], isPodVisible: true },
-    { Tag: "Construction Activity", Images: ["images/capital.png", "images/capital_hover.png"] },
-    { Tag: "Violations", Images: ["images/violations.png", "images/violations_hover.png"], isPodVisible: true },
-    { Tag: "Utilities", Images: ["images/water.png", "images/water_hover.png"], isPodVisible: true },
-    { Tag: "Public Notices", Images: ["images/special_events.png", "images/special_events_hover.png"] }
-    ],
+            { Tag: "Public Safety", Images: ["images/safety.png", "images/safety_hover.png"], isPodVisible: true },
+            { Tag: "City Services", Images: ["images/city.png", "images/city_hover.png"], isPodVisible: true },
+            { Tag: "Health", Images: ["images/transport.png", "images/transport_hover.png"], isPodVisible: true },
+            { Tag: "Violations", Images: ["images/capital.png", "images/capital_hover.png"], isPodVisible: true },
+            { Tag: "Utilities", Images: ["images/water.png", "images/water_hover.png"], isPodVisible: true },
+            { Tag: "Construction Activity", Images: ["images/capital.png", "images/capital_hover.png"] },
+            { Tag: "Public Notices", Images: ["images/safety.png", "images/safety_hover.png"] },
+            { Tag: "Special Events", Images: ["images/special_events.png", "images/special_events_hover.png"] }
+            ],
 
     //Specify fields for the Metric pods.
     InfoPodStatics: [

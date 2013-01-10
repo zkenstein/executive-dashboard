@@ -1,5 +1,5 @@
 ﻿/** @license
- | Version 10.1.1
+ | Version 10.1.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -550,7 +550,12 @@ function ShowLocateContainer() {
         dojo.byId('divAddressContent').style.right = (dojo.coords("holder").l + 15) + "px";
         dojo.replaceClass("divAddressContent", "showContainerHeight", "hideContainerHeight");
         dojo.byId("txtAddress").value = dojo.byId("txtAddress").getAttribute("defaultAddress");
-        if (dojo.byId("txtAddress").getAttribute("defaultAddress") != dojo.byId("txtAddress").getAttribute("defaultAddressTitle")) {
+
+        dojo.byId("txtAddress").blur();
+        if (dojo.byId("txtAddress").getAttribute("defaultAddress") == dojo.byId("txtAddress").getAttribute("defaultAddressTitle")) {
+            dojo.byId("txtAddress").style.color = "gray";
+        }
+        else {
             dojo.byId("txtAddress").style.color = "#000";
         }
     }

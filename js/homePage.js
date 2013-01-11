@@ -999,6 +999,13 @@ function ShowNotesInfo(feature, geometry, key, render, note) {
     txtArea.setAttribute("placeholder", "Add your notes here");
     txtArea.className = "txtArea";
 
+    dojo.connect(txtArea, "onkeyup", function(evt) {
+        var store = dojo.toJson(this.value.trim()).substring(1, (dojo.toJson(this.value.trim()).length - 1));
+        store = ReplaceWithSpecialCharacters(store);
+        var remaining = 1246 - store.length;
+        spnResultContainer.innerHTML = remaining + " character(s) remain";
+    });
+
     divContent.appendChild(txtArea);
 
     if (feature) {

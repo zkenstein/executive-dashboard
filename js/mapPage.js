@@ -1,4 +1,4 @@
-﻿/** @license
+/** @license
  | Version 10.1.1
  | Copyright 2012 Esri
  |
@@ -896,7 +896,7 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         trInner1.appendChild(tdText);
 
         var spanText = document.createElement("span");
-        spanText.style.fontSize = "38px";
+        spanText.style.fontSize = "24px";
         spanText.style.fontWeight = "bolder";
 
         if (statsData) {

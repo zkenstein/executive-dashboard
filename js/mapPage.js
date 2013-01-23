@@ -174,10 +174,13 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
                                     var webStats = [];
                                     for (var z in webInfo) {
                                         for (var y in webInfo[z].operationalLayers) {
-                                            var str = webInfo[z].operationalLayers[y].url;
-                                            var ss = str.substring(((str.lastIndexOf("/")) + 1), (str.length))
-                                            if (!isNaN(ss)) {
-                                                webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url });
+                                            if (webInfo[z].operationalLayers[y].title.title.indexOf(statisticsKeyword) >= 0) {
+
+                                                var str = webInfo[z].operationalLayers[y].url;
+                                                var ss = str.substring(((str.lastIndexOf("/")) + 1), (str.length))
+                                                if (!isNaN(ss)) {
+                                                    webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url });
+                                                }
                                             }
                                         }
                                     }

@@ -1,6 +1,6 @@
 ﻿/* This file contains the common style settings for "Executive Dashboard" template */
 /*
- | Version 10.1.1
+ | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -338,6 +338,13 @@ body,html
     box-shadow: 0 0 25px #FF0000;
 }
 
+.divPodGraySelected
+{
+    -webkit-box-shadow: 0 0 25px #AAAAAA;
+    -moz-box-shadow: 0 0 25px #AAAAAA;
+    box-shadow: 0 0 25px #AAAAAA;
+}
+
 /*---------------------------------------------------------------------------------------------------------*/
 /* Styles for customized buttons*/
 
@@ -506,7 +513,7 @@ body,html
 {
     z-index: 1100;
     position:absolute;
-    bottom: 75px;
+    bottom: 85px;
     width: 300px;
     right:15px;
     background-color: #CCCCCC;
@@ -544,7 +551,7 @@ body,html
 
 .divServiceDetails
 {
-    bottom: 75px;
+    bottom: 80px;
     position: absolute;
     z-index: 1005;
     text-align: middle;
@@ -599,7 +606,7 @@ body,html
     bottom:0px;
     left:0px;
     width:100%;
-    height:75px;
+    height:80px;
 }
 
 .tdBreak
@@ -719,6 +726,15 @@ body,html
     background-position: 0 -779px !important;
     right: 45px !important;
     top:9px !important;
+}
+.esriPopup .titleButton.prev
+{
+    background-position: 0 -221px !important;
+    right: 94px !important;
+}
+.esriPopup .titleButton.next
+{
+    right: 76px !important;
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -885,7 +901,7 @@ body,html
 
 .esriLogo
 {
-    bottom:75px !important;
+    bottom:80px !important;
     z-index:999 !important;
 }
 
@@ -908,4 +924,11 @@ body,html
     top: 0px;
     left: 0px;
     background-image: url("../images/background65.png");
+}
+
+.imgSearchLoader
+{
+    vertical-align: middle;
+    display: none;
+    cursor: default;
 }

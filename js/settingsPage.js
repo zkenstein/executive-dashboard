@@ -1,5 +1,5 @@
 ﻿/** @license
- | Version 10.1.1
+ | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,12 +17,10 @@
 var rss = []; //array for storing the rss feeds
 var trends = []; //array for storing the twitter trends
 
-//function for creating settings page according to feeds and trends through local storage
+//Create settings page according to feeds and trends for personalized RSS feeds and Twitter Trends stored in local storage
 function DisplaySettings() {
     dojo.byId("btnSettings").className = "customDisabledButton";
-
     GetDataFromStorage();
-
     dojo.byId("imgRSSAdd").onclick = function () {
         if (!dojo.byId("txtRSSFeedName").value.trim()) {
             if (!dojo.byId("txtRSSFeedURL").value.trim()) {
@@ -82,7 +80,7 @@ function DisplaySettings() {
     PopulateTrendList();
 }
 
-//function for creating the RSS feed list in the panel
+//Populate RSS feed list in the panel
 function PopulateFeedList() {
     dojo.byId("RSSErrorMessage").innerHTML = "";
     RemoveChildren(dojo.byId("divRSSFeedContent"));
@@ -99,7 +97,7 @@ function PopulateFeedList() {
     CreateScrollbar(dojo.byId('divRSSFeedContainer'), dojo.byId('divRSSFeedContent'));
 }
 
-//function for creating the twitter trend list in the panel
+//Populate Twitter Trends list in the panel
 function PopulateTrendList() {
     dojo.byId("twitterErrorMessage").innerHTML = "";
     RemoveChildren(dojo.byId("divTwitterFeedContent"));
@@ -115,7 +113,7 @@ function PopulateTrendList() {
     CreateScrollbar(dojo.byId('divTwitterFeedContainer'), dojo.byId('divTwitterFeedContent'));
 }
 
-//function to move up the position of list element
+//Move up the position of respective RSS feed or Twitter Trend from list
 function MoveUp(Cname, Carray) {
     for (var arr = 0; arr < Carray.length; arr++) {
         if (Cname == Carray[arr].name) {
@@ -146,7 +144,7 @@ function MoveUp(Cname, Carray) {
     return Carray;
 }
 
-//function to move down the position of list element
+//Move down the position of respective RSS feed or Twitter trend in the list
 function MoveDown(Dname, Darray) {
     for (var arr = 0; arr < Darray.length; arr++) {
         if (Dname == Darray[arr].name) {
@@ -177,7 +175,7 @@ function MoveDown(Dname, Darray) {
     return Darray;
 }
 
-//function to remove the element
+//Remove RSS feed or Twitter trend from list
 function RemoveElement(Rname, Rarray) {
     for (var l = 0; l < Rarray.length; l++) {
         if (Rname == Rarray[l].name) {
@@ -188,7 +186,7 @@ function RemoveElement(Rname, Rarray) {
     return Rarray;
 }
 
-//function to create the settings list data structure
+//Create the settings list for Rss feed or Twitter trend
 function CreateSettingsListTemplate(arrayList, tBody, feed) {
     if (arrayList) {
         for (var r = 0; r < arrayList.length; r++) {
@@ -338,12 +336,7 @@ function CreateSettingsListTemplate(arrayList, tBody, feed) {
     }
 }
 
-//function for converting string to boolean
-String.prototype.bool = function () {
-    return (/^true$/i).test(this);
-};
-
-//function for saving the changes in settings page
+//Save changed settings
 function SaveSettings() {
     dojo.byId("btnSettings").className = "customButton";
     dojo.byId("btnSettings").style.cursor = "pointer";
@@ -367,7 +360,7 @@ function SaveSettings() {
     }
 }
 
-//function to cancel the changes in settings page
+//Cancel changes to settings
 function CancelSettings() {
     dojo.byId("btnSettings").className = "customButton";
     dojo.byId("btnSettings").style.cursor = "pointer";
@@ -380,7 +373,7 @@ function CancelSettings() {
     }
 }
 
-//function to fetch data from local storage
+//Fetch RSS Feeds and Twitter Trends from local storage
 function GetDataFromStorage() {
     if (dojo.fromJson(localStorage.getItem("RSSFeedCollection"))) {
         rss = dojo.fromJson(localStorage.getItem("RSSFeedCollection"));

@@ -1,5 +1,5 @@
 ﻿/** @license
- | Version 10.1.1
+ | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,6 @@ var handlePoll;
 var selectedPoint; //variable for storing the selected point geometry
 var tinyUrl; //variable for storing the tiny URL link
 
-//function to create scroll-bar
 function CreateScrollbar(container, content) {
     var yMax;
     var pxLeft, pxTop, xCoord, yCoord;
@@ -85,7 +84,7 @@ function CreateScrollbar(container, content) {
             content.scrollTop = Math.round(scrollbar_handle.offsetTop / yMax * (content.scrollHeight - content.offsetHeight));
         }
     }
-    //Attaching events to scrollbar components
+    //Attaching events to scrollbar components - Click and Drag
     scrollbar_track.onclick = function (evt) {
         if (!isHandleClicked) {
             evt = (evt) ? evt : event;
@@ -110,7 +109,7 @@ function CreateScrollbar(container, content) {
         }
         isHandleClicked = false;
     };
-    //Attaching events to scrollbar components
+    //Attaching events to scrollbar components - Using mouse wheel
     scrollbar_handle.onmousedown = function (evt) {
         isHandleClicked = true;
         evt = (evt) ? evt : event;
@@ -143,6 +142,8 @@ function CreateScrollbar(container, content) {
     };
     var startPos;
     var scrollingTimer;
+
+    //Touch events for scrollbar
     dojo.connect(container, "touchstart", function (evt) {
         touchStartHandler(evt);
     });
@@ -169,7 +170,7 @@ function CreateScrollbar(container, content) {
         } else {
             y = pxTop - 10;
         }
-        //setting scrollbar handel
+        //setting scrollbar handle
         if (y > yMax) y = yMax;  // Limit vertical movement
         if (y < 0) y = 0;  // Limit vertical movement
         scrollbar_handle.style.top = y + "px";
@@ -188,7 +189,7 @@ function CreateScrollbar(container, content) {
     //touch scrollbar end
 }
 
-//function for creating tap events at devices for bottom panel
+//Create tap events for the metric pods in the carousel
 function CreateHorizontalScrollbar(container, content) {
     var startHPos;
     var scrollingHTimer;
@@ -241,10 +242,10 @@ function CreateHorizontalScrollbar(container, content) {
     function touchHEndHandler(e) {
         scrollingHTimer = setTimeout(function () { clearTimeout(scrollingHTimer); scrollingH = false; }, 100);
     }
-    //touch scrollbar end
+    //stop touch event
 }
 
-//function to get the extent based on the map point
+//Get the extent based on the map point
 function GetBrowserMapExtent(mapPoint) {
     var width = map.extent.getWidth();
     var height = map.extent.getHeight();
@@ -260,7 +261,7 @@ function GetBrowserMapExtent(mapPoint) {
 }
 
 
-//Function for refreshing address container div
+//Refresh address container
 function RemoveChildren(parentNode) {
     if (parentNode) {
         while (parentNode.hasChildNodes()) {
@@ -268,27 +269,34 @@ function RemoveChildren(parentNode) {
         }
     }
 }
-//Function for validating Email in comments tab
+
+//Validate Email in comments tab
 function CheckMailFormat(emailValue) {
     var pattern = /^([a-zA-Z][a-zA-Z0-9\_\-\.]*\@[a-zA-Z0-9\-]*\.[a-zA-Z]{2,4})?$/i;
     return pattern.test(emailValue);
 }
-//Function to append ... for a string
+
+//Append '...' for a string
 String.prototype.trimString = function (len) {
     return (this.length > len) ? this.substring(0, len) + "..." : this;
 }
-//function to trim string
+//Trim string
 String.prototype.trim = function () {
     return this.replace(/^\s*/, "").replace(/\s*$/, "");
 }
 
-//function to set the height of the login page
+//Set height of the login page
 function SetLoginPageHeight() {
     if (!isBrowser) {
         if (dojo.query(".dijitDialogUnderlayWrapper")) {
             if (dojo.query(".dijitDialogUnderlayWrapper").length > 0) {
                 dojo.query(".dijitDialogUnderlayWrapper")[0].style.left = "0px";
-                dojo.query(".esriSignInDialog")[0].style.left = ((dojo.coords("divLoginScreenContainer").w / 2)-165) + "px";
+                if (dojo.coords("divLoginScreenContainer").w > 0) {
+                    dojo.query(".esriSignInDialog")[0].style.left = ((dojo.coords("divLoginScreenContainer").w / 2) - 165) + "px";
+                }
+                else {
+                    dojo.query(".esriSignInDialog")[0].style.left = ((dojo.coords("divLoadingIndicator").w / 2) - 165) + "px";
+                }
             }
         }
     }
@@ -298,7 +306,7 @@ function SetLoginPageHeight() {
     }, 100);
 }
 
-//function to set the height of the home page
+//Set the height of dashboard page
 function SetHomePageHeight() {
     dojo.byId("divLayerContainer").style.height = (dojo.coords("divInfoContainer").h - 85) + "px";
     dojo.byId("divLayerContent").style.height = (dojo.coords("divInfoContainer").h - 85) + "px";
@@ -310,7 +318,7 @@ function SetHomePageHeight() {
     }, 100);
 }
 
-//function to set the height of the settings page
+//Set height of settings page
 function SetSettingsHeight() {
     dojo.byId("divRSSFeedContent").style.height = (dojo.coords("divSettingsContainer").h / 2 - 210) + "px";
     dojo.byId("divTwitterFeedContent").style.height = (dojo.coords("divSettingsContainer").h / 2 - 210) + "px";
@@ -318,7 +326,7 @@ function SetSettingsHeight() {
     CreateScrollbar(dojo.byId('divTwitterFeedContainer'), dojo.byId('divTwitterFeedContent'));
 }
 
-//function to call when the orientation changes
+//Handle orientation changes
 function orientationChanged() {
     orientationChange = true;
     setTimeout(function () {
@@ -340,7 +348,7 @@ function orientationChanged() {
     }, 500);
 }
 
-//function for fade Out the div container.
+//Fade-out animation
 function FadeOut(node) {
     var fadeArgs = {
         node: node,
@@ -349,7 +357,7 @@ function FadeOut(node) {
     dojo.fadeOut(fadeArgs).play();
 }
 
-//function for fade In the div container.
+//Fade-In animation
 function FadeIn(node) {
     var fadeArgs = {
         node: node,
@@ -358,7 +366,7 @@ function FadeIn(node) {
     dojo.fadeIn(fadeArgs).play();
 }
 
-//sliding to the right
+//Slide pods to right
 function SlideRight() {
     var difference = dojo.byId('divServiceData').offsetWidth - dojo.byId('carouselscroll').offsetWidth;
     if (newLeft >= difference) {
@@ -389,7 +397,7 @@ function SlideRight() {
     RepositionMetricPods();
 }
 
-//sliding to the left
+//Slide pods to left
 function SlideLeft() {
     var difference = dojo.byId('divServiceData').offsetWidth - dojo.byId('carouselscroll').offsetWidth;
     if (newLeft < 0) {
@@ -421,12 +429,12 @@ function SlideLeft() {
     RepositionMetricPods();
 }
 
-//function for reseting the slide controls
+//Reset pod positions
 function ResetSlideControls() {
     dojo.byId("divServiceDetails").style.left = (dojo.coords("holder").l) + "px";
 
-    if (dojo.byId("carouselscroll").offsetWidth > (dojo.coords("divGroupHolder").w - 90)) {
-        dojo.byId("divServiceData").style.width = (dojo.coords("divGroupHolder").w - 90) + "px";
+    if (dojo.byId("carouselscroll").offsetWidth > (dojo.coords("divGroupHolder").w - 104)) {
+        dojo.byId("divServiceData").style.width = (dojo.coords("divGroupHolder").w - 104) + "px";
     }
     else {
         dojo.byId("divServiceData").style.width = dojo.byId("carouselscroll").offsetWidth + "px";
@@ -434,16 +442,18 @@ function ResetSlideControls() {
     dojo.byId('carouselscroll').style.paddingLeft = "0px";
 
 
-    if (newLeft > dojo.byId("divServiceData").offsetWidth - dojo.byId("carouselscroll").offsetWidth) {
-        dojo.byId('tdServiceRightArrow').style.width = "37px";
-        dojo.byId('tdServiceLeftArrow').style.width = "37px";
+    if (newLeft > (dojo.byId("divServiceData").offsetWidth - dojo.byId("carouselscroll").offsetWidth)) {
+        dojo.byId('tdServiceRightArrow').style.width = "45px";
+        dojo.byId('tdServiceLeftArrow').style.width = "45px";
 
         dojo.byId('ServiceRightArrow').style.display = "block";
         dojo.byId('ServiceRightArrow').style.cursor = "pointer";
     }
     else {
-        dojo.byId('tdServiceRightArrow').style.width = "1px";
-        dojo.byId('tdServiceLeftArrow').style.width = "1px";
+        if ((dojo.byId("ServiceLeftArrow").style.display == "none") && (dojo.byId("ServiceRightArrow").style.display == "none")) {
+            dojo.byId('tdServiceRightArrow').style.width = "1px";
+            dojo.byId('tdServiceLeftArrow').style.width = "1px";
+        }
 
         dojo.byId('ServiceRightArrow').style.display = "none";
         dojo.byId('ServiceRightArrow').style.cursor = "default";
@@ -465,8 +475,9 @@ function ResetSlideControls() {
     }, 500);
 }
 
+//Reposition the pods based on number of metric pods available for a subject group
 function RepositionMetricPods() {
-    if (dojo.byId("divServiceData").offsetWidth - dojo.byId("carouselscroll").offsetWidth == 0) {
+    if (dojo.byId("divServiceData").offsetWidth - dojo.byId("carouselscroll").offsetWidth ==0) {
         if (dojo.byId('ServiceLeftArrow').style.display == "none" && dojo.byId('ServiceRightArrow').style.display == "none") {
             var cal = dojo.coords("divGroupHolder").w - dojo.byId("carouselscroll").offsetWidth;
             dojo.byId('divServiceDetails').style.marginLeft = (cal / 2) + "px";
@@ -478,7 +489,7 @@ function RepositionMetricPods() {
 }
 
 
-//function to toggle containers
+//Toggle containers
 function ToggleContainers() {
     if (dojo.coords('divBookmarkContent').h > 0) {
         dojo.byId('divBookmarkContent').style.right = (dojo.coords("holder").l + 15) + "px";
@@ -495,7 +506,7 @@ function ToggleContainers() {
 }
 
 
-//Function to get width of a control when text and font size are specified
+//Get width of a control when text and font size are specified
 String.prototype.getWidth = function (fontSize) {
     var test = document.createElement("span");
     document.body.appendChild(test);
@@ -509,7 +520,7 @@ String.prototype.getWidth = function (fontSize) {
     return w;
 }
 
-//Function to get the query string value of the provided key if not found the function returns empty string
+//Get query string value of the provided key, if not found the function returns empty string
 function GetQuerystring(key) {
     var _default;
     if (_default == null) _default = "";
@@ -522,5 +533,36 @@ function GetQuerystring(key) {
         return qs[1];
 }
 
+//Clear default value for text box controls
+function ClearDefaultText(e) {
+    var target = window.event ? window.event.srcElement : e ? e.target : null;
+    if (!target) return;
+    target.style.color = "#000";
+    target.value = '';
+}
+
+//Set default value on blur
+function ReplaceDefaultText(e) {
+    var target = window.event ? window.event.srcElement : e ? e.target : null;
+    if (!target) return;
+    ResetTargetValue(target, "defaultAddressTitle", "gray");
+}
+
+//Set target value for address
+function ResetTargetValue(target, title, color) {
+   if (target.value == '' && target.getAttribute(title)) {
+        target.value = target.title;
+        if (target.title == "") {
+            target.value = target.getAttribute(title);
+        }
+    }
+    target.style.color = color;
+    lastSearchString = dojo.byId("txtAddress").value.trim();
+}
+
+//Converting string to Boolean
+String.prototype.bool = function () {
+    return (/^true$/i).test(this);
+};
 
 

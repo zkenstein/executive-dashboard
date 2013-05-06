@@ -61,13 +61,13 @@ decide. (The tryit branch only uses a list of predefined URLs, so this tradeoff 
 
 Learn more about Esri's [ArcGIS for Local Government maps and apps](http://resources.arcgis.com/en/communities/local-government/).
 
-Show me a list of other [Local Government GitHub repositories](https://github.com/search?q=username:esri+local+government).
+Show me a list of other [Local Government GitHub repositories](http://esri.github.io/#Local%2DGovernment).
 
 Additional [information and sample data](http://www.arcgis.com/home/item.html?id=9c31136ff6f54dfb90edbc74f08573ed)
 are available for the application.
 
-This application uses the 3.1 version of
-[Esri's ArcGIS API for JavaScript](http://help.arcgis.com/en/webapi/javascript/arcgis/index.html);
+This application uses the 3.5 version of
+[Esri's ArcGIS API for JavaScript](http://help.arcgis.com/en/webapi/javascript/arcgis/);
 see the site for concepts, samples, and a reference for using the API to create mapping web sites.
 
 ## Issues

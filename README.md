@@ -97,5 +97,5 @@ limitations under the License.
 A copy of the license is available in the repository's
 [license.txt](https://raw.github.com/Esri/executive-dashboard/master/license.txt) file.
 
-[](Esri Tags: Local Government Executive Dashboard)
+[](Esri Tags: Local-Government Local Government Executive Dashboard)
 [](Esri Language: JavaScript)

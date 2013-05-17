@@ -22,27 +22,13 @@ on the ArcGIS Resource Center can guide you in the setup and configuration of th
 
 ### Developer Notes
 
-On the master branch, this repository has the Executive Dashboard as one would configure it for an
-organization that uses a private ArcGIS.com group for its Dashboard content. The tryit branch, on the
-other hand, has some small modifications that permit the login credentials to be stored on the server
-so that a user does not have to log in to the Dashboard. There's still a Sign In button, but upon
-clicking the button, one immediately goes to the content. You can see this difference between these
-two branches with the ArcGIS for Local Government's Dashboard try-its: the
-[master branch version](http://localgovtemplates2.esri.com/ExecutiveDashboard/) versus the
-[tryit branch version](http://localgovtemplates2.esri.com/ExecutiveDashboardTryItLive/).
-
-Regardless of the branch that you're using, you'll need to set up your own services as described
-in the previous section. If exploring the master branch, you'll sign in with your setup's credentials
-each time that you use the Dashboard. If exploring the tryit branch, you'll put your credentials into
-that branch's proxy.config file.
-
-Also of interest to the developer using the master branch is the configuration of the proxy for RSS
+Of interest to the developer is the configuration of the proxy for RSS
 feeds. If you configure the proxy to require URLs to match those present in the proxy.config file
 as [recommended by Esri](http://help.arcgis.com/en/webapi/javascript/arcgis/help/jshelp_start.htm#jshelp/ags_proxy.htm),
 you limit your users to whatever RSS feed URLs are configured. If instead you change mustMatch to
 "false", you permit your users to select any RSS feed, but there is the possibility that the site
 might be used by unexpected sources. This is a security tradeoff that you and your organization must
-decide. (The tryit branch only uses a list of predefined URLs, so this tradeoff is not an issue for it.)
+decide.
 
 ### General Help
 [New to Github? Get started here.](http://htmlpreview.github.com/?https://github.com/Esri/esri.github.com/blob/master/help/esri-getting-to-know-github.html)

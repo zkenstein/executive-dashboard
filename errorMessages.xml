@@ -21,7 +21,7 @@
     <noResults>No results found for</noResults>
     <noSearchResults>No search results found.</noSearchResults>
     <bookmarkName>Please enter bookmark name.</bookmarkName>
-    <existingBookmark>Bookmark with this name already exists, Please enter different name.</existingBookmark>
+    <existingBookmark>Bookmark with this name already exists; please enter different name.</existingBookmark>
     <exceededLimit>characters exceeded to create notes.</exceededLimit>
     <addressToLocate>Enter address to locate.</addressToLocate>
     <unableToLocate>Unable to locate specified address.</unableToLocate>
@@ -30,10 +30,10 @@
     <RSSUrl>Please enter RSS feed URL.</RSSUrl>
     <UrlFormat>Please enter correct URL format.</UrlFormat>
     <noCharacters>No character(s) remain</noCharacters>
-    <existingFeed>Feed with this name already exists, Please enter different name.</existingFeed>
+    <existingFeed>Feed with this name already exists; please enter different name.</existingFeed>
     <trendName>Please enter twitter trend name.</trendName>
-    <existingTrend>Trend with this name already exists, Please enter different name.</existingTrend>
-    <tinyURLEngine>Bit.ly API engine is not working, Please try again after some time.</tinyURLEngine>
+    <existingTrend>Trend with this name already exists; please enter different name.</existingTrend>
+    <tinyURLEngine>Bit.ly API engine is not working; please try again after some time.</tinyURLEngine>
     <geoLocation>You are currently outside the supported area</geoLocation>
     <geolocationTimeout>The browser is unable to supply a position at this time.</geolocationTimeout>
     <geolocationPositionUnavailable>Unable to locate the position.</geolocationPositionUnavailable>

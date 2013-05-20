@@ -1,6 +1,6 @@
 ﻿/** @license
  | Version 10.2
- | Copyright 2012 Esri
+ | Copyright 2013 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
  | you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 var baseMapExtent; //variable to store the basemap extent
 var notesArray = []; //array to store the notes
 var noteCount = 0; //variable to count the notes symbols
+var noteGraphicCount = 0; //variable to count the notes symbols for temp map
 var notesLayerClicked = false; //flag set to know whether notes layer is clicked or not
+var notesGraphicLayerClicked = false; //flag set to know whether notes layer is clicked or not
 var infoContentFocus = null; //variable for storing the info content value when it is focused
 var infoContentBlur = null; //variable for storing the info content value when it is focused out
 var infoContentClose = null; //variable for storing the info content value when info window was closed
@@ -27,6 +29,7 @@ var infoContentCut = null; //variable for storing the info content value when co
 var charCount; //variable for storing the remaining characters count for note
 var RSSCounter = 0; //variable for storing the count of RSS feeds
 var trendCounter = 0; //variable for storing the count of twitter trends
+var tempMap;
 
 //Function to create the info pods for subject groups(eg:Public Safety,Transportation,Capital Projects etc.)
 //For each webmap this function determines subject group, Key indicator, Increase or decrease indicator, Color of pod. This function also handles on click event for each pod.
@@ -48,6 +51,7 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
             var td = document.createElement("td");
             tr.appendChild(td);
         }
+
         var divPod = document.createElement("div");
         divPod.className = "divPod";
         divPod.style.width = "200px";
@@ -160,29 +164,44 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
                     var diff = (dojo.string.substitute(infoPodStatics[0].CurrentObservation, indicatorState[j].value) - dojo.string.substitute(infoPodStatics[0].LatestObservation, indicatorState[j].value));
                     if (diff > 0) {
                         imgArr.src = "images/up.png";
-                        if (dojo.string.substitute(infoPodStatics[0].StaticsPosition, indicatorState[j].value) == "Yes") {
-                            divPod.className = "divPodGreen";
-                            divPodInner.className = "divPodInnerGreen";
+                        if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value)) {
+                            if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value) == "Yes") {
+                                divPod.className = "divPodGreen";
+                                divPodInner.className = "divPodInnerGreen";
+                            }
+                            else if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value) == "No") {
+                                divPod.className = "divPodRed";
+                                divPodInner.className = "divPodInnerRed";
+                            }
+                            else {
+                                CreateStyleforNeutralPods(divPod, divPodInner);
+                            }
                         }
                         else {
-                            divPod.className = "divPodRed";
-                            divPodInner.className = "divPodInnerRed";
+                            CreateStyleforNeutralPods(divPod, divPodInner);
                         }
                     }
                     else if (diff < 0) {
                         imgArr.src = "images/down.png";
-                        if (dojo.string.substitute(infoPodStatics[0].LatestObservation, indicatorState[j].value) == "Yes") {
-                            divPod.className = "divPodRed";
-                            divPodInner.className = "divPodInnerRed";
+                        if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value)) {
+                            if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value) == "Yes") {
+                                divPod.className = "divPodRed";
+                                divPodInner.className = "divPodInnerRed";
+                            }
+                            else if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value) == "No") {
+                                divPod.className = "divPodGreen";
+                                divPodInner.className = "divPodInnerGreen";
+                            }
+                            else {
+                                CreateStyleforNeutralPods(divPod, divPodInner);
+                            }
                         }
                         else {
-                            divPod.className = "divPodGreen";
-                            divPodInner.className = "divPodInnerGreen";
+                            CreateStyleforNeutralPods(divPod, divPodInner);
                         }
                     }
                     else {
-                        divPod.className = "divPod";
-                        divPodInner.className = "divPodInner";
+                        CreateStyleforNeutralPods(divPod, divPodInner);
                     }
                     break;
                 }
@@ -249,6 +268,12 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
     HideProgressIndicator();
 }
 
+//This function assigns style classes to neutral pods
+function CreateStyleforNeutralPods(divPod, divPodInner) {
+    divPod.className = "divPod";
+    divPodInner.className = "divPodInner";
+}
+
 //Function to get data for the sub group(metric) pods(eg:Thefts,Ems Runs etc)
 //This function creates info pods for the webmapid
 function createDataforPods(group, tag, webMapId, webMapTitle, visibility, token, arrSubjectGroups, groupdata, indicatorState) {
@@ -265,6 +290,8 @@ function createDataforPods(group, tag, webMapId, webMapTitle, visibility, token,
             webmapDetails.addErrback(function (error) {
                 console.log("Map creation failed: ", dojo.toJson(error));
             });
+
+            dojo.byId("imgResize").setAttribute("webmapID", webMapId[id]);
 
             webmapDetails.addCallback(function (response) {
                 map = response.map;
@@ -302,17 +329,18 @@ function createDataforPods(group, tag, webMapId, webMapTitle, visibility, token,
                             }
                         }
                     }
-
                     //visibility(isPodVisible) flag is used to determine creation and display of info pod. The pods will be created and displayed only if this flag is set to true.
                     if (visibility) {
                         var webStats = [];
                         for (var z in webInfo) {
                             for (var y in webInfo[z].operationalLayers) {
                                 if (webInfo[z].operationalLayers[y].title.indexOf(statisticsKeyword) >= 0) {
-                                    var str = webInfo[z].operationalLayers[y].url;
-                                    var ss = str.substring(((str.lastIndexOf("/")) + 1), (str.length))
-                                    if (!isNaN(ss)) {
-                                        webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url, statsTitle: webInfo[z].operationalLayers[y].title });
+                                    if (webInfo[z].operationalLayers[y].url) {
+                                        var str = webInfo[z].operationalLayers[y].url;
+                                        var ss = str.substring(((str.lastIndexOf("/")) + 1), (str.length))
+                                        if (!isNaN(ss)) {
+                                            webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url, statsTitle: webInfo[z].operationalLayers[y].title });
+                                        }
                                     }
                                 }
                             }
@@ -341,6 +369,7 @@ function FetchStatData(webStats, inc, statsData, webInfo, groupdata, token) {
                 queryCounty.where = "1=1";
                 queryCounty.returnGeometry = false;
                 queryCounty.outFields = ["*"];
+                queryCounty.outSpatialReference = map.spatialReference;
                 queryCounty.spatialRelationship = esri.tasks.Query.SPATIAL_REL_WITHIN;
                 queryTask.execute(queryCounty, function (featureSet) {
                     statsData.push({ title: webStats[inc].title, data: featureSet.features[0].attributes, fields: featureSet.fields, statsTitle: webStats[inc].statsTitle });
@@ -632,6 +661,13 @@ function CreateNewsDataTemplate(Header, Link, Content, tBody, feed, lastVal) {
     tr1.appendChild(td2);
 }
 
+//This function is used to resize chart container
+function ResizeChartContainer() {
+    dojo.byId("divGraphComponent").style.width = ((dojo.coords("divGroupHolder").w - 70)) + "px";
+    if (chart) {
+        chart.resize((dojo.coords("divGroupHolder").w - 70), 250);
+    }
+}
 
 //Function to display the map page with the animation effects
 //This function displays the webmap using webmap ID
@@ -639,13 +675,29 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
     if (dojo.byId("btnMap").className != "customDisabledButton") {
         dojo.byId("imgSocialMedia").setAttribute("subjectGroup", header);
         dojo.byId("imgSocialMedia").setAttribute("mapName", webmapInfo.key);
-
+        ResizeChartContainer();
         dojo.byId("imgGeolocation").src = "images/imgGeolocation.png";
         ShowProgressIndicator();
         if (dojo.byId("imgNotes").getAttribute("state") != "unSelected") {
             dojo.byId("imgNotes").src = "images/imgNotes.png";
             dojo.byId("imgNotes").setAttribute("state", "unSelected");
         }
+
+        var comArray = dojo.fromJson(dojo.byId("imgResize").getAttribute("compareId"));
+        for (var comp = 0; comp < comArray.length; comp++) {
+            if (comArray[comp] == id) {
+                dojo.byId("imgResize").style.cursor = "pointer";
+                dojo.byId("imgResize").title = "Compare";
+                dojo.byId("imgResize").src = "images/resize.png";
+                break;
+            }
+            else {
+                dojo.byId("imgResize").style.cursor = "default";
+                dojo.byId("imgResize").title = "";
+                dojo.byId("imgResize").src = "images/resize-disable.png";
+            }
+        }
+
         if (map) {
             HideInfoContainer();
             if (map._layers) {
@@ -685,6 +737,7 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
                 dojo.byId("tdEventName").innerHTML = header;
                 dojo.byId("map").style.display = "block";
                 dojo.byId('map').style.marginLeft = (dojo.coords("holder").l) + "px";
+                dojo.byId('divFrozen').style.marginLeft = (dojo.coords("holder").l) + "px";
                 dojo.byId('showHide').style.right = (dojo.coords("holder").l + 15) + "px";
                 dojo.byId('map').style.height = "100%";
                 dojo.byId('map').style.width = "100%";
@@ -694,9 +747,13 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
                 CreateBottomHeaders(arrSubjectGroups, groupdata, token, header, bottomOffset);
             }
             selectedPoint = null;
+            selectedMapPoint = null;
+            selectedTempPoint = null;
 
             if (map) {
-                map.removeAllLayers();
+                if (map._layers.length) {
+                    map.removeAllLayers();
+                }
                 map.destroy();
             }
             var mapDeferred;
@@ -705,6 +762,7 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
                 zoomExtent = startExtent.split(',');
                 startExtent = new esri.geometry.Extent(parseFloat(zoomExtent[0]), parseFloat(zoomExtent[1]), parseFloat(zoomExtent[2]), parseFloat(zoomExtent[3]), map.spatialReference);
             }
+
             if (startExtent) {
                 mapDeferred = esri.arcgis.utils.createMap(id, "map", {
                     mapOptions: {
@@ -720,6 +778,7 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
                     }
                 });
             }
+            dojo.byId("imgResize").setAttribute("webmapID", id);
             mapDeferred.addCallback(function (response) {
                 map = response.map;
                 startExtent = map.extent;
@@ -745,22 +804,171 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
     }
 }
 
+function ShowCompare(click) {
+    ToggleHeaderPanels();
+    if (dojo.byId("imgNotes").getAttribute("state") != "unSelected") {
+        dojo.byId("imgNotes").src = "images/imgNotes.png";
+        dojo.byId("imgNotes").setAttribute("state", "unSelected");
+    }
+    var mapExtent = GetMapExtent();
+    if (click) {
+        if (dojo.byId("imgResize").style.cursor == "pointer") {
+            if (selectedMapPoint) {
+                if (!tempMap) {
+                    ShowProgressIndicator();
+                    dojo.byId("divMap").style.width = "50%";
+                    dojo.byId("divServiceDetails").style.marginLeft = "0px";
+                    dojo.byId("divFrozen").style.display = "block";
+                    dojo.byId("divFrozen").style.width = "50%";
+                    dojo.byId("divFrozen").style.height = (map.height - 140) + "px";
+                    dojo.byId("imgResize").src = "images/resize-hover.png";
+                    dojo.byId("imgResize").title = "Back to regular mode";
+                    dojo.byId("divTempMap").style.width = "50%";
+
+                    dojo.byId("divTempMap").style.left = ((dojo.coords("mapContainer").w + (dojo.coords("holder").l)) - dojo.coords("divMap").w) + "px";
+
+                    dojo.query('[divGroupPod]', "tblMetricPods").forEach(function (node) {
+                        if ((dojo.hasClass(node, "divPodRedSelected")) || (dojo.hasClass(node, "divPodGreenSelected")) || (dojo.hasClass(node, "divPodGraySelected"))) {
+                            node.style.display = "block";
+                            node.parentNode.style.display = "block";
+                        }
+                        else {
+                            node.style.display = "none";
+                            node.parentNode.style.display = "none";
+                        }
+                    });
+                }
+                else {
+                    BackToRegularMode();
+                }
+                map.resize(true);
+                map.reposition();
+
+                setTimeout(function () {
+                    map.setExtent(GetBrowserMapExtentforInfoWindow(selectedMapPoint));
+                    var point = selectedMapPoint;
+                    map.infoWindow.hide();
+                    setTimeout(function () {
+                        map.infoWindow.show(point);
+                        selectedMapPoint = point;
+                    }, 500);
+
+                    if (dojo.byId("imgResize").title != "Compare") {
+                        if (dojo.byId("imgResize").getAttribute("webmapID")) {
+                            var mapDeferred = esri.arcgis.utils.createMap(dojo.byId("imgResize").getAttribute("webmapID"), "tempMap", {
+                                mapOptions: {
+                                    extent: (map) ? map.extent : ""
+                                }
+                            });
+                            mapDeferred.then(function (response) {
+                                HideProgressIndicator();
+                                tempMap = response.map;
+                                tempMap.setExtent(new esri.geometry.Extent(Number(map.extent.xmin), Number(map.extent.ymin), Number(map.extent.xmax), Number(map.extent.ymax), map.spatialReference));
+
+                                dojo.byId("imgSocialMedia").style.cursor = "default";
+                                dojo.byId("imgSocialMedia").title = "";
+                                dojo.byId("imgSocialMedia").src = "images/share-disable.png";
+
+                                var gLayer = new esri.layers.GraphicsLayer();
+                                gLayer.id = temporaryGraphicsLayerId;
+                                tempMap.addLayer(gLayer);
+
+                                dojo.connect(tempMap.infoWindow, "onHide", function () {
+                                    selectedTempPoint = null;
+                                    selectedPoint = null;
+                                    if (dojo.query(".esriPopup .contentPane").length > 0) {
+                                        dojo.query(".esriPopup .contentPane")[1].style.overflow = "hidden";
+                                    }
+                                });
+                                dojo.connect(tempMap.infoWindow, "onShow", function () {
+                                    if (dojo.query(".esriPopup .contentPane").length > 0) {
+                                        dojo.query(".esriPopup .contentPane")[1].style.overflow = "auto";
+                                    }
+                                });
+                                dojo.connect(tempMap.infoWindow, "onMaximize", function () {
+                                    dojo.query(".esriPopup")[1].style.zIndex = "2100";
+                                });
+                                dojo.connect(tempMap.infoWindow, "onRestore", function () {
+                                    dojo.query(".esriPopup")[1].style.zIndex = "1005";
+                                });
+
+                                dojo.query(".esriPopup")[1].style.zIndex = "1005";
+
+                                CreateGraphicLayer(tempMap, "temp");
+                            }, function (error) {
+                                console.log("Map creation failed: ", dojo.toJson(error));
+                            });
+                        }
+                    }
+                }, 1000);
+
+            } else {
+                alert(messages.getElementsByTagName("selectLocation")[0].childNodes[0].nodeValue);
+            }
+        }
+    }
+    else {
+        BackToRegularMode();
+    }
+}
+
+function BackToRegularMode() {
+    sessionStorage.setItem("temp", null);
+    noteGraphicCount = 0;
+
+    dojo.byId("imgSocialMedia").style.cursor = "pointer";
+    dojo.byId("imgSocialMedia").title = "Share";
+    dojo.byId("imgSocialMedia").src = "images/imgSocialMedia.png";
+
+    dojo.query('[divGroupPod]', "tblMetricPods").forEach(function (node) {
+        node.style.display = "block";
+        node.parentNode.style.display = "block";
+    });
+
+    dojo.byId("divMap").style.width = "100%";
+    dojo.byId("imgResize").src = "images/resize.png";
+    dojo.byId("imgResize").title = "Compare";
+    dojo.byId("divFrozen").style.display = "none";
+    dojo.byId("divFrozen").style.width = "100%";
+
+    dojo.byId("divTempMap").style.width = "0px";
+    if (tempMap) {
+        tempMap.destroy();
+        tempMap = null;
+    }
+    ResetSlideControls();
+}
+
 //Function to create graphics layer and graphics from session storage
 function MapInitFunction(groupdata, token, webmapInfo, podsVisibility, id) {
-    if (dojo.query('.logo-med', dojo.byId('map')).length > 0) {
-        dojo.query('.logo-med', dojo.byId('map'))[0].id = "imgESRILogo";
-    }
-    else if (dojo.query('.logo-sm', dojo.byId('map')).length > 0) {
-        dojo.query('.logo-sm', dojo.byId('map'))[0].id = "imgESRILogo";
-    }
-
-    if (dojo.query('.esriControlsBR').length > 0) {
-        dojo.query('.esriControlsBR')[0].style.bottom = "80px";
-    }
-    dojo.addClass("imgESRILogo", "esriLogo");
     var gLayer = new esri.layers.GraphicsLayer();
     gLayer.id = tempGraphicsLayerId;
     map.addLayer(gLayer);
+
+    dojo.connect(map.infoWindow, "onHide", function () {
+        if (dojo.query(".esriPopup .contentPane").length > 0) {
+            dojo.query(".esriPopup .contentPane")[0].style.overflow = "hidden";
+        }
+        selectedMapPoint = null;
+        selectedPoint = null;
+    });
+
+    dojo.connect(map.infoWindow, "onShow", function () {
+        if (dojo.query(".esriPopup .contentPane").length > 0) {
+            dojo.query(".esriPopup .contentPane")[0].style.overflow = "auto";
+        }
+    });
+
+    dojo.connect(map.infoWindow, "onMaximize", function () {
+        dojo.query(".esriPopup")[0].style.zIndex = "2100";
+    });
+
+    dojo.connect(map.infoWindow, "onRestore", function () {
+        dojo.query(".esriPopup")[0].style.zIndex = "1005";
+    });
+
+    dojo.query(".esriPopup")[0].style.zIndex = "1005";
+
     noteCount = 0;
     dojo.connect(dojo.query(".esriPopup .titleButton .maximize")[0], "onclick", function (info) {
         if (dojo.byId("txtArea")) {
@@ -773,27 +981,7 @@ function MapInitFunction(groupdata, token, webmapInfo, podsVisibility, id) {
         }
     });
 
-    var gLayer1 = new esri.layers.GraphicsLayer();
-    gLayer1.id = "tempNotesLayerId";
-    dojo.connect(gLayer1, "onClick", function (evt) {
-        evt.cancelBubble = true;
-        if (evt.stopPropagation) evt.stopPropagation();
-        evt.preventDefault();
-        notesLayerClicked = true;
-        if (evt.graphic.attributes[0].note) {
-            map.infoWindow.hide();
-            for (var q = 0; q < map.getLayer("tempNotesLayerId").graphics.length; q++) {
-                if (!map.getLayer("tempNotesLayerId").graphics[q].attributes[0].note) {
-                    map.getLayer("tempNotesLayerId").remove(map.getLayer("tempNotesLayerId").graphics[q]);
-                }
-            }
-
-        } else {
-            RemoveGraphic(null, noteCount, webmapInfo.key, null);
-        }
-        ShowNotesInfo(evt.graphic.attributes[0], evt.graphic.geometry, webmapInfo.key, evt.graphic, Number(evt.graphic.attributes[0].count));
-    });
-    map.addLayer(gLayer1);
+    CreateGraphicLayer(map, webmapInfo);
 
     if (sessionStorage.getItem("notes" + webmapInfo.key)) {
         var nStore = dojo.fromJson(sessionStorage.getItem("notes" + webmapInfo.key));
@@ -885,31 +1073,6 @@ function MapInitFunction(groupdata, token, webmapInfo, podsVisibility, id) {
     else {
         dojo.byId("imgNotes").title = "Add Notes";
     }
-
-    //Function to create notes graphics on the map when user clicks on the map
-    dojo.connect(map, "onClick", function (evt) {
-        if (dojo.byId("imgNotes").getAttribute("state") != "unSelected") {
-            HideInfoContainer();
-            var iconSize = ((isBrowser) ? 30 : 44);
-            var symbol = new esri.symbol.PictureMarkerSymbol("images/notesGraphic.png", iconSize, iconSize);
-            noteCount++;
-            var att = [];
-            att.push({ count: noteCount });
-            var graphic = new esri.Graphic(evt.mapPoint, symbol, att, null);
-            map.getLayer("tempNotesLayerId").add(graphic);
-            notesLayerClicked = true;
-            ShowNotesInfo(null, evt.mapPoint, webmapInfo.key, null, noteCount);
-            dojo.byId("imgNotes").src = "images/imgNotes.png";
-            dojo.byId("imgNotes").setAttribute("state", "unSelected");
-        }
-        else if (!notesLayerClicked) {
-            if (dojo.query(".esriPopup .actionsPane .action").length > 0) {
-                dojo.query(".esriPopup .actionsPane .action")[0].style.display = "block";
-                dojo.query(".esriPopup .actionsPane .action")[0].style.width = "57px";
-            }
-            RemoveGraphic(null, noteCount, webmapInfo.key, null);
-        }
-    });
 }
 
 //Function to add the existing note graphics on the map
@@ -1065,6 +1228,7 @@ function ShowNotesInfo(feature, geometry, key, render, note) {
         }), 100);
     });
 
+
     var tblActionContainer = document.createElement("table");
     tblActionContainer.style.width = "97%";
     tblActionContainer.style.height = "100%";
@@ -1114,30 +1278,52 @@ function ShowNotesInfo(feature, geometry, key, render, note) {
     tdResultContainer.appendChild(spnResultContainer);
     selectedPoint = geometry;
 
-    setTimeout(function () {
-        if ((!feature) || (feature.note)) {
-            for (var q = 0; q < map.getLayer("tempNotesLayerId").graphics.length; q++) {
-                if (map.getLayer("tempNotesLayerId").graphics[q].attributes[0]) {
-                    if (map.getLayer("tempNotesLayerId").graphics[q].attributes[0].count == note) {
-                        map.infoWindow.setTitle("Notes");
-                        map.infoWindow.setContent(divContainer);
-                        if (dojo.query(".esriPopup .actionsPane .action").length > 0) {
-                            dojo.query(".esriPopup .actionsPane .action")[0].style.display = "none";
-                            dojo.query(".esriPopup .actionsPane .action")[0].style.width = "0px";
-                        }
-                        map.infoWindow.show(geometry, map.getInfoWindowAnchor(map.toScreen(geometry)));
-                        break;
+    if ((!feature) || (feature.note)) {
+        var notesGraphicLayer = (tempMap) ? tempMap.getLayer("tempNotesGraphicLayerId") : map.getLayer("tempNotesLayerId");
+        var mapCtrl = (!tempMap) ? map : tempMap;
+        for (var q = 0; q < notesGraphicLayer.graphics.length; q++) {
+            if (notesGraphicLayer.graphics[q].attributes[0]) {
+                if (notesGraphicLayer.graphics[q].attributes[0].count == note) {
+                    mapCtrl.infoWindow.setTitle("Notes");
+                    mapCtrl.infoWindow.setContent(divContainer);
+                    for (var zoom = 0; zoom < dojo.query(".esriPopup .actionsPane .action").length; zoom++) {
+                        dojo.query(".esriPopup .actionsPane .action")[zoom].style.display = "none";
+                        dojo.query(".esriPopup .actionsPane .action")[zoom].style.width = "0px";
                     }
+                    for (var next = 0; next < dojo.query(".esriPopup .titleButton.next").length; next++) {
+                        dojo.query(".esriPopup .titleButton.next")[next].style.display = "none";
+                    }
+
+                    mapCtrl.setExtent(GetBrowserMapExtent(geometry));
+                    setTimeout(function () {
+                        mapCtrl.infoWindow.show(geometry);
+                    }, 500);
+                    break;
                 }
             }
         }
-    }, 1500);
-    notesLayerClicked = false;
+    }
+
+    if (!tempMap) {
+        notesLayerClicked = false;
+    }
+    else {
+        notesGraphicLayerClicked = false;
+    }
+
     if (infoContentClose) {
         dojo.disconnect(infoContentClose);
     }
-    infoContentClose = dojo.connect(dojo.query(".esriPopup .titleButton.close")[0], "onclick", function () {
-        if (!notesLayerClicked) {
+
+    infoContentClose = dojo.connect(((!tempMap) ? dojo.query(".esriPopup .titleButton.close")[0] : dojo.query(".esriPopup .titleButton.close")[1]), "onclick", function () {
+        if (!tempMap) {
+            selectedMapPoint = null;
+        }
+        else {
+            selectedTempPoint = null;
+        }
+        selectedPoint = null;
+        if (((!tempMap) ? (!notesLayerClicked) : (!notesGraphicLayerClicked))) {
             RemoveGraphic(render, note, key, false);
         }
     });
@@ -1197,6 +1383,7 @@ function CalculateCharactersCount(obj, geometry, key, note, shareContent) {
     var url = esri.urlToObject(window.location.toString());
     nArray = PopulateNotesData(key);
     var urlSt;
+
     if (nArray.length > 0) {
         urlSt = encodeURIComponent(url.path) + encodeURIComponent(shareContent) + encodeURIComponent(dojo.toJson(nArray));
         if ((urlSt.length == 1425) && (encodeURIComponent(dojo.toJson(obj.value)).length >= (1425 - urlSt.length))) {
@@ -1215,6 +1402,7 @@ function CalculateCharactersCount(obj, geometry, key, note, shareContent) {
                 dojo.byId("spnResultContainer").innerHTML = messages.getElementsByTagName("noCharacters")[0].childNodes[0].nodeValue;
             }
         }
+
         charCount = (1425 - urlSt.length);
         dojo.byId("imgSocialMedia").setAttribute("shareNotesLink", encodeURIComponent(dojo.toJson(nArray)));
     }
@@ -1237,15 +1425,16 @@ function ReplaceWithSpecialCharacters(str) {
 function SaveNotes(geometry, key, note, store) {
     var attributes = [];
     attributes.push({ note: store, count: note });
-    for (var q = 0; q < map.getLayer("tempNotesLayerId").graphics.length; q++) {
-        if (map.getLayer("tempNotesLayerId").graphics[q].attributes[0]) {
-            if (map.getLayer("tempNotesLayerId").graphics[q].attributes[0].count == note) {
-                map.getLayer("tempNotesLayerId").graphics[q].attributes[0] = attributes[0];
+    var notesGraphicLayer = (tempMap) ? tempMap.getLayer("tempNotesGraphicLayerId") : map.getLayer("tempNotesLayerId");
+    for (var q = 0; q < notesGraphicLayer.graphics.length; q++) {
+        if (notesGraphicLayer.graphics[q].attributes[0]) {
+            if (notesGraphicLayer.graphics[q].attributes[0].count == note) {
+                notesGraphicLayer.graphics[q].attributes[0] = attributes[0];
             }
         }
         else {
-            if (map.getLayer("tempNotesLayerId").graphics[q].attributes.count == note) {
-                map.getLayer("tempNotesLayerId").graphics[q].attributes[0] = attributes[0];
+            if (notesGraphicLayer.graphics[q].attributes.count == note) {
+                notesGraphicLayer.graphics[q].attributes[0] = attributes[0];
             }
         }
     }
@@ -1271,25 +1460,37 @@ function SaveNotes(geometry, key, note, store) {
 
 //Function to remove the note graphic from the map
 function RemoveGraphic(render, note, key, btnclick) {
+    var notesLayer = (!tempMap) ? map.getLayer("tempNotesLayerId") : tempMap.getLayer("tempNotesGraphicLayerId");
     if (dojo.byId("txtArea")) {
         if ((dojo.byId("txtArea").value.trim() == "") || (btnclick)) {
             if (render) {
-                map.getLayer("tempNotesLayerId").remove(render);
+                notesLayer.remove(render);
             }
             else {
-                for (var q = 0; q < map.getLayer("tempNotesLayerId").graphics.length; q++) {
-                    if (map.getLayer("tempNotesLayerId").graphics[q].attributes[0].count == note) {
-                        map.getLayer("tempNotesLayerId").remove(map.getLayer("tempNotesLayerId").graphics[q]);
+                for (var q = 0; q < notesLayer.graphics.length; q++) {
+                    if (notesLayer.graphics[q].attributes[0].count == note) {
+                        notesLayer.remove(notesLayer.graphics[q]);
                     }
                 }
             }
             var notes = [];
-            noteCount = 0;
+            if (!tempMap) {
+                noteCount = 0;
+            }
+            else {
+                noteGraphicCount = 0;
+            }
             for (var d = 0; d < notesArray.length; d++) {
                 if (notesArray[d][0].key == key) {
                     if (notesArray[d][0].count != note) {
-                        noteCount++;
-                        notesArray[d][0].count = noteCount;
+                        if (!tempMap) {
+                            noteCount++;
+                            notesArray[d][0].count = noteCount;
+                        }
+                        else {
+                            noteGraphicCount++;
+                            notesArray[d][0].count = noteGraphicCount;
+                        }
                         notes.push(notesArray[d]);
                     }
                 }
@@ -1301,9 +1502,9 @@ function RemoveGraphic(render, note, key, btnclick) {
             sessionStorage.setItem("notes" + key, dojo.toJson(notesArray));
             dojo.byId("imgSocialMedia").setAttribute("noteGraphics", sessionStorage.getItem("notes" + key));
 
-            for (var q = 0; q < map.getLayer("tempNotesLayerId").graphics.length; q++) {
-                if (map.getLayer("tempNotesLayerId").graphics[q].attributes[0].count) {
-                    map.getLayer("tempNotesLayerId").graphics[q].attributes[0].count = (q + 1);
+            for (var q = 0; q < notesLayer.graphics.length; q++) {
+                if (notesLayer.graphics[q].attributes[0].count) {
+                    notesLayer.graphics[q].attributes[0].count = (q + 1);
                 }
             }
             nArray = PopulateNotesData(key);
@@ -1325,11 +1526,118 @@ function RemoveGraphic(render, note, key, btnclick) {
             HideInfoContainer();
         }
         else {
-            map.infoWindow.hide();
+            if (!tempMap) {
+                map.infoWindow.hide();
+            }
+            else {
+                tempMap.infoWindow.hide();
+            }
         }
     }
     else {
         RemoveHiglightGraphic();
     }
 }
+var selectedMapPoint;
+var selectedTempPoint;
+var graphicLayer = null;
+function CreateGraphicLayer(mapCtrl, webmapInfo) {
+    var gLayer1 = new esri.layers.GraphicsLayer();
+    gLayer1.id = (!tempMap) ? "tempNotesLayerId" : "tempNotesGraphicLayerId";
+    dojo.connect(gLayer1, "onClick", function (evt) {
+        graphicLayer = evt.graphic;
+    });
+    mapCtrl.addLayer(gLayer1);
+
+    dojo.connect(mapCtrl, "onClick", function (evt) {
+        if (!graphicLayer) {
+            if (dojo.byId("imgNotes").getAttribute("state") != "unSelected") {
+                HideInfoContainer();
+                var iconSize = ((isBrowser) ? 30 : 44);
+                var symbol = new esri.symbol.PictureMarkerSymbol("images/notesGraphic.png", iconSize, iconSize);
+                if (!tempMap) {
+                    noteCount++;
+                }
+                else {
+                    noteGraphicCount++;
+                }
+                var att = [];
+                att.push({ count: ((!tempMap) ? noteCount : noteGraphicCount) });
+                var graphic = new esri.Graphic(evt.mapPoint, symbol, att, null);
+
+
+                if (!tempMap) {
+                    notesLayerClicked = true;
+                    mapCtrl.getLayer("tempNotesLayerId").add(graphic);
+                } else {
+                    notesGraphicLayerClicked = true;
+                    mapCtrl.getLayer("tempNotesGraphicLayerId").add(graphic);
+                }
+
+                ShowNotesInfo(null, evt.mapPoint, ((!tempMap) ? webmapInfo.key : "temp"), null, ((!tempMap) ? noteCount : noteGraphicCount));
+            }
+            else if (((!tempMap) ? (!notesLayerClicked) : (!notesGraphicLayerClicked))) {
+                mapCtrl.infoWindow.hide();
+                if (!tempMap) {
+                    selectedMapPoint = evt.mapPoint;
+                }
+                else {
+                    selectedTempPoint = evt.mapPoint;
+                }
+                mapCtrl.setExtent(GetBrowserMapExtentforInfoWindow(evt.mapPoint));
+                setTimeout(function () {
+                    mapCtrl.infoWindow.show(evt.mapPoint);
+                }, 500);
+
+                for (var zoom = 0; zoom < dojo.query(".esriPopup .actionsPane .action").length; zoom++) {
+                    dojo.query(".esriPopup .actionsPane .action")[zoom].style.display = "block";
+                    dojo.query(".esriPopup .actionsPane .action")[zoom].style.width = "57px";
+                }
+                var btnCount = 0;
+                for (var next = 0; next < dojo.query(".esriPopup .titleButton.next").length; next++) {
+                    if (!(tempMap && next == 0)) {
+                        dojo.query(".esriPopup .titleButton.next")[next].style.display = "none";
+                    }
+                    for (var title = 0; title < dojo.query(".esriPopup .titlePane .title").length; title++) {
+                        setTimeout(function () {
+                            btnCount++;
+                            if (dojo.query(".esriPopup .titlePane .title")[btnCount - 1]) {
+                                if (dojo.query(".esriPopup .titlePane .title")[btnCount - 1].innerHTML != "&nbsp;") {
+                                    if (dojo.query(".esriPopup .actionsPane .action")[btnCount - 1].style.display != "none") {
+                                        dojo.query(".esriPopup .titleButton.next")[btnCount - 1].style.display = "block";
+                                    }
+                                }
+                            }
+                        }, 2000);
+                    }
+                }
+                RemoveGraphic(null, ((!tempMap) ? noteCount : noteGraphicCount), ((!tempMap) ? webmapInfo.key : "temp"), null);
+            }
+        }
+        else {
+            if (!tempMap) {
+                notesLayerClicked = true;
+            } else {
+                notesGraphicLayerClicked = true;
+            }
+            if (graphicLayer.attributes[0].note) {
+                mapCtrl.infoWindow.hide();
+                var notesLayer = (!tempMap) ? mapCtrl.getLayer("tempNotesLayerId") : mapCtrl.getLayer("tempNotesGraphicLayerId");
+                for (var q = 0; q < notesLayer.graphics.length; q++) {
+                    if (!notesLayer.graphics[q].attributes[0].note) {
+                        notesLayer.remove(notesLayer.graphics[q]);
+                    }
+                }
+
+            } else {
+                RemoveGraphic(null, ((!tempMap) ? noteCount : noteGraphicCount), (!tempMap) ? webmapInfo.key : "temp", null);
+            }
+
+            ShowNotesInfo(graphicLayer.attributes[0], graphicLayer.geometry, ((!tempMap) ? webmapInfo.key : "temp"), graphicLayer, Number(graphicLayer.attributes[0].count));
+            graphicLayer = null;
+        }
+    });
+}
+
+
 

@@ -15,6 +15,7 @@
  | limitations under the License.
  */
 var shareOnLoad = true; //flag set for shared link
+var chart; // variable used to store created chart object for trends
 
 //Create bottom panel for subject groups with respective images
 function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, bottomOffset) {
@@ -80,6 +81,7 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
         imgHeader.onclick = function () {
             //Upon clicking/tapping on the subject group image; the data for selected subject group will be transferred to function PopulateEventDetails to create map page.
             if (this.style.cursor == "pointer") {
+                ShowCompare(false);
                 if (dojo.coords("divMoreContent").h > 0) {
                     dojo.byId("imgMore").src = "images/more.png";
                     dojo.replaceClass("divMoreContent", "hideContainerHeight", "showContainerHeight");
@@ -123,7 +125,6 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
                             }
                         });
                         mapDeferred.addCallback(function (response) {
-
                             map = response.map;
                             map.destroy();
                             var webmapInfo = {};
@@ -176,11 +177,13 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
                                     var webStats = [];
                                     for (var z in webInfo) {
                                         for (var y in webInfo[z].operationalLayers) {
-                                            if (webInfo[z].operationalLayers[y].url) {
-                                                var str = webInfo[z].operationalLayers[y].url;
-                                                var ss = str.substring(((str.lastIndexOf("/")) + 1), (str.length))
-                                                if (!isNaN(ss)) {
-                                                    webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url, statsTitle: webInfo[z].operationalLayers[y].title });
+                                            if (webInfo[z].operationalLayers[y].title.indexOf(statisticsKeyword) >= 0) {
+                                                if (webInfo[z].operationalLayers[y].url) {
+                                                    var str = webInfo[z].operationalLayers[y].url;
+                                                    var ss = str.substring(((str.lastIndexOf("/")) + 1), (str.length))
+                                                    if (!isNaN(ss)) {
+                                                        webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url, statsTitle: webInfo[z].operationalLayers[y].title });
+                                                    }
                                                 }
                                             }
                                         }
@@ -305,6 +308,7 @@ function ShowMoreContainer() {
 
 //Go back to the dashboard page with the animation effects
 function BackToPods() {
+    ShowCompare(false);
     dojo.byId("divServiceDetails").style.display = "none";
     newLeft = 0;
     dojo.byId('carouselscroll').style.left = "0px";
@@ -350,19 +354,28 @@ function BackToPods() {
 //Hide info window
 function HideInfoContainer() {
     RemoveHiglightGraphic();
-    if (map.infoWindow) {
-        map.infoWindow.hide();
+    if (!tempMap) {
+        if (map.infoWindow) {
+            map.infoWindow.hide();
+            selectedMapPoint = null;
+        }
+    }
+    else {
+        if (tempMap.infoWindow) {
+            tempMap.infoWindow.hide();
+        }
     }
 }
 
 //Remove note graphic on map
 function RemoveHiglightGraphic() {
-    if (map.getLayer("tempNotesLayerId")) {
-        if (map.getLayer("tempNotesLayerId").graphics.length != 0) {
-            if (map.getLayer("tempNotesLayerId").graphics[(map.getLayer("tempNotesLayerId").graphics.length - 1)].attributes) {
-                if (map.getLayer("tempNotesLayerId").graphics[(map.getLayer("tempNotesLayerId").graphics.length - 1)].attributes[0]) {
-                    if (!(map.getLayer("tempNotesLayerId").graphics[(map.getLayer("tempNotesLayerId").graphics.length - 1)].attributes[0].note)) {
-                        map.getLayer("tempNotesLayerId").remove(map.getLayer("tempNotesLayerId").graphics[(map.getLayer("tempNotesLayerId").graphics.length - 1)]);
+    var notesLayer = (!tempMap) ? map.getLayer("tempNotesLayerId") : tempMap.getLayer("tempNotesGraphicLayerId");
+    if (notesLayer) {
+        if (notesLayer.graphics.length != 0) {
+            if (notesLayer.graphics[(notesLayer.graphics.length - 1)].attributes) {
+                if (notesLayer.graphics[(notesLayer.graphics.length - 1)].attributes[0]) {
+                    if (!(notesLayer.graphics[(notesLayer.graphics.length - 1)].attributes[0].note)) {
+                        notesLayer.remove(notesLayer.graphics[(notesLayer.graphics.length - 1)]);
                     }
                 }
             }
@@ -399,7 +412,7 @@ function ShowBookmarkContainer() {
             }
             bookmarks.push({
                 "name": dojo.byId("txtBookmark").value.trim(),
-                "extent": map.extent
+                "extent": (!tempMap) ? map.extent : tempMap.extent
             });
             localStorage.setItem("BookmarkCollection", dojo.toJson(bookmarks));
             PopulateBookmarkList();
@@ -423,7 +436,7 @@ function PopulateBookmarkList() {
     var arrayBookmarks = dojo.fromJson(localStorage.getItem("BookmarkCollection"));
     if (arrayBookmarks) {
         for (var r = 0; r < arrayBookmarks.length; r++) {
-            var tr = document.createElement("tr")
+            var tr = document.createElement("tr");
             if (r % 2 != 0) {
                 tr.className = "listDarkColor";
             } else {
@@ -446,8 +459,8 @@ function PopulateBookmarkList() {
 
             var x = arrayBookmarks[r].name.split(" ");
             for (var i in x) {
-                w = x[i].getWidth(11);
-                var boxWidth = 200;
+                w = x[i].getWidth(((isTablet) ? 14 : 11));
+                var boxWidth = ((isTablet) ? 155 : 200);
                 if (boxWidth < w) {
                     td.className = "tdBreakWord";
                     continue;
@@ -463,8 +476,14 @@ function PopulateBookmarkList() {
                 //Upon clicking/tapping on this cell map will pan to the respective stored extent of this bookmark
                 for (var b = 0; b < arrayBookmarks.length; b++) {
                     if (this.getAttribute("bookmarkName") == arrayBookmarks[b].name) {
-                        map.setExtent(new esri.geometry.Extent(arrayBookmarks[b].extent.xmin, arrayBookmarks[b].extent.ymin,
+                        if (!tempMap) {
+                            map.setExtent(new esri.geometry.Extent(arrayBookmarks[b].extent.xmin, arrayBookmarks[b].extent.ymin,
                                                                arrayBookmarks[b].extent.xmax, arrayBookmarks[b].extent.ymax, map.spatialReference));
+                        }
+                        else {
+                            tempMap.setExtent(new esri.geometry.Extent(arrayBookmarks[b].extent.xmin, arrayBookmarks[b].extent.ymin,
+                                                               arrayBookmarks[b].extent.xmax, arrayBookmarks[b].extent.ymax, tempMap.spatialReference));
+                        }
                         break;
                     }
                 }
@@ -565,62 +584,71 @@ function ShowLocateContainer() {
 
 //Get current map Extent
 function GetMapExtent() {
-    var extents = map.extent.xmin.toString().split(".")[0] + "," + map.extent.ymin.toString().split(".")[0] + "," +
-                  map.extent.xmax.toString().split(".")[0] + "," + map.extent.ymax.toString().split(".")[0];
+    var extents;
+    if (tempMap) {
+        extents = Math.round(tempMap.extent.xmin).toString() + "," + Math.round(tempMap.extent.ymin).toString() + "," +
+                      Math.round(tempMap.extent.xmax).toString() + "," + Math.round(tempMap.extent.ymax).toString();
+    }
+    else {
+        extents = Math.round(map.extent.xmin).toString() + "," + Math.round(map.extent.ymin).toString() + "," +
+                  Math.round(map.extent.xmax).toString() + "," + Math.round(map.extent.ymax).toString();
+    }
     return (extents);
 }
 
 //Open Email client with shared link
 function ShareLink(ext) {
-    dojo.byId("imgSocialMedia").src = "images/imgSocialMedia_hover.png";
-    tinyUrl = null;
-    mapExtent = GetMapExtent();
-    var url = esri.urlToObject(window.location.toString());
-    var urlStr;
-    if (dojo.byId("imgSocialMedia").getAttribute("shareNotesLink")) {
-        if (dojo.byId("imgSocialMedia").getAttribute("shareNotesLink").length > 5) {
-            var shareContent = "?extent=" + mapExtent + "$t=" + dojo.byId("imgSocialMedia").getAttribute("mapName") + "$n=";
-            urlStr = encodeURI(url.path) + shareContent + dojo.byId("imgSocialMedia").getAttribute("shareNotesLink");
+    if (!tempMap) {
+        dojo.byId("imgSocialMedia").src = "images/imgSocialMedia_hover.png";
+        tinyUrl = null;
+        mapExtent = GetMapExtent();
+        var url = esri.urlToObject(window.location.toString());
+        var urlStr;
+        if (dojo.byId("imgSocialMedia").getAttribute("shareNotesLink")) {
+            if (dojo.byId("imgSocialMedia").getAttribute("shareNotesLink").length > 5) {
+                var shareContent = "?extent=" + mapExtent + "$t=" + dojo.byId("imgSocialMedia").getAttribute("mapName") + "$n=";
+                urlStr = encodeURI(url.path) + shareContent + dojo.byId("imgSocialMedia").getAttribute("shareNotesLink");
+            }
+            else {
+                urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$t=" + dojo.byId("imgSocialMedia").getAttribute("mapName").replace("&", "@");
+            }
         }
         else {
             urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$t=" + dojo.byId("imgSocialMedia").getAttribute("mapName").replace("&", "@");
         }
-    }
-    else {
-        urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$t=" + dojo.byId("imgSocialMedia").getAttribute("mapName").replace("&", "@");
-    }
-    url = dojo.string.substitute(mapSharingOptions.TinyURLServiceURL, [urlStr]);
-    setTimeout(function () {
-        dojo.byId("imgSocialMedia").src = "images/imgSocialMedia.png";
-    }, 500);
-    dojo.io.script.get({
-        url: url,
-        callbackParamName: "callback",
-        load: function (data) {
-            tinyResponse = data;
-            tinyUrl = data;
-            var attr = mapSharingOptions.TinyURLResponseAttribute.split(".");
-            for (var x = 0; x < attr.length; x++) {
-                tinyUrl = tinyUrl[attr[x]];
-            }
-            if (tinyUrl) {
-                parent.location = dojo.string.substitute(mapSharingOptions.ShareByMailLink, [dojo.byId("imgSocialMedia").getAttribute("mapName").replace("&", "and") + " - " + tinyUrl]);
+        url = dojo.string.substitute(mapSharingOptions.TinyURLServiceURL, [urlStr]);
+        setTimeout(function () {
+            dojo.byId("imgSocialMedia").src = "images/imgSocialMedia.png";
+        }, 500);
+        dojo.io.script.get({
+            url: url,
+            callbackParamName: "callback",
+            load: function (data) {
+                tinyResponse = data;
+                tinyUrl = data;
+                var attr = mapSharingOptions.TinyURLResponseAttribute.split(".");
+                for (var x = 0; x < attr.length; x++) {
+                    tinyUrl = tinyUrl[attr[x]];
+                }
+                if (tinyUrl) {
+                    parent.location = dojo.string.substitute(mapSharingOptions.ShareByMailLink, [dojo.byId("imgSocialMedia").getAttribute("mapName").replace("&", "and") + " - " + tinyUrl]);
 
-            } else {
+                } else {
+                    alert(messages.getElementsByTagName("tinyURLEngine")[0].childNodes[0].nodeValue);
+                    return;
+                }
+            },
+            error: function (error) {
+                alert(tinyResponse.error);
+            }
+        });
+        setTimeout(function () {
+            if (!tinyResponse) {
                 alert(messages.getElementsByTagName("tinyURLEngine")[0].childNodes[0].nodeValue);
                 return;
             }
-        },
-        error: function (error) {
-            alert(tinyResponse.error);
-        }
-    });
-    setTimeout(function () {
-        if (!tinyResponse) {
-            alert(messages.getElementsByTagName("tinyURLEngine")[0].childNodes[0].nodeValue);
-            return;
-        }
-    }, 6000);
+        }, 6000);
+    }
 }
 
 //Set height for address results list and create scrollbar
@@ -690,6 +718,7 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         divPod.id = "div" + p + "Pod";
         divPod.setAttribute("layer", p);
         divPod.setAttribute("info", p);
+        divPod.setAttribute("divGroupPod", p);
 
         divPod.onclick = function (evt) {
             //Upon clicking/tapping on the pod, the data for selected pod will be transferred to function to create map page.
@@ -738,12 +767,6 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
                 }
                 PopulateEventDetails(webInfo[dojo.fromJson(this.getAttribute("info"))].id, null, dojo.byId("tdEventName").innerHTML, webInfo[dojo.fromJson(this.getAttribute("info"))], groupdata, token, false, "Yes", null);
 
-                for (var r in webInfo) {
-                    if ((dojo.hasClass("div" + r + "Pod", "divPodRedSelected")) || (dojo.hasClass("div" + r + "Pod", "divPodGreenSelected"))) {
-                        dojo.byId("tdMetricHeader").innerHTML = webInfo[r].key;
-                        break;
-                    }
-                }
 
                 infoClicked = false;
 
@@ -901,6 +924,7 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
                     //If stats keyword mentioned in config file is available in layer then show color, indicator and value for the pod
                     if (statsData[c].statsTitle.indexOf(statisticsKeyword) >= 0) {
                         if (webInfo[0].key) {
+                            dojo.byId("divGraphHeader").style.display = "block";
                             dojo.byId("divGraphHeader").style.color = "#FFFFFF";
                             dojo.byId("divGraphHeader").setAttribute("state", "enabled");
                             dojo.byId("divGraphHeader").style.cursor = "pointer";
@@ -913,13 +937,14 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
                         }
                         catch (err) {
                             spanText.innerHTML = showNullValueAs;
+                            //spanText.innerHTML = 0;
                         }
                         try {
                             var diff = (dojo.string.substitute(infoPodStatics[0].CurrentObservation, statsData[c].data) - dojo.string.substitute(infoPodStatics[0].LatestObservation, statsData[c].data));
                             // Calculate increase or decrease indicator; Accordingly set the color and arrow symbol for the pod
                             if (diff >= 0) {
                                 imgArr.src = "images/up.png";
-                                if (dojo.string.substitute(infoPodStatics[0].StaticsPosition, statsData[c].data) == "Yes") {
+                                if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, statsData[c].data) == "Yes") {
                                     divPod.className = "divPodGreen";
                                     divPodInner.className = "divPodInnerGreen";
                                 }
@@ -936,7 +961,7 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
                             }
                             else if (diff < 0) {
                                 imgArr.src = "images/down.png";
-                                if (dojo.string.substitute(infoPodStatics[0].StaticsPosition, statsData[c].data) == "Yes") {
+                                if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, statsData[c].data) == "Yes") {
                                     divPod.className = "divPodRed";
                                     divPodInner.className = "divPodInnerRed";
                                 }
@@ -1011,13 +1036,6 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         }
         count++;
     }
-    for (var r in webInfo) {
-        if ((dojo.hasClass("div" + r + "Pod", "divPodRedSelected")) || (dojo.hasClass("div" + r + "Pod", "divPodGreenSelected")) || (dojo.hasClass("div" + r + "Pod", "divPodGraySelected"))) {
-            dojo.byId("imgSocialMedia").setAttribute("key", webInfo[r].key);
-            dojo.byId("tdMetricHeader").innerHTML = webInfo[r].key;
-            break;
-        }
-    }
 
     dojo.byId("imgSocialMedia").setAttribute("statistical", dojo.toJson(statsData));
 
@@ -1061,6 +1079,7 @@ function HideGraphContainer() {
     dojo.replaceClass("divGraphComponent", "hideContainerHeight", "showContainerHeight");
     dojo.byId('divGraphComponent').style.height = '0px';
     dojo.byId('showHide').style.top = '59px';
+    dojo.byId("divGraphHeader").style.display = "none";
     dojo.byId("divGraphHeader").style.color = "gray";
     dojo.byId("divGraphHeader").setAttribute("state", "disabled");
     dojo.byId("divGraphHeader").style.cursor = "default";
@@ -1181,15 +1200,25 @@ function CreateLineChart(statsData, title) {
             for (var y = 0; y < statsData.length; y++) {
                 if (statsData[y].title == title) {
                     if (statsData[y].statsTitle.indexOf(statisticsKeyword) >= 0) {
-                        var chartData = [];
 
-                        chartData.push(Number(dojo.string.substitute(infoPodStatics[0].CurrentObservation, statsData[y].data)));
+                        dojo.byId("tdMetricHeader").innerHTML = statsData[y].statsTitle.split(statisticsKeyword)[0];
+
+                        var chartData = [];
+                        try {
+                            chartData.push(Number(dojo.string.substitute(infoPodStatics[0].CurrentObservation, statsData[y].data)));
+                        }
+                        catch (err) {
+                            chartData.push(0);
+                        }
                         chartData.push(Number(dojo.string.substitute(infoPodStatics[0].LatestObservation, statsData[y].data)));
                         for (var z = 0; z < infoPodStatics[0].PreviousObservations.length; z++) {
-                            chartData.push(Number(dojo.string.substitute(infoPodStatics[0].PreviousObservations[z], statsData[y].data)));
+                            try {
+                                chartData.push(Number(dojo.string.substitute(infoPodStatics[0].PreviousObservations[z], statsData[y].data)));
+                            }
+                            catch (err) {
+                                chartData.push(0);
+                            }
                         }
-
-
 
                         var date = new js.date();
                         var xAxisData = [];
@@ -1228,8 +1257,6 @@ function CreateLineChart(statsData, title) {
         }
 
         var chartNode = document.createElement("div");
-        chartNode.style.width = "380px";
-        chartNode.style.height = "250px";
         chartNode.id = "chartNodePod";
         divChart.appendChild(chartNode);
         setTimeout("PopulateChart(" + dojo.toJson(chartData) + "," + dojo.toJson(chartData) + "," + dojo.toJson(xAxisData) + ")", 1000);
@@ -1249,7 +1276,7 @@ function PopulateChart(chartData, data, xAxisData) {
     var minVal = Number(arrsort[0]) - 10;
     var maxVal = Number(arrsort[(chartData.length - 1)]) + 10;
 
-    var chart = new dojox.charting.Chart2D("chartNodePod");
+    chart = new dojox.charting.Chart2D("chartNodePod");
     //style the chart
     chart.margins.l = 0;
     chart.margins.t = 18;
@@ -1268,18 +1295,21 @@ function PopulateChart(chartData, data, xAxisData) {
         markers: true
     });
 
+    var label = [];
+    for (var lbl = 0; lbl <= (xAxisData.length + 1); lbl++) {
+        if ((lbl == 0) || (lbl == (xAxisData.length + 1))) {
+            label.push({ value: lbl, text: "" });
+        }
+        else {
+            label.push({ value: lbl, text: xAxisData[(lbl - 1)] });
+        }
+    }
+
+
     chart.addAxis("x", {
-        stroke: "white", min: 0, max: 6, fontColor: "white", minorTicks: false, minorLabels: false, microTicks: false, font: "normal normal normal 9pt verdana",
+        stroke: "white", min: 0, max: (xAxisData.length + 1), fontColor: "white", minorTicks: false, minorLabels: false, microTicks: false, font: "normal normal normal 9pt verdana",
         hMajorLines: false, hMinorLines: false, fixLower: "major", fixUpper: "major", includeZero: false, title: "Reporting Period", titleGap: 10, titleFontColor: "#FFF", titleOrientation: "away",
-        labels: [
-            { value: 0, text: "" },
-            { value: 1, text: xAxisData[0] },
-			{ value: 2, text: xAxisData[1] },
-            { value: 3, text: xAxisData[2] },
-            { value: 4, text: xAxisData[3] },
-            { value: 5, text: xAxisData[4] },
-			{ value: 6, text: "" }
-		]
+        labels: label
     });
 
     chart.addAxis("y", { stroke: "white", min: minVal, max: maxVal, vertical: true, hMajorLines: false, fontColor: "white", font: "normal normal normal 9pt verdana",
@@ -1287,10 +1317,14 @@ function PopulateChart(chartData, data, xAxisData) {
     });
     chart.addSeries("dashboard", data);
     chart.render();
+
     //Enable the graph container tab
+    dojo.byId("divGraphHeader").style.display = "block";
     dojo.byId("divGraphHeader").style.color = "#FFFFFF";
     dojo.byId("divGraphHeader").setAttribute("state", "enabled");
     dojo.byId("divGraphHeader").style.cursor = "pointer";
+
+    ResizeChartContainer();
 }
 
 //Toggle notes icon
@@ -1303,6 +1337,12 @@ function PopulateNotes(evt) {
         else {
             dojo.byId("imgNotes").src = "images/imgNotes.png";
             evt.setAttribute("state", "unSelected");
+            if (!tempMap) {
+                notesLayerClicked = false;
+            }
+            else {
+                notesGraphicLayerClicked = false;
+            }
         }
     }
 }
@@ -1316,6 +1356,7 @@ function ShowGraphDetails() {
             dojo.byId('divGraphComponent').style.height = "300px";
             dojo.replaceClass("divGraphComponent", "showContainerHeight", "hideContainerHeight");
             dojo.byId('showHide').style.top = '358px';
+            ResizeChartContainer();
         }
     }
 }
@@ -1327,6 +1368,7 @@ function ToggleHeaderPanels() {
         dojo.byId("imgLocate").src = "images/locate.png";
         dojo.replaceClass("divAddressContent", "hideContainerHeight", "showContainerHeight");
         dojo.byId('divAddressContent').style.height = '0px';
+        dojo.byId("imgSearchLoader").style.display = "none";
     }
     if (dojo.coords("divMoreContent").h > 0) {
         dojo.byId("imgMore").src = "images/more.png";

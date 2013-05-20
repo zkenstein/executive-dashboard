@@ -20,7 +20,9 @@
     <nonAuthenticatedMember>You are not the member of this group to log in.</nonAuthenticatedMember>
     <noResults>No results found for</noResults>
     <noSearchResults>No search results found.</noSearchResults>
+    <locatorService>Locator service is not working; please try again after some time.</locatorService>
     <bookmarkName>Please enter bookmark name.</bookmarkName>
+    <selectLocation>Please select a location to compare.</selectLocation>
     <existingBookmark>Bookmark with this name already exists; please enter different name.</existingBookmark>
     <exceededLimit>characters exceeded to create notes.</exceededLimit>
     <addressToLocate>Enter address to locate.</addressToLocate>

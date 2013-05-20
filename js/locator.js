@@ -1,6 +1,6 @@
 ﻿/** @license
  | Version 10.2
- | Copyright 2012 Esri
+ | Copyright 2013 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
  | you may not use this file except in compliance with the License.
@@ -30,20 +30,28 @@ function LocateAddress() {
         }
         return;
     }
-    var address = [];
-    address[locatorSettings.LocatorParamaters] = dojo.byId('txtAddress').value;
 
-    var locator1 = new esri.tasks.Locator(locatorSettings.LocatorURL);
-    locator1.outSpatialReference = map.spatialReference;
-    locator1.addressToLocations(address, [locatorSettings.CandidateFields], function (candidates) {
-        // Discard searches made obsolete by new typing from user
-        if (thisSearchTime < lastSearchTime) {
-            return;
+    var params = {};
+    params["f"] = "json";
+    params[locatorSettings.LocatorParamaters.SearchField] = dojo.byId('txtAddress').value;
+    params[locatorSettings.LocatorParamaters.SpatialReferenceField] = ((map.spatialReference.wkid) ? ("{wkid:" + map.spatialReference.wkid + "}") : ("{wkt:" + map.spatialReference.wkt + "}"));
+    params[locatorSettings.LocatorParamaters.SearchResultField] = locatorSettings.CandidateFields;
+    params[locatorSettings.LocatorParamaters.SearchCountField] = locatorSettings.MaxResults;
+    params[locatorSettings.LocatorParamaters.SearchBoundaryField] = dojo.toJson(baseMapExtent);
+    esri.request({
+        url: locatorSettings.LocatorURL,
+        content: params,
+        callbackParamName: "callback",
+        load: function (candidates) {
+            // Discard searches made obsolete by new typing from user
+            if (thisSearchTime < lastSearchTime) {
+                return;
+            }
+            ShowLocatedAddress(candidates.locations);
+        }, error: function (err) {
+            dojo.byId("imgSearchLoader").style.display = "none";
+            LoctorErrBack("locatorService");
         }
-        ShowLocatedAddress(candidates);
-    },
-    function (err) {
-        dojo.byId("imgSearchLoader").style.display = "none";
     });
 }
 
@@ -61,35 +69,61 @@ function ShowLocatedAddress(candidates) {
 
         //Filter and display valid address results according to locator settings in configuration file
         var counter = 0;
+        var validResult = true;
+        var searchFields = [];
+        for (var s in locatorSettings.LocatorFieldValues) {
+            searchFields.push(locatorSettings.LocatorFieldValues[s]);
+        }
+
+        searchFields.push(locatorSettings.CountyFields.LocatorFieldValue);
         for (var i in candidates) {
-            if (candidates[i].score > locatorSettings.AddressMatchScore) {
-                if (baseMapExtent.contains(candidates[i].location)) {
-                    for (j in locatorSettings.LocatorFieldValues) {
-                        if (candidates[i].attributes[locatorSettings.LocatorFieldName] == locatorSettings.LocatorFieldValues[j]) {
+            if (candidates[i].feature.attributes[locatorSettings.AddressMatchScore.Field] > locatorSettings.AddressMatchScore.Value) {
+                var locatePoint = new esri.geometry.Point(Number(candidates[i].feature.geometry.x), Number(candidates[i].feature.geometry.y), map.spatialReference);
+                for (j in searchFields) {
+                    if (candidates[i].feature.attributes[locatorSettings.LocatorFieldName] == searchFields[j]) {
+                        if (candidates[i].feature.attributes[locatorSettings.LocatorFieldName] == locatorSettings.CountyFields.LocatorFieldValue) {
+                            if (candidates[i].feature.attributes[locatorSettings.CountyFields.FieldName] != locatorSettings.CountyFields.Value) {
+                                validResult = false;
+                            }
+                            else {
+                                validResult = true;
+                            }
+                        }
+                        else {
+                            validResult = true;
+                        }
+                        if (validResult) {
                             counter++;
                             var candidate = candidates[i];
                             var tr = document.createElement("tr");
                             tBody.appendChild(tr);
                             var td1 = document.createElement("td");
-                            td1.innerHTML = dojo.string.substitute(locatorSettings.DisplayField, candidate.attributes);
+                            td1.innerHTML = dojo.string.substitute(locatorSettings.DisplayField, candidate.feature.attributes);
                             td1.align = "left";
                             td1.style.borderBottom = "black 1px solid";
-                            if (i % 2 != 0) {
-                                td1.className = "bottomborder listDarkColor";
-                            } else {
+
+                            if (counter % 2 != 0) {
                                 td1.className = "bottomborder listLightColor";
+                            } else {
+                                td1.className = "bottomborder listDarkColor";
                             }
                             td1.style.cursor = "pointer";
-                            td1.setAttribute("x", candidate.location.x);
-                            td1.setAttribute("y", candidate.location.y);
-                            td1.setAttribute("address", dojo.string.substitute(locatorSettings.DisplayField, candidate.attributes));
+                            td1.setAttribute("x", candidate.feature.geometry.x);
+                            td1.setAttribute("y", candidate.feature.geometry.y);
+                            td1.setAttribute("address", dojo.string.substitute(locatorSettings.DisplayField, candidate.feature.attributes));
+                            if (candidate.feature.attributes[locatorSettings.CountyFields.FieldName] == locatorSettings.CountyFields.Value) {
+                                td1.setAttribute("county", dojo.toJson(candidate.extent));
+                            }
+                            else {
+                                td1.setAttribute("county", null);
+                            }
                             td1.onclick = function () {
                                 dojo.byId("txtAddress").value = this.innerHTML;
                                 lastSearchString = dojo.byId("txtAddress").value.trim();
                                 dojo.byId('txtAddress').setAttribute("defaultAddress", this.innerHTML);
                                 mapPoint = new esri.geometry.Point(Number(this.getAttribute("x")), Number(this.getAttribute("y")), map.spatialReference);
                                 dojo.byId("txtAddress").setAttribute("defaultAddressTitle", this.innerHTML);
-                                LocateGraphicOnMap();
+                                LocateGraphicOnMap(this);
                                 dojo.byId("imgGeolocation").src = "images/imgGeolocation.png";
                             }
                             tr.appendChild(td1);
@@ -132,10 +166,36 @@ function LoctorErrBack(val) {
 }
 
 //Locate searched address on map with pushpin graphic
-function LocateGraphicOnMap() {
-    map.centerAndZoom(mapPoint, locatorSettings.ZoomLevel);
-    if (map.getLayer(tempGraphicsLayerId)) {
-        map.getLayer(tempGraphicsLayerId).clear();
+function LocateGraphicOnMap(evt) {
+    if (evt) {
+        if (evt.getAttribute("county") != "null") {
+            var countyExtent = dojo.fromJson(evt.getAttribute("county"));
+            var extent = new esri.geometry.Extent(parseFloat(countyExtent.xmin), parseFloat(countyExtent.ymin), parseFloat(countyExtent.xmax), parseFloat(countyExtent.ymax), map.spatialReference);
+        }
+    }
+    if (!tempMap) {
+        map.infoWindow.hide();
+        if (!countyExtent) {
+            map.centerAndZoom(mapPoint, locatorSettings.ZoomLevel);
+        }
+        else {
+            map.setExtent(extent.expand(1.75));
+        }
+        if (map.getLayer(tempGraphicsLayerId)) {
+            map.getLayer(tempGraphicsLayerId).clear();
+        }
+    }
+    else {
+        tempMap.infoWindow.hide();
+        if (!countyExtent) {
+            tempMap.centerAndZoom(mapPoint, locatorSettings.ZoomLevel);
+        }
+        else {
+            tempMap.setExtent(extent.expand(1.75));
+        }
+        if (tempMap.getLayer(temporaryGraphicsLayerId)) {
+            tempMap.getLayer(temporaryGraphicsLayerId).clear();
+        }
     }
 
     var symbol = new esri.symbol.PictureMarkerSymbol(locatorSettings.DefaultLocatorSymbol, locatorSettings.MarkupSymbolSize.width, locatorSettings.MarkupSymbolSize.height);
@@ -144,7 +204,7 @@ function LocateGraphicOnMap() {
     features.push(graphic);
     var featureSet = new esri.tasks.FeatureSet();
     featureSet.features = features;
-    var layer = map.getLayer(tempGraphicsLayerId);
+    var layer = (!tempMap) ? map.getLayer(tempGraphicsLayerId) : tempMap.getLayer(temporaryGraphicsLayerId);
     layer.add(featureSet.features[0]);
     HideProgressIndicator();
     HideContainer("locate");
@@ -166,14 +226,20 @@ function ShowMyLocation() {
         geometryService.project([graphicCollection], map.spatialReference, function (newPointCollection) {
             mapPoint = newPointCollection[0].getPoint(0);
             if (!(baseMapExtent.contains(mapPoint))) {
-                map.infoWindow.hide();
+                if (!tempMap) {
+                    map.infoWindow.hide();
+                    map.getLayer(tempGraphicsLayerId).clear();
+                }
+                else {
+                    tempMap.infoWindow.hide();
+                    tempMap.getLayer(temporaryGraphicsLayerId).clear();
+                }
                 mapPoint = null;
-                map.getLayer(tempGraphicsLayerId).clear();
                 HideProgressIndicator();
                 alert(messages.getElementsByTagName("geoLocation")[0].childNodes[0].nodeValue);
                 return;
             }
-            LocateGraphicOnMap();
+            LocateGraphicOnMap(false);
             HideProgressIndicator();
         });
     },

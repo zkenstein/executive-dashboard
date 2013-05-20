@@ -250,11 +250,23 @@ function GetBrowserMapExtent(mapPoint) {
     var width = map.extent.getWidth();
     var height = map.extent.getHeight();
     var xmin = mapPoint.x - (width / 2);
-    if (dojo.byId("divServiceDetails").style.display == "block") {
-        var ymin = mapPoint.y - (height / 2.5);
+    var ymin = mapPoint.y - (height / 1.5);
+    var xmax = xmin + width;
+    var ymax = ymin + height;
+    return new esri.geometry.Extent(xmin, ymin, xmax, ymax, map.spatialReference);
+}
+
+//Get the extent based on the map point
+function GetBrowserMapExtentforInfoWindow(mapPoint) {
+    var width = map.extent.getWidth();
+    var height = map.extent.getHeight();
+    var xmin;
+    if ((isTablet) && (window.matchMedia("(orientation: portrait)").matches)) {
+        xmin = mapPoint.x - (width / 4.5);
     } else {
-        var ymin = mapPoint.y - (height / 3);
+        xmin = mapPoint.x - (width / 2.5);
     }
+    var ymin = mapPoint.y - (height / 2);
     var xmax = xmin + width;
     var ymax = ymin + height;
     return new esri.geometry.Extent(xmin, ymin, xmax, ymax, map.spatialReference);
@@ -339,13 +351,46 @@ function orientationChanged() {
         if (dojo.byId("divSettingsContainer").style.display != "none") {
             SetSettingsHeight();
         }
-        if (selectedPoint) {
-            if (map) {
-                map.setExtent(GetBrowserMapExtent(selectedPoint));
-            }
+        if (map) {
+            dojo.byId("divTempMap").style.left = ((dojo.coords("mapContainer").w + (dojo.coords("holder").l)) - dojo.coords("divMap").w) + "px";
+            dojo.byId("divFrozen").style.height = (map.height - 140) + "px";
+
+            ResizeChartContainer();
+
+            dojo.byId("tdMapControls").style.width = ((window.matchMedia("(orientation: portrait)").matches) ? "300px" : "330px");
+            dojo.byId("tdMapButtons").style.width = ((window.matchMedia("(orientation: portrait)").matches) ? "300px" : "330px");
+
+            setTimeout(function () {
+                OrientationChangesforInfoWindow();
+            }, 500);
         }
         orientationChange = false;
     }, 500);
+}
+
+function OrientationChangesforInfoWindow() {
+    if (selectedPoint) {
+        (tempMap) ? tempMap.setExtent(GetBrowserMapExtent(selectedPoint)) : map.setExtent(GetBrowserMapExtent(selectedPoint));
+    }
+
+    if (selectedMapPoint) {
+        map.setExtent(GetBrowserMapExtentforInfoWindow(selectedMapPoint));
+        var point = selectedMapPoint;
+        map.infoWindow.hide();
+        setTimeout(function () {
+            map.infoWindow.show(point);
+            selectedMapPoint = point;
+        }, 500);
+    }
+    if (selectedTempPoint) {
+        tempMap.setExtent(GetBrowserMapExtentforInfoWindow(selectedTempPoint));
+        var tempPoint = selectedTempPoint;
+        tempMap.infoWindow.hide();
+        setTimeout(function () {
+            tempMap.infoWindow.show(tempPoint);
+            selectedTempPoint = tempPoint;
+        }, 500);
+    }
 }
 
 //Fade-out animation
@@ -432,22 +477,28 @@ function SlideLeft() {
 //Reset pod positions
 function ResetSlideControls() {
     dojo.byId("divServiceDetails").style.left = (dojo.coords("holder").l) + "px";
-
-    if (dojo.byId("carouselscroll").offsetWidth > (dojo.coords("divGroupHolder").w - 104)) {
-        dojo.byId("divServiceData").style.width = (dojo.coords("divGroupHolder").w - 104) + "px";
+    if (tempMap) {
+        dojo.byId("divServiceData").style.width = (dojo.coords("divGroupHolder").w / 2.5) + "px";
     }
     else {
-        dojo.byId("divServiceData").style.width = dojo.byId("carouselscroll").offsetWidth + "px";
+        if (dojo.byId("carouselscroll").offsetWidth > (dojo.coords("divGroupHolder").w - 104)) {
+            dojo.byId("divServiceData").style.width = (dojo.coords("divGroupHolder").w - 104) + "px";
+        }
+        else {
+            dojo.byId("divServiceData").style.width = dojo.byId("carouselscroll").offsetWidth + "px";
+        }
     }
     dojo.byId('carouselscroll').style.paddingLeft = "0px";
 
 
     if (newLeft > (dojo.byId("divServiceData").offsetWidth - dojo.byId("carouselscroll").offsetWidth)) {
-        dojo.byId('tdServiceRightArrow').style.width = "45px";
-        dojo.byId('tdServiceLeftArrow').style.width = "45px";
+        if (!tempMap) {
+            dojo.byId('tdServiceRightArrow').style.width = "45px";
+            dojo.byId('tdServiceLeftArrow').style.width = "45px";
 
-        dojo.byId('ServiceRightArrow').style.display = "block";
-        dojo.byId('ServiceRightArrow').style.cursor = "pointer";
+            dojo.byId('ServiceRightArrow').style.display = "block";
+            dojo.byId('ServiceRightArrow').style.cursor = "pointer";
+        }
     }
     else {
         if ((dojo.byId("ServiceLeftArrow").style.display == "none") && (dojo.byId("ServiceRightArrow").style.display == "none")) {
@@ -477,10 +528,12 @@ function ResetSlideControls() {
 
 //Reposition the pods based on number of metric pods available for a subject group
 function RepositionMetricPods() {
-    if (dojo.byId("divServiceData").offsetWidth - dojo.byId("carouselscroll").offsetWidth ==0) {
+    if (dojo.byId("divServiceData").offsetWidth - dojo.byId("carouselscroll").offsetWidth == 0) {
         if (dojo.byId('ServiceLeftArrow').style.display == "none" && dojo.byId('ServiceRightArrow').style.display == "none") {
             var cal = dojo.coords("divGroupHolder").w - dojo.byId("carouselscroll").offsetWidth;
-            dojo.byId('divServiceDetails').style.marginLeft = (cal / 2) + "px";
+            if (!tempMap) {
+                dojo.byId('divServiceDetails').style.marginLeft = (cal / 2) + "px";
+            }
         }
     }
     else {
@@ -550,7 +603,7 @@ function ReplaceDefaultText(e) {
 
 //Set target value for address
 function ResetTargetValue(target, title, color) {
-   if (target.value == '' && target.getAttribute(title)) {
+    if (target.value == '' && target.getAttribute(title)) {
         target.value = target.title;
         if (target.title == "") {
             target.value = target.getAttribute(title);

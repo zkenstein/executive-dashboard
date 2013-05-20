@@ -80,7 +80,7 @@ body,html
 {
     color: #ffffff;
     position: absolute;
-    z-index: 1005;
+    z-index: 1004;
     overflow: hidden;
     -webkit-transition: top 0.5s ease-in;
     -moz-transition: top 0.5s ease-in;
@@ -161,7 +161,7 @@ body,html
    position: absolute;
    height: 60px;
    width: 100%;
-   z-index: 1005;
+   z-index: 1006;
    overflow: hidden;
 }
 .lblAppName
@@ -210,6 +210,15 @@ body,html
 {
     width:100%;
     height:100%;
+}
+.divFrozen
+{
+    position:absolute;
+    left:0px;
+    top:60px;
+    background: rgba(0,0,0,0.30);
+    width: 100%;
+    z-index: 2500;
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -498,7 +507,7 @@ body,html
 
 .divBookmarkContent,.divAddressContent
 {
-    z-index: 1100;
+    z-index: 2600;
     position:absolute;
     top: 65px;
     width: 300px;
@@ -553,7 +562,7 @@ body,html
 {
     bottom: 80px;
     position: absolute;
-    z-index: 1005;
+    z-index: 1004;
     text-align: middle;
 }
 
@@ -607,6 +616,7 @@ body,html
     left:0px;
     width:100%;
     height:80px;
+    z-index:1006;
 }
 
 .tdBreak
@@ -685,11 +695,6 @@ body,html
 .claro .dijitTooltip
 {
     z-index:2200 !important;
-}
-
-.esriPopup
-{
-    z-index:2100 !important;
 }
 
 .esriPopup .titleButton
@@ -855,11 +860,10 @@ body,html
 
 .divGraphComponent
 {
-    width: 380px;
     height: 300px;
-    z-index: 1100 !important;
+    z-index: 2600 !important;
     top: 59px;
-    background-color: #000000;
+    background: rgba(0,0,0,0.60);
     position:absolute;
     right:15px;
     -moz-border-radius: 0px 0px 0px 10px;
@@ -899,7 +903,7 @@ body,html
     top: 90px !important;
 }
 
-.esriLogo
+.esriControlsBR
 {
     bottom:80px !important;
     z-index:999 !important;
@@ -932,3 +936,5 @@ body,html
     display: none;
     cursor: default;
 }
+
+

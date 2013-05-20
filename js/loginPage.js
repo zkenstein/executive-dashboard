@@ -21,7 +21,6 @@ dojo.require("dojox.charting.Chart2D");
 dojo.require("dojox.charting.themes.RoyalPurples");
 dojo.require("esri.map");
 dojo.require("esri.layers.FeatureLayer");
-dojo.require("esri.tasks.locator");
 dojo.require("esri.tasks.geometry");
 dojo.require("esri.arcgis.utils");
 dojo.require("esri.arcgis.Portal");
@@ -50,6 +49,7 @@ var showNullValueAs; //variable for storing values to be shown for null values
 var startExtent; //variable for storing the default extent
 var statisticsKeyword; // variable for identifying statistics layer
 var tempGraphicsLayerId = 'tempGraphicsLayerID';  //variable to store graphics layer ID
+var temporaryGraphicsLayerId = 'temporaryGraphicsLayerId'; //variable to store graphics layer ID for temporary map
 var twitterDetails; //variable for storing twitter link and fields
 var podInformation; //variable for storing information of pods
 var welcomeScreenImages; //variable for storing images for welcome screen
@@ -122,11 +122,17 @@ function Init() {
                 if (map) {
                     if (dojo.byId("map").style.display != "none") {
                         dojo.byId('map').style.marginLeft = (dojo.coords("holder").l) + "px";
+                        dojo.byId('divFrozen').style.marginLeft = (dojo.coords("holder").l) + "px";
                         dojo.byId('showHide').style.right = (dojo.coords("holder").l + 15) + "px";
                         ToggleContainers();
-                        ResetSlideControls();
                         map.reposition();
                         map.resize();
+                        ResetSlideControls();
+                        dojo.byId("divTempMap").style.left = ((dojo.coords("mapContainer").w + (dojo.coords("holder").l)) - dojo.coords("divMap").w) + "px";
+                        setTimeout(function () {
+                            dojo.byId("divFrozen").style.height = (map.height - 140) + "px";
+                        }, 500);
+                        ResizeChartContainer();
                     }
                 }
             });
@@ -141,6 +147,8 @@ function Init() {
 
             if (isTablet) {
                 SetLoginPageHeight();
+                dojo.byId("tdMapControls").style.width = ((window.matchMedia("(orientation: portrait)").matches) ? "300px" : "330px");
+                dojo.byId("tdMapButtons").style.width = ((window.matchMedia("(orientation: portrait)").matches) ? "300px" : "330px");
             }
 
             // Read config.js file to set appropriate values
@@ -148,6 +156,7 @@ function Init() {
             dojo.byId("lblAppName").innerHTML = responseObject.ApplicationName.trimString(19);
             dojo.byId("lblAppName").title = responseObject.ApplicationName;
             dojo.byId("divWelcomeContent").innerHTML = responseObject.WelcomeScreenMessage;
+            dojo.byId("tdSearchHeader").innerHTML = responseObject.LocatorSettings.DisplayText;
             welcomeScreenImages = responseObject.WelcomeScreenImages;
             authenticatedGroup = responseObject.AuthenticatedGroup;
             authenticatedLinks = responseObject.AuthenticatedLinks;
@@ -330,6 +339,7 @@ function FindArcGISGroup() {
             url: userGroupLink,
             callbackParamName: "callback",
             load: function (groupdata) {
+                var compareWebmaps = [];
                 for (var t = 0; t < groupdata.items.length; t++) {
                     for (var u = 0; u < groupdata.items[t].tags.length; u++) {
                         if (groupdata.items[t].tags[u] != baseMapLayer[0].MapValue) {
@@ -341,6 +351,11 @@ function FindArcGISGroup() {
                                     arrSubjectGroups[groupdata.items[t].tags[u]] = [];
                                     arrSubjectGroups[groupdata.items[t].tags[u]].push({ "webMapId": groupdata.items[t].id, "title": groupdata.items[t].title, "tags": groupdata.items[t].tags });
                                 }
+                            }
+                        }
+                        else {
+                            if (groupdata.items[t].tags[u] == "Compare") {
+                                compareWebmaps.push(groupdata.items[t].id);
                             }
                         }
                     }
@@ -362,6 +377,7 @@ function FindArcGISGroup() {
                 var responseCounter = 0;
                 var keyIndicators = [];
                 var indicatorState = [];
+
                 for (var p in orderedLayer) {
                     for (var g in orderedLayer[p]) {
                         for (var h in orderedLayer[p][g].tags) {
@@ -372,6 +388,7 @@ function FindArcGISGroup() {
                                         slider: false
                                     }
                                 });
+                                dojo.byId("imgResize").setAttribute("webmapID", orderedLayer[p][g].webMapId);
                                 mapDeferred.addCallback(function (response) {
                                     map = response.map;
                                     map.destroy();
@@ -390,9 +407,16 @@ function FindArcGISGroup() {
                                 });
                                 break;
                             }
+                            else if (orderedLayer[p][g].tags[h] == "Compare") {
+                                compareWebmaps.push(orderedLayer[p][g].webMapId);
+                            }
                         }
                     }
                 }
+                if (compareWebmaps.length > 0) {
+                    dojo.byId("imgResize").setAttribute("compareId", dojo.toJson(compareWebmaps));
+                }
+
                 //Display News and Events panel when none groups have key indicator
                 if (keyCounter == 0) {
                     CreateLayerPods(orderedLayer, data.token, groupdata, null);
@@ -455,6 +479,7 @@ function CreateBasemap(orderedLayer, groupdata, data) {
                         slider: false
                     }
                 });
+                dojo.byId("imgResize").setAttribute("webmapID", groupdata.items[q].id);
                 webmapDetails.addCallback(function (response) {
                     map = response.map;
                     map.destroy();
@@ -473,6 +498,7 @@ function CreateBasemap(orderedLayer, groupdata, data) {
                     dojo.replaceClass("divGraphComponent", "hideContainerHeight", "showContainerHeight");
                     dojo.byId('divGraphComponent').style.height = '0px';
                     dojo.byId('showHide').style.top = '59px';
+                    dojo.byId("divGraphHeader").style.display = "none";
                     dojo.byId("divGraphHeader").style.color = "gray";
                     dojo.byId("divGraphHeader").setAttribute("state", "disabled");
                     dojo.byId("divGraphHeader").style.cursor = "default";
@@ -559,6 +585,7 @@ function PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer,
                 queryCounty.where = "1=1";
                 queryCounty.returnGeometry = false;
                 queryCounty.outFields = ["*"];
+                queryCounty.outSpatialReference = map.spatialReference;
                 queryCounty.spatialRelationship = esri.tasks.Query.SPATIAL_REL_WITHIN;
                 queryTask.execute(queryCounty, function (featureSet) {
                     indicatorState.push({ key: keyIndicators[val].key, value: featureSet.features[0].attributes });

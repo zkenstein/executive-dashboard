@@ -177,7 +177,7 @@ body
 
 @media screen and (min-width: 1024px)
 {
-    .tblLoginScreenContainer,.tblApplicationHeader,.tblMapApplicationHeader,.tblInfoContainer,.imgMap,.tblBookmark,.tblSettingsContainer,.tblBottomContainer
+    .tblLoginScreenContainer,.tblApplicationHeader,.tblMapApplicationHeader,.tblInfoContainer,.tblBookmark,.tblSettingsContainer,.tblBottomContainer,.mapContainer
     {
         width:75% !important;
     }

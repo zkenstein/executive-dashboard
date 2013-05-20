@@ -83,7 +83,7 @@ dojo.declare("js.config", null, {
     AuthenticatedLinks: "http://www.arcgis.com/sharing/rest/content/groups/${0}?f=json&token=${0}",
 
     //Authenticated group id for dashboard group.
-    AuthenticatedGroup: "9c63fc64e30c4c57a3b34c4b8a3da56e",
+    AuthenticatedGroup: "4cd8df6c536347399d67314a89117f4f",
 
     //Title for bookmarks header
     BookmarkHeader: "Bookmarks",
@@ -102,17 +102,20 @@ dojo.declare("js.config", null, {
 
     //Set locator settings
     LocatorSettings: {
+        DisplayText: "Search by Address or County",
         DefaultLocatorSymbol: "images/RedPushpin.png",
         MarkupSymbolSize: { width: 35, height: 35 },
-        DefaultValue: "139 W Porter Ave Naperville IL 60540",
-        LocatorParamaters: ["SingleLine"],
-        LocatorURL: "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
-        CandidateFields: "Loc_name, Score, Match_addr",
+        DefaultValue: "1848 N Mill St Naperville IL 60563",
+        LocatorParamaters: { SearchField: "text", SearchResultField: "outFields", SearchCountField: "maxLocations", SearchBoundaryField: "bbox", SpatialReferenceField: "outSR" },
+        LocatorURL: "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find",
+        CandidateFields: "Addr_type,Type,Score, Match_addr",
         DisplayField: "${Match_addr}",
         ZoomLevel: 14,
-        AddressMatchScore: 80,
-        LocatorFieldName: 'Loc_name',
-        LocatorFieldValues: ["USA.StreetName" , "USA.PointAddress", "USA.StreetAddress"]
+        AddressMatchScore: { Field: "Score", Value: 80 },
+        LocatorFieldName: 'Addr_type',
+        LocatorFieldValues: ["StreetAddress", "StreetName", "PointAddress"],
+        CountyFields: { LocatorFieldValue: 'POI', FieldName: 'Type', Value: 'county' },
+        MaxResults: 100
     },
 
     //Fields for RSS Feed.
@@ -120,7 +123,7 @@ dojo.declare("js.config", null, {
 
     //Link and fields for twitter trend.
     TwitterDetails: [
-    { SearchURL: "https://api.twitter.com/1.1/search/tweets.json",StatusField:"statuses" },
+    { SearchURL: "https://api.twitter.com/1.1/search/tweets.json", StatusField: "statuses" },
     { TitleFields: ["user", "name"] },
     { DescriptionField: "text" },
     { StatusURL: "https://twitter.com/${0}/statuses", StatusFields: ["user", "screen_name"], StatusId: "id_str" }
@@ -128,8 +131,8 @@ dojo.declare("js.config", null, {
 
     //Default values to set the RSS Feed and Twitter trend.
     DefaultNewsFields: [
-    { RSSFeedName: "Chicago Tribune", RSSFeedURL: "http://feeds.chicagotribune.com/chicagotribune/news/" },
-    { TwitterTrendName: "NapervilleIL" }
+    { RSSFeedName: "Florida Local News", RSSFeedURL: "http://www.floridapsc.com/home/news/newsrss.ashx" },
+    { TwitterTrendName: "Florida" }
     ],
 
     //Set headers and Images for the welcome screen.
@@ -141,28 +144,23 @@ dojo.declare("js.config", null, {
 
     //Layer Images for the subject groups.
     LayerImages: [
-          { Tag: "Public Safety", Images: ["images/safety.png", "images/safety_hover.png"], isPodVisible: true },
-          { Tag: "City Services", Images: ["images/city.png", "images/city_hover.png"], isPodVisible: true },
-          { Tag: "Health", Images: ["images/transport.png", "images/transport_hover.png"], isPodVisible: true },
-          { Tag: "Violations", Images: ["images/capital.png", "images/capital_hover.png"], isPodVisible: true },
-          { Tag: "Utilities", Images: ["images/water.png", "images/water_hover.png"], isPodVisible: true },
-          { Tag: "Construction Activity", Images: ["images/capital.png", "images/capital_hover.png"] },
-          { Tag: "Public Notices", Images: ["images/safety.png", "images/safety_hover.png"] },
-          { Tag: "Special Events", Images: ["images/special_events.png", "images/special_events_hover.png"] }
-       ],
-
+          { Tag: "Employment", Images: ["images/employment.png", "images/employment-hover.png"], isPodVisible: true },
+          { Tag: "Growth", Images: ["images/growth.png", "images/growth_hover.png"], isPodVisible: true },
+          { Tag: "Health", Images: ["images/health.png", "images/health_hover.png"], isPodVisible: true },
+          { Tag: "Indicator", Images: ["images/indicators.png", "images/indicators-hover.png"], isPodVisible: true }
+    ],
 
     //Specify fields for the Metric pods.
     InfoPodStatics: [
-    { CurrentObservation: "${OBSERVCURR}", LatestObservation: "${OBSERV1}", PreviousObservations: ["${OBSERV2}", "${OBSERV3}", "${OBSERV4}"], StaticsPosition: "${INCREASEPOS}" },
-    { DateObservations: ["${DATECURR}", "${DATE1}", "${DATE2}", "${DATE3}", "${DATE4}"], DatePattern: "MMM-dd" }
+    { CurrentObservation: "${OBSERVCURR}", LatestObservation: "${OBSERV3}", PreviousObservations: ["${OBSERV2}", "${OBSERV1}"], StatisticsPosition: "${INCREASEPOS}" },
+    { DateObservations: ["${DATECURR}", "${DATE3}", "${DATE2}", "${DATE1}"], DatePattern: "MMM dd, yyyy" }
     ],
 
     //Update information for info pods.
     PodInformation: "This report was updated on ${LASTUPDATE} and includes data from ${STARTDATE} to ${ENDDATE}.",
 
     //Keyword to detect the statistics layer.
-    StatisticsKeyword: "Stats",
+    StatisticsKeyword: "- Stats",
 
     // ------------------------------------------------------------------------------------------------------------------------
     // SETTINGS FOR MAP SHARING

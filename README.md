@@ -1,10 +1,12 @@
 # executive-dashboard
 
-The Executive Dashboard is a configuration of ArcGIS Online and a HTML 5 / JavaScript application used by local government leaders to proactively view critical metrics, identify trends, raise questions, and devise new management strategies.  It supports community-wide efforts to increase accountability and transparency within government and with the citizens they serve.   The Dashboard is a single application that can be deployed by local governments and used by decision-makers on a tablet device and desktop PC.
+The Executive Dashboard is a configuration of ArcGIS Online and a HTML 5 / JavaScript application used by government leaders to proactively view critical metrics, identify trends, raise questions, and devise new management strategies.  It supports community-wide efforts to increase accountability and transparency within government and with the citizens they serve.   The Dashboard is a single application that can be deployed by  governments and used by decision-makers on a tablet device and desktop PC.
 
 [Try the Executive Dashboard application](http://localgovtemplates2.esri.com/ExecutiveDashboardTryItLive/)
 
-[![Image of Executive Dashboard application](https://raw.github.com/Esri/executive-dashboard/master/executive-dashboard.png "Executive Dashboard application")](http://localgovtemplates2.esri.com/ExecutiveDashboardTryItLive/)
+[![Image of Local Government Executive Dashboard application](https://raw.github.com/Esri/executive-dashboard/master/executive-dashboard.png "Executive Dashboard application")](http://localgovtemplates2.esri.com/ExecutiveDashboardTryItLive/)
+
+[![Image of Local Government Executive Dashboard application](https://raw.github.com/Esri/executive-dashboard/master/state-governmentexecdashboard.png "Executive Dashboard application")](http://localgovtemplates2.esri.com/ExecutiveDashboardTryItLive/)
 
 ## Features
 
@@ -40,7 +42,7 @@ decide.
 * ArcGIS Online
 * ArcGIS for Desktop 10.1 - Standard or Advanced - [About](http://www.esri.com/software/arcgis/arcgis-for-desktop)
 * ArcGIS for Server 10.1 - Standard or Advanced - [About](http://www.esri.com/software/arcgis/arcgisserver)
-* Local Government Information Model - [About](http://www.arcgis.com/home/item.html?id=5f799e6d23d94e25b5aaaf2a58e63fb1)
+* Local Government Information Model for Local Government Implementations - [About](http://www.arcgis.com/home/item.html?id=5f799e6d23d94e25b5aaaf2a58e63fb1)
 * Microsoft ASP.NET Framework 4.0 available from the [Microsoft website](http://www.microsoft.com/en-us/download/details.aspx?id=17851)
 
 ## Resources
@@ -48,6 +50,8 @@ decide.
 Learn more about Esri's [ArcGIS for Local Government maps and apps](http://resources.arcgis.com/en/communities/local-government/).
 
 Show me a list of other [Local Government GitHub repositories](http://esri.github.io/#Local-Government).
+
+Learn more about Esri's [ArcGIS for State Government maps and apps](http://resources.arcgis.com/en/communities/state-government/).
 
 Additional [information and sample data](http://www.arcgis.com/home/item.html?id=9c31136ff6f54dfb90edbc74f08573ed)
 are available for the application.
@@ -83,5 +87,5 @@ limitations under the License.
 A copy of the license is available in the repository's
 [license.txt](https://raw.github.com/Esri/executive-dashboard/master/license.txt) file.
 
-[](Esri Tags: Local-Government Local Government Executive Dashboard)
+[](Esri Tags: Local-Government Local Government State-Government State Government Executive Dashboard)
 [](Esri Language: JavaScript)

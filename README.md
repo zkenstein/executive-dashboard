@@ -6,7 +6,7 @@ The Executive Dashboard is a configuration of ArcGIS Online and a HTML 5 / JavaS
 
 [![Image of Local Government Executive Dashboard application](https://raw.github.com/Esri/executive-dashboard/master/executive-dashboard.png "Executive Dashboard application")](http://localgovtemplates2.esri.com/ExecutiveDashboardTryItLive/)
 
-[![Image of State Government Executive Dashboard application](https://raw.github.com/Esri/executive-dashboard/master/state-governmentexecdashboard.png "Executive Dashboard application")]
+[![Image of State Government Executive Dashboard application](https://raw.github.com/Esri/executive-dashboard/tree/state_adaptation/stategovernment-execdashboard.png "Executive Dashboard application")]
 
 ## Features
 

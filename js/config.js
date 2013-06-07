@@ -1,4 +1,5 @@
-﻿/** @license
+﻿/*global dojo */
+/** @license
  | Version 10.2
  | Copyright 2012 Esri
  |
@@ -72,12 +73,9 @@ dojo.declare("js.config", null, {
     HelpURL: "help.htm",
 
     //Set baseMap layer value.
-    BaseMapLayer:
-          [
-          {
-              MapValue: "Basemap"
-          }
-          ],
+    BaseMapLayer: [{
+        MapValue: "Basemap"
+    }],
 
     //Authenticated links to generate tokens with the credentials.
     AuthenticatedLinks: "http://www.arcgis.com/sharing/rest/content/groups/${0}?f=json&token=${0}",
@@ -104,17 +102,33 @@ dojo.declare("js.config", null, {
     LocatorSettings: {
         DisplayText: "Search by Address or County",
         DefaultLocatorSymbol: "images/RedPushpin.png",
-        MarkupSymbolSize: { width: 35, height: 35 },
+        MarkupSymbolSize: {
+            width: 35,
+            height: 35
+        },
         DefaultValue: "1848 N Mill St Naperville IL 60563",
-        LocatorParamaters: { SearchField: "text", SearchResultField: "outFields", SearchCountField: "maxLocations", SearchBoundaryField: "bbox", SpatialReferenceField: "outSR" },
+        LocatorParamaters: {
+            SearchField: "text",
+            SearchResultField: "outFields",
+            SearchCountField: "maxLocations",
+            SearchBoundaryField: "bbox",
+            SpatialReferenceField: "outSR"
+        },
         LocatorURL: "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find",
         CandidateFields: "Addr_type,Type,Score, Match_addr",
         DisplayField: "${Match_addr}",
         ZoomLevel: 14,
-        AddressMatchScore: { Field: "Score", Value: 80 },
+        AddressMatchScore: {
+            Field: "Score",
+            Value: 80
+        },
         LocatorFieldName: 'Addr_type',
         LocatorFieldValues: ["StreetAddress", "StreetName", "PointAddress"],
-        CountyFields: { LocatorFieldValue: 'POI', FieldName: 'Type', Value: 'county' },
+        CountyFields: {
+            LocatorFieldValue: 'POI',
+            FieldName: 'Type',
+            Value: 'county'
+        },
         MaxResults: 100
     },
 
@@ -122,39 +136,68 @@ dojo.declare("js.config", null, {
     RSSFields: ["item", "title", "link", "description"],
 
     //Link and fields for twitter trend.
-    TwitterDetails: [
-    { SearchURL: "https://api.twitter.com/1.1/search/tweets.json", StatusField: "statuses" },
-    { TitleFields: ["user", "name"] },
-    { DescriptionField: "text" },
-    { StatusURL: "https://twitter.com/${0}/statuses", StatusFields: ["user", "screen_name"], StatusId: "id_str" }
-    ],
+    TwitterDetails: [{
+        SearchURL: "https://api.twitter.com/1.1/search/tweets.json",
+        StatusField: "statuses"
+    }, {
+        TitleFields: ["user", "name"]
+    }, {
+        DescriptionField: "text"
+    }, {
+        StatusURL: "https://twitter.com/${0}/statuses",
+        StatusFields: ["user", "screen_name"],
+        StatusId: "id_str"
+    }],
 
     //Default values to set the RSS Feed and Twitter trend.
-    DefaultNewsFields: [
-    { RSSFeedName: "Florida Local News", RSSFeedURL: "http://www.floridapsc.com/home/news/newsrss.ashx" },
-    { TwitterTrendName: "Florida" }
-    ],
+    DefaultNewsFields: [{
+        RSSFeedName: "Florida Local News",
+        RSSFeedURL: "http://www.floridapsc.com/home/news/newsrss.ashx"
+    }, {
+        TwitterTrendName: "Florida"
+    }],
 
     //Set headers and Images for the welcome screen.
-    WelcomeScreenImages: [
-    { Name: "Efficient Transportation", Image: "images/b1.png" },
-    { Name: "Quality Education", Image: "images/b2.png" },
-    { Name: "Vibrant Downtown", Image: "images/b3.png" }
-    ],
+    WelcomeScreenImages: [{
+        Name: "Efficient Transportation",
+        Image: "images/b1.png"
+    }, {
+        Name: "Quality Education",
+        Image: "images/b2.png"
+    }, {
+        Name: "Vibrant Downtown",
+        Image: "images/b3.png"
+    }],
 
     //Layer Images for the subject groups.
-    LayerImages: [
-          { Tag: "Employment", Images: ["images/employment.png", "images/employment-hover.png"], isPodVisible: true },
-          { Tag: "Growth", Images: ["images/growth.png", "images/growth_hover.png"], isPodVisible: true },
-          { Tag: "Health", Images: ["images/health.png", "images/health_hover.png"], isPodVisible: true },
-          { Tag: "Indicator", Images: ["images/indicators.png", "images/indicators-hover.png"], isPodVisible: true }
-    ],
+    LayerImages: [{
+        Tag: "Employment",
+        Images: ["images/employment.png", "images/employment-hover.png"],
+        isPodVisible: true
+    }, {
+        Tag: "Growth",
+        Images: ["images/growth.png", "images/growth_hover.png"],
+        isPodVisible: true
+    }, {
+        Tag: "Health",
+        Images: ["images/health.png", "images/health_hover.png"],
+        isPodVisible: true
+    }, {
+        Tag: "Indicator",
+        Images: ["images/indicators.png", "images/indicators-hover.png"],
+        isPodVisible: true
+    }],
 
     //Specify fields for the Metric pods.
-    InfoPodStatics: [
-    { CurrentObservation: "${OBSERVCURR}", LatestObservation: "${OBSERV3}", PreviousObservations: ["${OBSERV2}", "${OBSERV1}"], StatisticsPosition: "${INCREASEPOS}" },
-    { DateObservations: ["${DATECURR}", "${DATE3}", "${DATE2}", "${DATE1}"], DatePattern: "MMM dd, yyyy" }
-    ],
+    InfoPodStatics: [{
+        CurrentObservation: "${OBSERVCURR}",
+        LatestObservation: "${OBSERV3}",
+        PreviousObservations: ["${OBSERV2}", "${OBSERV1}"],
+        StatisticsPosition: "${INCREASEPOS}"
+    }, {
+        DateObservations: ["${DATECURR}", "${DATE3}", "${DATE2}", "${DATE1}"],
+        DatePattern: "MMM dd, yyyy"
+    }],
 
     //Update information for info pods.
     PodInformation: "This report was updated on ${LASTUPDATE} and includes data from ${STARTDATE} to ${ENDDATE}.",
@@ -166,11 +209,10 @@ dojo.declare("js.config", null, {
     // SETTINGS FOR MAP SHARING
     // ------------------------------------------------------------------------------------------------------------------------
     // Set URL for TinyURL service, and URLs for Email.
-    MapSharingOptions:
-          {
-              TinyURLServiceURL: "http://api.bit.ly/v3/shorten?login=esri&apiKey=R_65fd9891cd882e2a96b99d4bda1be00e&uri=${0}&format=json",
-              TinyURLResponseAttribute: "data.url",
-              ShareByMailLink: "mailto:%20?subject=Note%20from%20my%20Executive%20Dashboard&body=${0}"
-          }
+    MapSharingOptions: {
+        TinyURLServiceURL: "http://api.bit.ly/v3/shorten?login=esri&apiKey=R_65fd9891cd882e2a96b99d4bda1be00e&uri=${0}&format=json",
+        TinyURLResponseAttribute: "data.url",
+        ShareByMailLink: "mailto:%20?subject=Note%20from%20my%20Executive%20Dashboard&body=${0}"
+    }
 
 });

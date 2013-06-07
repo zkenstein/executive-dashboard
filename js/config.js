@@ -1,4 +1,5 @@
-﻿/** @license
+﻿/*global dojo */
+/** @license
  | Version 10.2
  | Copyright 2012 Esri
  |
@@ -72,12 +73,9 @@ dojo.declare("js.config", null, {
     HelpURL: "help.htm",
 
     //Set baseMap layer value.
-    BaseMapLayer:
-          [
-          {
-              MapValue: "Basemap"
-          }
-          ],
+    BaseMapLayer: [{
+        MapValue: "Basemap"
+    }],
 
     //Authenticated links to generate tokens with the credentials.
     AuthenticatedLinks: "http://www.arcgis.com/sharing/rest/content/groups/${0}?f=json&token=${0}",
@@ -103,7 +101,10 @@ dojo.declare("js.config", null, {
     //Set locator settings
     LocatorSettings: {
         DefaultLocatorSymbol: "images/RedPushpin.png",
-        MarkupSymbolSize: { width: 35, height: 35 },
+        MarkupSymbolSize: {
+            width: 35,
+            height: 35
+        },
         DefaultValue: "139 W Porter Ave Naperville IL 60540",
         LocatorParamaters: ["SingleLine"],
         LocatorURL: "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
@@ -112,51 +113,88 @@ dojo.declare("js.config", null, {
         ZoomLevel: 14,
         AddressMatchScore: 80,
         LocatorFieldName: 'Loc_name',
-        LocatorFieldValues: ["USA.StreetName" , "USA.PointAddress", "USA.StreetAddress"]
+        LocatorFieldValues: ["USA.StreetName", "USA.PointAddress", "USA.StreetAddress"]
     },
 
     //Fields for RSS Feed.
     RSSFields: ["item", "title", "link", "description"],
 
     //Link and fields for twitter trend.
-    TwitterDetails: [
-    { SearchURL: "https://api.twitter.com/1.1/search/tweets.json",StatusField:"statuses" },
-    { TitleFields: ["user", "name"] },
-    { DescriptionField: "text" },
-    { StatusURL: "https://twitter.com/${0}/statuses", StatusFields: ["user", "screen_name"], StatusId: "id_str" }
-    ],
+    TwitterDetails: [{
+        SearchURL: "https://api.twitter.com/1.1/search/tweets.json",
+        StatusField: "statuses"
+    }, {
+        TitleFields: ["user", "name"]
+    }, {
+        DescriptionField: "text"
+    }, {
+        StatusURL: "https://twitter.com/${0}/statuses",
+        StatusFields: ["user", "screen_name"],
+        StatusId: "id_str"
+    }],
 
     //Default values to set the RSS Feed and Twitter trend.
-    DefaultNewsFields: [
-    { RSSFeedName: "Chicago Tribune", RSSFeedURL: "http://feeds.chicagotribune.com/chicagotribune/news/" },
-    { TwitterTrendName: "NapervilleIL" }
-    ],
+    DefaultNewsFields: [{
+        RSSFeedName: "Chicago Tribune",
+        RSSFeedURL: "http://feeds.chicagotribune.com/chicagotribune/news/"
+    }, {
+        TwitterTrendName: "NapervilleIL"
+    }],
 
     //Set headers and Images for the welcome screen.
-    WelcomeScreenImages: [
-    { Name: "Efficient Transportation", Image: "images/b1.png" },
-    { Name: "Quality Education", Image: "images/b2.png" },
-    { Name: "Vibrant Downtown", Image: "images/b3.png" }
-    ],
+    WelcomeScreenImages: [{
+        Name: "Efficient Transportation",
+        Image: "images/b1.png"
+    }, {
+        Name: "Quality Education",
+        Image: "images/b2.png"
+    }, {
+        Name: "Vibrant Downtown",
+        Image: "images/b3.png"
+    }],
 
     //Layer Images for the subject groups.
-    LayerImages: [
-          { Tag: "Public Safety", Images: ["images/safety.png", "images/safety_hover.png"], isPodVisible: true },
-          { Tag: "City Services", Images: ["images/city.png", "images/city_hover.png"], isPodVisible: true },
-          { Tag: "Health", Images: ["images/transport.png", "images/transport_hover.png"], isPodVisible: true },
-          { Tag: "Violations", Images: ["images/capital.png", "images/capital_hover.png"], isPodVisible: true },
-          { Tag: "Utilities", Images: ["images/water.png", "images/water_hover.png"], isPodVisible: true },
-          { Tag: "Construction Activity", Images: ["images/capital.png", "images/capital_hover.png"] },
-          { Tag: "Public Notices", Images: ["images/safety.png", "images/safety_hover.png"] },
-          { Tag: "Special Events", Images: ["images/special_events.png", "images/special_events_hover.png"] }
-       ],
-
+    LayerImages: [{
+        Tag: "Public Safety",
+        Images: ["images/safety.png", "images/safety_hover.png"],
+        isPodVisible: true
+    }, {
+        Tag: "City Services",
+        Images: ["images/city.png", "images/city_hover.png"],
+        isPodVisible: true
+    }, {
+        Tag: "Health",
+        Images: ["images/transport.png", "images/transport_hover.png"],
+        isPodVisible: true
+    }, {
+        Tag: "Violations",
+        Images: ["images/capital.png", "images/capital_hover.png"],
+        isPodVisible: true
+    }, {
+        Tag: "Utilities",
+        Images: ["images/water.png", "images/water_hover.png"],
+        isPodVisible: true
+    }, {
+        Tag: "Construction Activity",
+        Images: ["images/capital.png", "images/capital_hover.png"]
+    }, {
+        Tag: "Public Notices",
+        Images: ["images/safety.png", "images/safety_hover.png"]
+    }, {
+        Tag: "Special Events",
+        Images: ["images/special_events.png", "images/special_events_hover.png"]
+    }],
 
     //Specify fields for the Metric pods.
-    InfoPodStatics: [
-    { CurrentObservation: "${OBSERVCURR}", LatestObservation: "${OBSERV1}", PreviousObservations: ["${OBSERV2}", "${OBSERV3}", "${OBSERV4}"], StaticsPosition: "${INCREASEPOS}" },
-    { DateObservations: ["${DATECURR}", "${DATE1}", "${DATE2}", "${DATE3}", "${DATE4}"], DatePattern: "MMM-dd" }
-    ],
+    InfoPodStatics: [{
+        CurrentObservation: "${OBSERVCURR}",
+        LatestObservation: "${OBSERV1}",
+        PreviousObservations: ["${OBSERV2}", "${OBSERV3}", "${OBSERV4}"],
+        StaticsPosition: "${INCREASEPOS}"
+    }, {
+        DateObservations: ["${DATECURR}", "${DATE1}", "${DATE2}", "${DATE3}", "${DATE4}"],
+        DatePattern: "MMM-dd"
+    }],
 
     //Update information for info pods.
     PodInformation: "This report was updated on ${LASTUPDATE} and includes data from ${STARTDATE} to ${ENDDATE}.",
@@ -168,11 +206,10 @@ dojo.declare("js.config", null, {
     // SETTINGS FOR MAP SHARING
     // ------------------------------------------------------------------------------------------------------------------------
     // Set URL for TinyURL service, and URLs for Email.
-    MapSharingOptions:
-          {
-              TinyURLServiceURL: "http://api.bit.ly/v3/shorten?login=esri&apiKey=R_65fd9891cd882e2a96b99d4bda1be00e&uri=${0}&format=json",
-              TinyURLResponseAttribute: "data.url",
-              ShareByMailLink: "mailto:%20?subject=Note%20from%20my%20Executive%20Dashboard&body=${0}"
-          }
+    MapSharingOptions: {
+        TinyURLServiceURL: "http://api.bit.ly/v3/shorten?login=esri&apiKey=R_65fd9891cd882e2a96b99d4bda1be00e&uri=${0}&format=json",
+        TinyURLResponseAttribute: "data.url",
+        ShareByMailLink: "mailto:%20?subject=Note%20from%20my%20Executive%20Dashboard&body=${0}"
+    }
 
 });

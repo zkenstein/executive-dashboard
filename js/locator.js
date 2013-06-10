@@ -1,19 +1,19 @@
 ﻿/** @license
- | Version 10.2
- | Copyright 2013 Esri
- |
- | Licensed under the Apache License, Version 2.0 (the "License");
- | you may not use this file except in compliance with the License.
- | You may obtain a copy of the License at
- |
- |    http://www.apache.org/licenses/LICENSE-2.0
- |
- | Unless required by applicable law or agreed to in writing, software
- | distributed under the License is distributed on an "AS IS" BASIS,
- | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- | See the License for the specific language governing permissions and
- | limitations under the License.
- */
+| Version 10.2
+| Copyright 2012 Esri
+|
+| Licensed under the Apache License, Version 2.0 (the "License");
+| you may not use this file except in compliance with the License.
+| You may obtain a copy of the License at
+|
+|    http://www.apache.org/licenses/LICENSE-2.0
+|
+| Unless required by applicable law or agreed to in writing, software
+| distributed under the License is distributed on an "AS IS" BASIS,
+| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+| See the License for the specific language governing permissions and
+| limitations under the License.
+*/
 var searchAddress;
 
 //Get candidate address results for searched address
@@ -165,49 +165,51 @@ function LoctorErrBack(val) {
     tr.appendChild(td1);
 }
 
-//Locate searched address on map with pushpin graphic
+//Locate searched address on map with pushpin graphic  
 function LocateGraphicOnMap(evt) {
-    if (evt) {
-        if (evt.getAttribute("county") != "null") {
-            var countyExtent = dojo.fromJson(evt.getAttribute("county"));
-            var extent = new esri.geometry.Extent(parseFloat(countyExtent.xmin), parseFloat(countyExtent.ymin), parseFloat(countyExtent.xmax), parseFloat(countyExtent.ymax), map.spatialReference);
-        }
-    }
-    if (!tempMap) {
-        map.infoWindow.hide();
-        if (!countyExtent) {
-            map.centerAndZoom(mapPoint, locatorSettings.ZoomLevel);
-        }
-        else {
-            map.setExtent(extent.expand(1.75));
-        }
-        if (map.getLayer(tempGraphicsLayerId)) {
-            map.getLayer(tempGraphicsLayerId).clear();
-        }
-    }
-    else {
-        tempMap.infoWindow.hide();
-        if (!countyExtent) {
-            tempMap.centerAndZoom(mapPoint, locatorSettings.ZoomLevel);
-        }
-        else {
-            tempMap.setExtent(extent.expand(1.75));
-        }
-        if (tempMap.getLayer(temporaryGraphicsLayerId)) {
-            tempMap.getLayer(temporaryGraphicsLayerId).clear();
-        }
-    }
-
-    var symbol = new esri.symbol.PictureMarkerSymbol(locatorSettings.DefaultLocatorSymbol, locatorSettings.MarkupSymbolSize.width, locatorSettings.MarkupSymbolSize.height);
-    var graphic = new esri.Graphic(mapPoint, symbol, null, null);
-    var features = [];
-    features.push(graphic);
-    var featureSet = new esri.tasks.FeatureSet();
-    featureSet.features = features;
-    var layer = (!tempMap) ? map.getLayer(tempGraphicsLayerId) : tempMap.getLayer(temporaryGraphicsLayerId);
-    layer.add(featureSet.features[0]);
-    HideProgressIndicator();
     HideContainer("locate");
+    setTimeout(function () {
+        if (evt) {
+            if (evt.getAttribute("county") != "null") {
+                var countyExtent = dojo.fromJson(evt.getAttribute("county"));
+                var extent = new esri.geometry.Extent(parseFloat(countyExtent.xmin), parseFloat(countyExtent.ymin), parseFloat(countyExtent.xmax), parseFloat(countyExtent.ymax), map.spatialReference);
+            }
+        }
+        if (!tempMap) {
+            map.infoWindow.hide();
+            if (!countyExtent) {
+                map.centerAndZoom(mapPoint, locatorSettings.ZoomLevel);
+            }
+            else {
+                map.setExtent(extent.expand(1.75));
+            }
+            if (map.getLayer(tempGraphicsLayerId)) {
+                map.getLayer(tempGraphicsLayerId).clear();
+            }
+        }
+        else {
+            tempMap.infoWindow.hide();
+            if (!countyExtent) {
+                tempMap.centerAndZoom(mapPoint, locatorSettings.ZoomLevel);
+            }
+            else {
+                tempMap.setExtent(extent.expand(1.75));
+            }
+            if (tempMap.getLayer(temporaryGraphicsLayerId)) {
+                tempMap.getLayer(temporaryGraphicsLayerId).clear();
+            }
+        }
+
+        var symbol = new esri.symbol.PictureMarkerSymbol(locatorSettings.DefaultLocatorSymbol, locatorSettings.MarkupSymbolSize.width, locatorSettings.MarkupSymbolSize.height);
+        var graphic = new esri.Graphic(mapPoint, symbol, null, null);
+        var features = [];
+        features.push(graphic);
+        var featureSet = new esri.tasks.FeatureSet();
+        featureSet.features = features;
+        var layer = (!tempMap) ? map.getLayer(tempGraphicsLayerId) : tempMap.getLayer(temporaryGraphicsLayerId);
+        layer.add(featureSet.features[0]);
+        HideProgressIndicator();
+    }, 1000);
 }
 
 //Display the current location of the user

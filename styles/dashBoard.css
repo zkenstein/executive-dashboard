@@ -24,22 +24,22 @@
                                                                           divWelcomeContainer,divRSSFeedContainer,divTwitterFeedContainer,divBookMarksResultsContainer,
                                                                           divLayerContainer,divAddressScrollContainer,divMoreResultsContainer,divWelcomeContent,
                                                                           divRSSFeedContent,divTwitterFeedContent,divBookMarksResultsContent,divLayerContent,
-                                                                          divAddressScrollContent,divMoreResultsContent}*/
-/* 5.  Set the styles for text controls         - { Style(s) to look for: formLabel,inputText,textarea}*/
-/* 6.  Set the styles for settings page header  - { Style(s) to look for: divSettingsHeader,tdSettingsHeader}*/
-/* 7.  Set the styles for Info Pods             - { Style(s) to look for: divPod,divPodInner,divPodGreen,divPodInnerGreen,divPodRed,divPodInnerRed}*/
-/* 8.  Set the styles for customized buttons    - { Style(s) to look for: customButton,customDisabledButton}*/
-/* 9.  Set the styles for custom scrollbar      - { Style(s) to look for: scrollbar_track,scrollbar_handle}*/
-/* 10. Set the styles for news containers       - { Style(s) to look for: divNAEContainer,divNAEDisplayContainer,divNAEDisplayContent}*/
+                                                                          divAddressScrollContent,divMoreResultsContent}*/    
+/* 5.  Set the styles for text controls         - { Style(s) to look for: formLabel,inputText,textarea}*/    
+/* 6.  Set the styles for settings page header  - { Style(s) to look for: divSettingsHeader,tdSettingsHeader}*/  
+/* 7.  Set the styles for Info Pods             - { Style(s) to look for: divPod,divPodInner,divPodGreen,divPodInnerGreen,divPodRed,divPodInnerRed}*/ 
+/* 8.  Set the styles for customized buttons    - { Style(s) to look for: customButton,customDisabledButton}*/ 
+/* 9.  Set the styles for custom scrollbar      - { Style(s) to look for: scrollbar_track,scrollbar_handle}*/ 
+/* 10. Set the styles for news containers       - { Style(s) to look for: divNAEContainer,divNAEDisplayContainer,divNAEDisplayContent}*/ 
 /* 11. Set the styles for Address Container,
-       Bookmark Container and More Container
+       Bookmark Container and More Container 
        Styles                                   - { Style(s) to look for: divAddressScrollContainer,divAddressScrollContent,tblHeader,divAddressPlaceHolder,txtAddress,
                                                                           imgLocate,divAddressList,bottomborder,divBookmarkContent,divAddressContent,divMoreContent,
-                                                                          rounded,bookmarkErrorMessage,listDarkColor,listLightColor}*/
+                                                                          rounded,bookmarkErrorMessage,listDarkColor,listLightColor}*/                                                                                                                                         
 /* 12.  Set the styles for share container      - { Style(s) to look for: divAppContainer,divAppHolder}*/
 /* 13.  Set the styles for carousel scroll      - { Style(s) to look for: divServiceDetails,carouselscroll,divServiceData}*/
 /* 14.  Set the styles for info window          - { Style(s) to look for: tdInfoHeader,infoOptions,spanContentText,title,divBottomContainer,tdBreak,tdBreakWord}*/
-/* 15.  Set the styles for identity manager
+/* 15.  Set the styles for identity manager 
         and esri popup                          - { Style(s) to look for: esriSignInDialog,claro .dijitDialog,claro .dijitDialogTitleBar,
                                                                           claro .dijitDialogPaneContent claro .dijitDialogPaneActionBar,claro .dijitButton .dijitButtonNode,
                                                                           claro .dijitToggleButton .dijitButtonNode,claro .dijitDialogTitle,claro .dijitButtonContents,
@@ -49,10 +49,10 @@
                                                                           esriPopup,esriPopup .titleButton.close,esriPopup .titleButton.maximize,
                                                                           esriPopup .titleButton.restore }*/
 /* 16  Set the styles for login page            - {Style(s) to look for:  tdOptions,tblLeftOptions,tblRightOptions,tblLoginScreenContainer,tdWelcomeContent,tblWelcomeContent
-                                                                          tdWelcomeHeader,tblGallery,imgFrame,tblInfoContainer,tdLayerContainer}*/
-/* 17  Set the styles for settings page         - {Style(s) to look for:  tdFeedContainer,spnNewsHeader,tblSettingsContainer,tblRSS,tblSettingsControl}*/
-/* 18. Set the styles for graph container       - {Style(s) to look for:  divGraphComponent,divDefaultHeader}*/
-/* 19. Set the style for map                    - {Style(s) to look for:  imgMap}*/
+                                                                          tdWelcomeHeader,tblGallery,imgFrame,tblInfoContainer,tdLayerContainer}*/    
+/* 17  Set the styles for settings page         - {Style(s) to look for:  tdFeedContainer,spnNewsHeader,tblSettingsContainer,tblRSS,tblSettingsControl}*/     
+/* 18. Set the styles for graph container       - {Style(s) to look for:  divGraphComponent,divDefaultHeader}*/         
+/* 19. Set the style for map                    - {Style(s) to look for:  imgMap}*/                                                                                                                                   
 /* 20. Set the styles for esri slider           - { Style(s) to look for: esriSimpleSlider,esriLogo}*/
 /* 21. Set the styles for loading indicator     - { Style(s) to look for: divLoadingIndicator}*/
 
@@ -64,28 +64,28 @@
 
 body,html
 {
-    font-family: verdana !important;
+    font-family: verdana !important;    
     margin: 0;
-    padding: 0;
+    padding: 0;    
     width: 100%;
-    height: 100%;
-    font-size: 11px;
-    overflow:hidden;
+    height: 100%;    
+    font-size: 11px;  
+    overflow:hidden;    
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
 /*animations */
 
 .showHide
-{
-    color: #ffffff;
+{  
+    color: #ffffff;    
     position: absolute;
-    z-index: 1004;
+    z-index: 1004;   
     overflow: hidden;
     -webkit-transition: top 0.5s ease-in;
     -moz-transition: top 0.5s ease-in;
     -o-transition: top 0.5s ease-in;
-    transition: top 0.5s ease-in;
+    transition: top 0.5s ease-in; 
 }
 
 .hideContainerHeight
@@ -155,12 +155,12 @@ body,html
 
 .divApplicationHeader
 {
-   vertical-align: middle;
+   vertical-align: middle;  
    top: 0px;
    left: 0px;
    position: absolute;
    height: 60px;
-   width: 100%;
+   width: 100%;  
    z-index: 1006;
    overflow: hidden;
 }
@@ -172,7 +172,7 @@ body,html
 }
 .tblApplicationHeader
 {
-    height: 100%;
+    height: 100%; 
     background-image: url('../images/background90.png');
 }
 
@@ -182,19 +182,19 @@ body,html
 .divLoginScreenContainer,.divInfoContainer,.divSettingsContainer
 {
    top: 0px;
-   left:0px;
-   position: absolute;
+   left:0px;  
+   position: absolute;    
    width: 100%;
-   height: 100%;
+   height: 100%; 
    overflow: hidden
 }
-
+        
 #divLoginScreenContent
 {
-    text-align: left;
+    text-align: left;   
     color: black;
-    z-index: 1000;
-}
+    z-index: 1000;   
+}  
 
 .divWelcomeContainer,.divRSSFeedContainer,.divTwitterFeedContainer,.divBookMarksResultsContainer,.divLayerContainer,.divAddressScrollContainer,.divMoreResultsContainer
 {
@@ -203,13 +203,13 @@ body,html
 }
 
 .divWelcomeContent,.divRSSFeedContent,.divTwitterFeedContent,.divBookMarksResultsContent,.divLayerContent,.divAddressScrollContent,.divMoreResultsContent
-{
-    overflow: hidden;
+{   
+    overflow: hidden;     
 }
 .container
-{
+{    
     width:100%;
-    height:100%;
+    height:100%; 
 }
 .divFrozen
 {
@@ -217,45 +217,45 @@ body,html
     left:0px;
     top:60px;
     background: rgba(0,0,0,0.30);
-    width: 100%;
+    width: 100%;      
     z-index: 2500;
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
 /* Styles for text controls*/
-
+      
 .formLabel
 {
     font-weight: bold;
     border-bottom: gray 2px solid
-}
-
+}  
+     
 .inputText
 {
-     background-color: white;
-     padding: 2px;
+     background-color: white;    
+     padding: 2px;    
      width: 230px;
      margin: 2px;
      vertical-align: middle;
      -moz-border-radius: 5px;
      -webkit-border-radius: 5px;
-     border-radius: 5px;
+     border-radius: 5px;   
      line-height: 20px;
-     font-family: verdana !important;
+     font-family: verdana !important; 
 }
 
 .txtArea
 {
-    border: 1px solid #242424;
+    border: 1px solid #242424;   
     padding: 1px;
     background-color: #F7F7F7;
-    color: #000000;
+    color: #000000;        
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
-    border-radius: 3px;
-    resize: none;
+    border-radius: 3px;   
+    resize: none;    
     height: 100px;
-    overflow:auto;
+    overflow:auto;  
     width:97%;
 }
 
@@ -263,30 +263,30 @@ body,html
 /* Styles for settings page header*/
 
 .divSettingsHeader
-{
+{  
    border: none;
    color: #fff;
    background-image: url("../images/background90.png");
 }
 .tdSettingsHeader
 {
-     font-weight: bolder;
-     color: white;
+     font-weight: bolder;    
+     color: white;    
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
 /* Styles for info pods*/
 .divPod
-{
+{  
    border: none;
    color: #fff;
    cursor: pointer;
-   background-image: url("../images/blue_bg.png");
+   background-image: url("../images/blue_bg.png");   
    -moz-border-radius: 10px;
    -webkit-border-radius: 10px;
    border-radius: 10px;
-   overflow: hidden;
-   float:left;
+   overflow: hidden;    
+   float:left;   
 }
 
 .divPodInner
@@ -296,16 +296,16 @@ body,html
 }
 
 .divPodGreen
-{
+{  
    border: none;
    color: #fff;
-   cursor: pointer;
-   background-image: url("../images/green_bg.png");
+   cursor: pointer; 
+   background-image: url("../images/green_bg.png");   
    -moz-border-radius: 10px;
    -webkit-border-radius: 10px;
    border-radius: 10px;
-   overflow: hidden;
-   float:left;
+   overflow: hidden;    
+   float:left;        
 }
 
 .divPodInnerGreen
@@ -322,20 +322,20 @@ body,html
 }
 
 .divPodRed
-{
+{  
    border: none;
    color: #fff;
-   cursor: pointer;
-   background-image: url("../images/red_bg.png");
+   cursor: pointer; 
+   background-image: url("../images/red_bg.png");   
    -moz-border-radius: 10px;
    -webkit-border-radius: 10px;
    border-radius: 10px;
-   overflow: hidden;
-   float:left;
+   overflow: hidden;    
+   float:left;     
 }
 
 .divPodInnerRed
-{
+{ 
    width: 100%;
    height: 100%;
 }
@@ -358,21 +358,21 @@ body,html
 /* Styles for customized buttons*/
 
 .customButton
-{
+{  
    border: none;
    color: #FFFFFF;
    cursor: pointer;
-   background-image: url("../images/button.png");
-   overflow: hidden;
+   background-image: url("../images/button.png");   
+   overflow: hidden;    
 }
 
 .customDisabledButton
-{
+{  
    border: none;
    color: gray;
    cursor: pointer;
-   background-image: url("../images/button.png");
-   overflow: hidden;
+   background-image: url("../images/button.png");   
+   overflow: hidden;    
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -409,8 +409,8 @@ body,html
      background-color:#000000;
     -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
-    border-radius:10px;
-    padding:0px 10px 10px 10px;
+    border-radius:10px;  
+    padding:0px 10px 10px 10px;   
 }
 
 .divNAEDisplayContainer
@@ -420,15 +420,15 @@ body,html
     background-color:White;
     -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
-    border-radius:10px;
+    border-radius:10px;   
     background-color:#CCCCCC;
 }
 
 .divNAEDisplayContent
-{
-    overflow:hidden;
+{   
+    overflow:hidden;  
     color:Black;
-    width:100%;
+    width:100%;  
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -467,12 +467,12 @@ body,html
 
 .divAddressPlaceHolder
 {
-    border: 1px solid #000000;
+    border: 1px solid #000000;    
     background-color: #000000;
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
     border-radius: 3px;
-    position: relative;
+    position: relative;   
 }
 
 .txtAddress
@@ -480,16 +480,16 @@ body,html
     background-color: white;
     color: black;
     width: 240px;
-    border: none !important;
+    border: none !important; 
     outline:none;
     padding:0px !important;
-    vertical-align:middle;
+    vertical-align:middle;  
 }
 
 .imgLocate
 {
     position: absolute;
-    cursor: pointer;
+    cursor: pointer;    
 }
 
 .divAddressList
@@ -508,39 +508,39 @@ body,html
 .divBookmarkContent,.divAddressContent
 {
     z-index: 2600;
-    position:absolute;
-    top: 65px;
+    position:absolute;    
+    top: 65px;   
     width: 300px;
     right:15px;
-    background-color: #CCCCCC;
+    background-color: #CCCCCC;  
     -moz-border-radius: 8px;
     -webkit-border-radius: 8px;
-    border-radius: 8px;
+    border-radius: 8px; 
 }
 
 .divMoreContent
 {
     z-index: 1100;
-    position:absolute;
-    bottom: 85px;
+    position:absolute;    
+    bottom: 85px;   
     width: 300px;
     right:15px;
-    background-color: #CCCCCC;
+    background-color: #CCCCCC;  
     -moz-border-radius: 8px;
     -webkit-border-radius: 8px;
-    border-radius: 8px;
+    border-radius: 8px; 
 }
 
 .rounded
 {
    -moz-border-radius: 10px;
    -webkit-border-radius: 10px;
-   border-radius:10px;
+   border-radius:10px;    
 }
 
 .bookmarkErrorMessage
 {
-    color: black;
+    color: black; 
     height: 20px;
     border-bottom: black 1px solid;
 }
@@ -560,16 +560,16 @@ body,html
 
 .divServiceDetails
 {
-    bottom: 80px;
+    bottom: 80px;    
     position: absolute;
-    z-index: 1004;
+    z-index: 1004; 
     text-align: middle;
 }
 
 .carouselscroll
 {
     float: left;
-    height: 100%;
+    height: 100%;    
     position: absolute;
     left: 0px;
     vertical-align: middle;
@@ -577,9 +577,9 @@ body,html
 
 .divServiceData
 {
-    height: 200px;
+    height: 200px;   
     position: relative;
-    overflow: hidden;
+    overflow: hidden;    
     float: left;
 }
 
@@ -587,8 +587,8 @@ body,html
 /*InfoWindow Styles*/
 
 .tdInfoHeader
-{
-    font-weight: bolder;
+{   
+    font-weight: bolder;    
 }
 
 .infoOptions
@@ -600,13 +600,13 @@ body,html
     cursor:pointer;
 }
 .spanContentText
-{
+{  
     margin-left:5px;
     margin-top:5px;
 }
 .title
-{
-   font-weight:bolder;
+{  
+   font-weight:bolder; 
 }
 
 .divBottomContainer
@@ -615,20 +615,20 @@ body,html
     bottom:0px;
     left:0px;
     width:100%;
-    height:80px;
-    z-index:1006;
+    height:80px;  
+    z-index:1006;  
 }
 
 .tdBreak
-{
-    word-wrap: break-word;
-}
+{   
+    word-wrap: break-word;   
+} 
 
 .tdBreakWord
 {
     display:inline-block;
     word-break:break-all;
-    word-wrap: break-word;
+    word-wrap: break-word;   
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -639,7 +639,7 @@ body,html
     z-index:2100 !important;
 }
 
-.claro .dijitDialog
+.claro .dijitDialog 
 {
     border:1px solid #BBBBBB !important
 }
@@ -661,7 +661,7 @@ body,html
     background-color:#CCCCCC !important;
 }
 
-.claro .dijitButton .dijitButtonNode,.claro .dijitToggleButton .dijitButtonNode
+.claro .dijitButton .dijitButtonNode,.claro .dijitToggleButton .dijitButtonNode 
 {
      background-color:#000000 !important;
      border:1px solid #CCCCCC !important;
@@ -687,7 +687,7 @@ body,html
     width:300px !important;
 }
 
-.claro .dijitTextBox, .claro .dijitTextBox .dijitButtonNode
+.claro .dijitTextBox, .claro .dijitTextBox .dijitButtonNode 
 {
     height:25px !important;
 }
@@ -697,7 +697,7 @@ body,html
     z-index:2200 !important;
 }
 
-.esriPopup .titleButton
+.esriPopup .titleButton 
 {
     background-image: url('../images/imgPopup.png') !important;
     top:8px !important;
@@ -708,7 +708,7 @@ body,html
     line-height:40px !important;
 }
 
-.esriPopup .titleButton.close,.esriPopup .titleButton.maximize,.esriPopup .titleButton.next,.esriPopup .titleButton.prev,.esriPopup .titleButton.restore
+.esriPopup .titleButton.close,.esriPopup .titleButton.maximize,.esriPopup .titleButton.next,.esriPopup .titleButton.prev,.esriPopup .titleButton.restore 
 {
     width:20px !important;
     height:20px !important;
@@ -726,20 +726,20 @@ body,html
     right:45px !important;
 }
 
-.esriPopup .titleButton.restore
+.esriPopup .titleButton.restore 
 {
-    background-position: 0 -779px !important;
-    right: 45px !important;
+    background-position: 0 -779px !important;    
+    right: 45px !important;  
     top:9px !important;
 }
-.esriPopup .titleButton.prev
+.esriPopup .titleButton.prev 
 {
-    background-position: 0 -221px !important;
-    right: 94px !important;
+    background-position: 0 -221px !important;    
+    right: 94px !important;    
 }
-.esriPopup .titleButton.next
-{
-    right: 76px !important;
+.esriPopup .titleButton.next 
+{       
+    right: 76px !important;      
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -747,7 +747,7 @@ body,html
 
 .tdOptions
 {
-    vertical-align: middle;
+    vertical-align: middle; 
     width: 200px;
 }
 
@@ -769,16 +769,16 @@ body,html
 
 .tdWelcomeContent
 {
-    width: 100%;
+    width: 100%; 
     vertical-align: top;
-    padding-left: 10px;
+    padding-left: 10px; 
     padding-right: 10px;
     padding-top: 80px;
 }
 
 .tblWelcomeContent
 {
-    width: 100%;
+    width: 100%; 
     height: 100%;
 }
 
@@ -789,29 +789,29 @@ body,html
 
 .tblGallery
 {
-    width: 100%;
-    padding-right: 10px;
+    width: 100%; 
+    padding-right: 10px; 
     padding-left: 10px;
 }
 
 .imgFrame
 {
-    width: 220px;
+    width: 220px; 
     height: 200px;
 }
 
 .tblInfoContainer
 {
     width: 100%;
-    border: #000000 1px solid;
+    border: #000000 1px solid; 
     background-color: #CCCCCC;
     padding-top: 5px;
 }
 
 .tdLayerContainer
 {
-    width: 72%;
-    vertical-align: top;
+    width: 72%; 
+    vertical-align: top; 
     padding-top: 60px;
 }
 
@@ -820,32 +820,32 @@ body,html
 
 .tdFeedContainer
 {
-    width: 28%;
-    padding-right: 15px;
-    padding-left: 15px;
+    width: 28%; 
+    padding-right: 15px; 
+    padding-left: 15px; 
     vertical-align: top;
     padding-top: 60px;
 }
 
 .spnNewsHeader
 {
-    color: White;
-    font-size: 16px;
+    color: White; 
+    font-size: 16px; 
     font-weight: bolder;
 }
 
 .tblSettingsContainer
 {
-    width: 100%;
-    height: 100%;
-    border: #000000 1px solid;
+    width: 100%; 
+    height: 100%; 
+    border: #000000 1px solid; 
     background-color: #CCCCCC;
 }
 
 .tblRSS
 {
-    width: 100%;
-    padding-left: 10px;
+    width: 100%; 
+    padding-left: 10px; 
     padding-right: 10px;
 }
 
@@ -859,30 +859,30 @@ body,html
 /* styles for graph container*/
 
 .divGraphComponent
-{
+{     
     height: 300px;
     z-index: 2600 !important;
     top: 59px;
     background: rgba(0,0,0,0.60);
-    position:absolute;
-    right:15px;
+    position:absolute;  
+    right:15px; 
     -moz-border-radius: 0px 0px 0px 10px;
     -webkit-border-radius: 0px 0px 0px 10px;
-    border-radius: 0px 0px 0px 10px;
+    border-radius: 0px 0px 0px 10px; 
 }
 
 .divDefaultHeader
-{
+{  
     -moz-border-radius: 0px 0px 10px 10px;
     -webkit-border-radius: 0px 0px 10px 10px;
     border-radius: 0px 0px 10px 10px;
-    overflow:hidden;
+    overflow:hidden;      
     font-weight: bolder;
     height: 36px;
     width: 100px;
-    z-index: 1050;
+    z-index: 1050; 
     color:White;
-    text-align: center;
+    text-align: center;    
     background-image: url('../images/blackGradient.png');
 }
 
@@ -890,8 +890,8 @@ body,html
 /* style for map*/
 .imgMap
 {
-    width: 100%;
-    height: 100%;
+    width: 100%; 
+    height: 100%; 
     position: relative;
 }
 
@@ -904,9 +904,9 @@ body,html
 }
 
 .esriControlsBR
-{
-    bottom:80px !important;
-    z-index:999 !important;
+{  
+    bottom:80px !important;   
+    z-index:999 !important; 
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -917,16 +917,16 @@ body,html
     height: 100%;
     width: 100%;
     display: none;
-    font-family: Verdana;
+    font-family: Verdana;   
     z-index: 2000;
     position: absolute;
     bottom: 0px;
     filter: alpha(opacity = 55);
     -moz-opacity: 0.55;
     -khtml-opacity: 0.55;
-    opacity: 0.55;
+    opacity: 0.55;    
     top: 0px;
-    left: 0px;
+    left: 0px;    
     background-image: url("../images/background65.png");
 }
 

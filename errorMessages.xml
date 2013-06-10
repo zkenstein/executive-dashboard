@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--
  | Version 10.2
  | Copyright 2012 Esri
@@ -16,29 +16,29 @@
  | limitations under the License.
 -->
 <Messages>
-    <browserSupport>Browser not supported.</browserSupport>
-    <nonAuthenticatedMember>You are not the member of this group to log in.</nonAuthenticatedMember>
-    <noResults>No results found for</noResults>
-    <noSearchResults>No search results found.</noSearchResults>
-    <locatorService>Locator service is not working; please try again after some time.</locatorService>
-    <bookmarkName>Please enter bookmark name.</bookmarkName>
-    <selectLocation>Please select a location to compare.</selectLocation>
-    <existingBookmark>Bookmark with this name already exists; please enter different name.</existingBookmark>
-    <exceededLimit>characters exceeded to create notes.</exceededLimit>
-    <addressToLocate>Enter address to locate.</addressToLocate>
-    <unableToLocate>Unable to locate specified address.</unableToLocate>
-    <enterRSS>Please enter RSS feed name and URL.</enterRSS>
-    <RSSName>Please enter RSS feed name.</RSSName>
-    <RSSUrl>Please enter RSS feed URL.</RSSUrl>
-    <UrlFormat>Please enter correct URL format.</UrlFormat>
-    <noCharacters>No character(s) remain</noCharacters>
-    <existingFeed>Feed with this name already exists; please enter different name.</existingFeed>
-    <trendName>Please enter twitter trend name.</trendName>
-    <existingTrend>Trend with this name already exists; please enter different name.</existingTrend>
-    <tinyURLEngine>Bit.ly API engine is not working; please try again after some time.</tinyURLEngine>
-    <geoLocation>You are currently outside the supported area</geoLocation>
-    <geolocationTimeout>The browser is unable to supply a position at this time.</geolocationTimeout>
-    <geolocationPositionUnavailable>Unable to locate the position.</geolocationPositionUnavailable>
-    <geolocationPermissionDenied>Permission denied.</geolocationPermissionDenied>
-    <geolocationUnKnownError>Unknown error.</geolocationUnKnownError>
+  <browserSupport>Browser not supported.</browserSupport>
+  <nonAuthenticatedMember>You are not the member of this group to log in.</nonAuthenticatedMember>
+  <noResults>No results found for</noResults>
+  <noSearchResults>No search results found.</noSearchResults>
+  <locatorService>Locator service is not working, Please try again after some time.</locatorService>
+  <bookmarkName>Please enter bookmark name.</bookmarkName>
+  <selectLocation>Please select a location to compare.</selectLocation>
+  <existingBookmark>Bookmark with this name already exists, Please enter different name.</existingBookmark>
+  <exceededLimit>characters exceeded to create notes.</exceededLimit>
+  <addressToLocate>Enter address to locate.</addressToLocate>
+  <unableToLocate>Unable to locate specified address.</unableToLocate>
+  <enterRSS>Please enter RSS feed name and URL.</enterRSS>
+  <RSSName>Please enter RSS feed name.</RSSName>
+  <RSSUrl>Please enter RSS feed URL.</RSSUrl>
+  <UrlFormat>Please enter correct URL format.</UrlFormat>
+  <noCharacters>No character(s) remain</noCharacters>
+  <existingFeed>Feed with this name already exists, Please enter different name.</existingFeed>
+  <trendName>Please enter twitter trend name.</trendName>
+  <existingTrend>Trend with this name already exists, Please enter different name.</existingTrend>
+  <tinyURLEngine>Bit.ly API engine is not working, Please try again after some time.</tinyURLEngine>
+  <geoLocation>You are currently outside the supported area</geoLocation>
+  <geolocationTimeout>The browser is unable to supply a position at this time.</geolocationTimeout>
+  <geolocationPositionUnavailable>Unable to locate the position.</geolocationPositionUnavailable>
+  <geolocationPermissionDenied>Permission denied.</geolocationPermissionDenied>
+  <geolocationUnKnownError>Unknown error.</geolocationUnKnownError>
 </Messages>

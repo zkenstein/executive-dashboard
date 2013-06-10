@@ -1,19 +1,19 @@
 ﻿/** @license
- | Version 10.2
- | Copyright 2012 Esri
- |
- | Licensed under the Apache License, Version 2.0 (the "License");
- | you may not use this file except in compliance with the License.
- | You may obtain a copy of the License at
- |
- |    http://www.apache.org/licenses/LICENSE-2.0
- |
- | Unless required by applicable law or agreed to in writing, software
- | distributed under the License is distributed on an "AS IS" BASIS,
- | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- | See the License for the specific language governing permissions and
- | limitations under the License.
- */
+| Version 10.2
+| Copyright 2012 Esri
+|
+| Licensed under the Apache License, Version 2.0 (the "License");
+| you may not use this file except in compliance with the License.
+| You may obtain a copy of the License at
+|
+|    http://www.apache.org/licenses/LICENSE-2.0
+|
+| Unless required by applicable law or agreed to in writing, software
+| distributed under the License is distributed on an "AS IS" BASIS,
+| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+| See the License for the specific language governing permissions and
+| limitations under the License.
+*/
 var newLeft = 0;    //Variable to store the new left value for carousel of polling place
 var operationalLayers; //variable for storing the operational layer details
 var orientationChange = false; //variable for setting the flag on orientation
@@ -186,7 +186,7 @@ function CreateScrollbar(container, content) {
             scrolling = false;
         }, 100);
     }
-    //touch scrollbar end
+    //touch scrollbar end 
 }
 
 //Create tap events for the metric pods in the carousel
@@ -242,21 +242,21 @@ function CreateHorizontalScrollbar(container, content) {
     function touchHEndHandler(e) {
         scrollingHTimer = setTimeout(function () { clearTimeout(scrollingHTimer); scrollingH = false; }, 100);
     }
-    //stop touch event
+    //stop touch event 
 }
 
-//Get the extent based on the map point
+//Get the extent based on the map point 
 function GetBrowserMapExtent(mapPoint) {
     var width = map.extent.getWidth();
     var height = map.extent.getHeight();
     var xmin = mapPoint.x - (width / 2);
-    var ymin = mapPoint.y - (height / 1.5);
+    var ymin = mapPoint.y - (height / 1.5);   
     var xmax = xmin + width;
     var ymax = ymin + height;
     return new esri.geometry.Extent(xmin, ymin, xmax, ymax, map.spatialReference);
 }
 
-//Get the extent based on the map point
+//Get the extent based on the map point 
 function GetBrowserMapExtentforInfoWindow(mapPoint) {
     var width = map.extent.getWidth();
     var height = map.extent.getHeight();
@@ -273,7 +273,7 @@ function GetBrowserMapExtentforInfoWindow(mapPoint) {
 }
 
 
-//Refresh address container
+//Refresh address container 
 function RemoveChildren(parentNode) {
     if (parentNode) {
         while (parentNode.hasChildNodes()) {
@@ -393,7 +393,7 @@ function OrientationChangesforInfoWindow() {
     }
 }
 
-//Fade-out animation
+//Fade-out animation 
 function FadeOut(node) {
     var fadeArgs = {
         node: node,

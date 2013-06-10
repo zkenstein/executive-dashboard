@@ -22,12 +22,12 @@
     <link rel="shortcut icon" href="images/appIcon.ico" />
     <link rel="apple-touch-icon" href="images/appIcon.png" />
     <link href="styles/dashBoard.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/esri/dijit/css/Popup.css">
-    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dijit/themes/claro/claro.css">
-    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/esri/css/esri.css" />
+    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.4/js/esri/dijit/css/Popup.css">
+    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.4/js/dojo/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.4/js/esri/css/esri.css" />
     <link rel="Stylesheet" id="dynamicStyleSheet" />
     <title>Dashboard</title>
-    <script type="text/javascript">
+    <script type="text/javascript">    
            var dojoConfig = {
             async: false,
             parseOnLoad: true,
@@ -35,9 +35,9 @@
             packages:[
                 {name:"js",location:location.pathname.replace(/\/[^/]+$/, '') + '/js'}
             ]
-        };
+        };     
     </script>
-    <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5compact">
+    <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=3.4compact">
     </script>
     <script src="js/config.js" type="text/javascript"></script>
     <script src="js/utils.js" type="text/javascript"></script>
@@ -573,7 +573,7 @@
         <div id="divAddressContent" class="divAddressContent hideContainerHeight">
             <table class="tblHeader" style="width: 100%;">
                 <tr style="height: 30px;" align="center" valign="top">
-                    <td class="tdHeader" id="tdSearchHeader" align="left" valign="middle" style="padding-left: 8px; color: white">
+                    <td class="tdHeader" id="tdSearchHeader" align="left" valign="middle" style="padding-left: 8px; color: white">                  
                     </td>
                     <td style="width: 10%;" align="right">
                         <img src="images/close.png" class="imgOptions" title="Close" style="cursor: pointer;

@@ -237,7 +237,7 @@ public class proxy : IHttpHandler
         serverResponse.Close();
         response.End();
     }
-
+    
     // Gets the token for a server URL from a configuration file
     // TODO: ?modify so can generate a new short-lived token from username/password in the config file
     private string getTokenFromConfigFile(string uri)

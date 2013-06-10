@@ -1,19 +1,19 @@
 ﻿/** @license
- | Version 10.2
- | Copyright 2012 Esri
- |
- | Licensed under the Apache License, Version 2.0 (the "License");
- | you may not use this file except in compliance with the License.
- | You may obtain a copy of the License at
- |
- |    http://www.apache.org/licenses/LICENSE-2.0
- |
- | Unless required by applicable law or agreed to in writing, software
- | distributed under the License is distributed on an "AS IS" BASIS,
- | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- | See the License for the specific language governing permissions and
- | limitations under the License.
- */
+| Version 10.2
+| Copyright 2012 Esri
+|
+| Licensed under the Apache License, Version 2.0 (the "License");
+| you may not use this file except in compliance with the License.
+| You may obtain a copy of the License at
+|
+|    http://www.apache.org/licenses/LICENSE-2.0
+|
+| Unless required by applicable law or agreed to in writing, software
+| distributed under the License is distributed on an "AS IS" BASIS,
+| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+| See the License for the specific language governing permissions and
+| limitations under the License.
+*/
 var rss = []; //array for storing the rss feeds
 var trends = []; //array for storing the twitter trends
 
@@ -299,17 +299,17 @@ function CreateSettingsListTemplate(arrayList, tBody, feed) {
                 tdCheck.style.borderBottom = "1px #000 solid";
                 tdCheck.align = "center";
                 tdCheck.className = 'imgOptions';
-
+                                
 
                 var check = document.createElement("img");
                 check.className = 'imgOptions';
 
                 if (arrayList[r].checked) {
                     check.src = "images/checked.png";
-                    check.setAttribute("checked", true);
+                    check.setAttribute("checked", true);                 
                 } else {
                     check.src = "images/unchecked.png";
-                    check.setAttribute("checked", false);
+                    check.setAttribute("checked", false);                   
                 }
                 check.onclick = function () {
                     if (this.getAttribute("checked").bool()) {
@@ -360,14 +360,14 @@ function SaveSettings() {
     }
 }
 
-//Cancel changes to settings
-function CancelSettings() {
+//Cancel changes to settings 
+function CancelSettings() { 
     dojo.byId("btnSettings").className = "customButton";
     dojo.byId("btnSettings").style.cursor = "pointer";
     dojo.byId("divInfoContainer").style.display = "block";
     dojo.byId("divSettingsContainer").style.display = "none";
     GetDataFromStorage();
-
+  
     if (isTablet) {
         SetHomePageHeight();
     }

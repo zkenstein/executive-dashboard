@@ -1,19 +1,19 @@
 ﻿/** @license
- | Version 10.2
- | Copyright 2012 Esri
- |
- | Licensed under the Apache License, Version 2.0 (the "License");
- | you may not use this file except in compliance with the License.
- | You may obtain a copy of the License at
- |
- |    http://www.apache.org/licenses/LICENSE-2.0
- |
- | Unless required by applicable law or agreed to in writing, software
- | distributed under the License is distributed on an "AS IS" BASIS,
- | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- | See the License for the specific language governing permissions and
- | limitations under the License.
- */
+| Version 10.2
+| Copyright 2012 Esri
+|
+| Licensed under the Apache License, Version 2.0 (the "License");
+| you may not use this file except in compliance with the License.
+| You may obtain a copy of the License at
+|
+|    http://www.apache.org/licenses/LICENSE-2.0
+|
+| Unless required by applicable law or agreed to in writing, software
+| distributed under the License is distributed on an "AS IS" BASIS,
+| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+| See the License for the specific language governing permissions and
+| limitations under the License.
+*/
 dojo.require("js.date");
 dojo.require("dojo.window");
 dojo.require("dojo.string");
@@ -49,7 +49,7 @@ var showNullValueAs; //variable for storing values to be shown for null values
 var startExtent; //variable for storing the default extent
 var statisticsKeyword; // variable for identifying statistics layer
 var tempGraphicsLayerId = 'tempGraphicsLayerID';  //variable to store graphics layer ID
-var temporaryGraphicsLayerId = 'temporaryGraphicsLayerId'; //variable to store graphics layer ID for temporary map
+var temporaryGraphicsLayerId = 'temporaryGraphicsLayerId'; //variable to store graphics layer ID for temporary map 
 var twitterDetails; //variable for storing twitter link and fields
 var podInformation; //variable for storing information of pods
 var welcomeScreenImages; //variable for storing images for welcome screen
@@ -214,7 +214,7 @@ function Init() {
                                 clearTimeout(stagedSearch);
 
                                 if (dojo.byId("txtAddress").value.trim().length > 0) {
-                                    // Stage a new search, which will launch if no new searches show up
+                                    // Stage a new search, which will launch if no new searches show up 
                                     // before the timeout
                                     stagedSearch = setTimeout(function () {
                                         dojo.byId("imgSearchLoader").style.display = "block";
@@ -303,7 +303,7 @@ function AuthenticateUser() {
     });
 }
 
-//Function to find the authenticated group
+//Function to find the authenticated group 
 //This function is used to find the group by its groupId; It also identifies webmaps for each subject group
 function FindArcGISGroup() {
     var params = {
@@ -342,20 +342,22 @@ function FindArcGISGroup() {
                 var compareWebmaps = [];
                 for (var t = 0; t < groupdata.items.length; t++) {
                     for (var u = 0; u < groupdata.items[t].tags.length; u++) {
-                        if (groupdata.items[t].tags[u] != baseMapLayer[0].MapValue) {
-                            if (groupdata.items[t].tags[u] != "Key Indicator") {
-                                if (arrSubjectGroups[groupdata.items[t].tags[u]]) {
-                                    arrSubjectGroups[groupdata.items[t].tags[u]].push({ "webMapId": groupdata.items[t].id, "title": groupdata.items[t].title, "tags": groupdata.items[t].tags });
-                                }
-                                else {
-                                    arrSubjectGroups[groupdata.items[t].tags[u]] = [];
-                                    arrSubjectGroups[groupdata.items[t].tags[u]].push({ "webMapId": groupdata.items[t].id, "title": groupdata.items[t].title, "tags": groupdata.items[t].tags });
+                        if (groupdata.items[t].type == "Web Map") {
+                            if (groupdata.items[t].tags[u] != baseMapLayer[0].MapValue) {
+                                if (groupdata.items[t].tags[u] != "Key Indicator") {
+                                    if (arrSubjectGroups[groupdata.items[t].tags[u]]) {
+                                        arrSubjectGroups[groupdata.items[t].tags[u]].push({ "webMapId": groupdata.items[t].id, "title": groupdata.items[t].title, "tags": groupdata.items[t].tags });
+                                    }
+                                    else {
+                                        arrSubjectGroups[groupdata.items[t].tags[u]] = [];
+                                        arrSubjectGroups[groupdata.items[t].tags[u]].push({ "webMapId": groupdata.items[t].id, "title": groupdata.items[t].title, "tags": groupdata.items[t].tags });
+                                    }
                                 }
                             }
-                        }
-                        else {
-                            if (groupdata.items[t].tags[u] == "Compare") {
-                                compareWebmaps.push(groupdata.items[t].id);
+                            else {
+                                if (groupdata.items[t].tags[u] == "Compare") {
+                                    compareWebmaps.push(groupdata.items[t].id);
+                                }
                             }
                         }
                     }
@@ -394,7 +396,8 @@ function FindArcGISGroup() {
                                     map.destroy();
                                     responseCounter++;
                                     var webmapInfo = {};
-                                    webmapInfo.key = response.itemInfo.item.title
+                                    webmapInfo.key = response.itemInfo.item.title;
+                                    dojo.byId("imgResize").setAttribute("webmapKey", webmapInfo.key);
                                     webmapInfo.operationalLayers = response.itemInfo.itemData.operationalLayers;
                                     webmapInfo.baseMap = response.itemInfo.itemData.baseMap.baseMapLayers;
                                     keyIndicators.push(webmapInfo);
@@ -487,6 +490,7 @@ function CreateBasemap(orderedLayer, groupdata, data) {
                     var webmapInfo = {};
                     webmapInfo.id = response.itemInfo.item.id;
                     webmapInfo.key = response.itemInfo.item.title;
+                    dojo.byId("imgResize").setAttribute("webmapKey", webmapInfo.key);
                     webmapInfo.operationalLayers = response.itemInfo.itemData.operationalLayers;
                     webmapInfo.baseMap = response.itemInfo.itemData.baseMap.baseMapLayers;
 
@@ -585,23 +589,23 @@ function PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer,
                 queryCounty.where = "1=1";
                 queryCounty.returnGeometry = false;
                 queryCounty.outFields = ["*"];
-                queryCounty.outSpatialReference = map.spatialReference;
-                queryCounty.spatialRelationship = esri.tasks.Query.SPATIAL_REL_WITHIN;
-                queryTask.execute(queryCounty, function (featureSet) {
+                queryTask.execute(queryCounty, function (featureSet) {             
                     indicatorState.push({ key: keyIndicators[val].key, value: featureSet.features[0].attributes });
                     val++;
                     if (keyIndicators.length == val) {
                         CreateLayerPods(orderedLayer, token, groupdata, indicatorState);
                         PopulateNews(dojo.byId("btnNews"));
+                        return;
                     }
                     PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer, token, groupdata);
                 },
-                        function (err) {
+                        function (err) {                     
                             alert(err.message);
                             val++;
                             if (keyIndicators.length == val) {
                                 CreateLayerPods(orderedLayer, token, groupdata, indicatorState);
                                 PopulateNews(dojo.byId("btnNews"));
+                                return;
                             }
                             PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer, token, groupdata);
                         });

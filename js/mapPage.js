@@ -1,21 +1,21 @@
 ﻿/** @license
- | Version 10.2
- | Copyright 2012 Esri
- |
- | Licensed under the Apache License, Version 2.0 (the "License");
- | you may not use this file except in compliance with the License.
- | You may obtain a copy of the License at
- |
- |    http://www.apache.org/licenses/LICENSE-2.0
- |
- | Unless required by applicable law or agreed to in writing, software
- | distributed under the License is distributed on an "AS IS" BASIS,
- | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- | See the License for the specific language governing permissions and
- | limitations under the License.
- */
-var shareOnLoad = true; //flag set for shared link
-var chart; // variable used to store created chart object for trends
+| Version 10.2
+| Copyright 2012 Esri
+|
+| Licensed under the Apache License, Version 2.0 (the "License");
+| you may not use this file except in compliance with the License.
+| You may obtain a copy of the License at
+|
+|    http://www.apache.org/licenses/LICENSE-2.0
+|
+| Unless required by applicable law or agreed to in writing, software
+| distributed under the License is distributed on an "AS IS" BASIS,
+| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+| See the License for the specific language governing permissions and
+| limitations under the License.
+*/
+var shareOnLoad = true; //flag set for shared link 
+var chart; // variable used to store created chart object for trends 
 
 //Create bottom panel for subject groups with respective images
 function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, bottomOffset) {
@@ -473,7 +473,7 @@ function PopulateBookmarkList() {
             }
 
             td.onclick = function (evt) {
-                //Upon clicking/tapping on this cell map will pan to the respective stored extent of this bookmark
+                //Upon clicking/tapping on this cell map will pan to the respective stored extent of this bookmark            
                 for (var b = 0; b < arrayBookmarks.length; b++) {
                     if (this.getAttribute("bookmarkName") == arrayBookmarks[b].name) {
                         if (!tempMap) {
@@ -651,7 +651,7 @@ function ShareLink(ext) {
     }
 }
 
-//Set height for address results list and create scrollbar
+//Set height for address results list and create scrollbar 
 function SetAddressResultsHeight() {
     var height = dojo.coords(dojo.byId('divAddressContent')).h;
     if (height > 0) {
@@ -660,7 +660,7 @@ function SetAddressResultsHeight() {
     CreateScrollbar(dojo.byId("divAddressScrollContainer"), dojo.byId("divAddressScrollContent"));
 }
 
-//Show progress indicator
+//Show progress indicator 
 function ShowProgressIndicator() {
     dojo.byId('divLoadingIndicator').style.display = "block";
 }
@@ -671,7 +671,7 @@ function HideProgressIndicator() {
 }
 
 //Create metric pods for subject groups
-//For each pod this function determines Key indicator, Increase or decrease indicator, Color of pod. This function also handles on click event for each pod.
+//For each pod this function determines Key indicator, Increase or decrease indicator, Color of pod. This function also handles on click event for each pod. 
 function CreateGroupPods(webInfo, groupdata, token, statsData) {
     dojo.byId('carouselscroll').style.paddingLeft = "0px";
     dojo.byId("divServiceDetails").style.display = "block";
@@ -835,7 +835,7 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         var tableInner = document.createElement("table");
         tableInner.cellPadding = 0;
         tableInner.cellSpacing = 0;
-        tableInner.style.width = "100%";
+        tableInner.style.width = "200px";
         tableInner.style.height = "100%";
         tdInner.appendChild(tableInner);
         var tbodyInner = document.createElement("tbody");
@@ -914,6 +914,7 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         var spanText = document.createElement("span");
         spanText.style.fontSize = "38px";
         spanText.style.fontWeight = "bolder";
+        spanText.style.wordBreak = "break-all";
 
         var featureCollection = true;
 
@@ -1083,9 +1084,6 @@ function HideGraphContainer() {
     dojo.byId("divGraphHeader").style.color = "gray";
     dojo.byId("divGraphHeader").setAttribute("state", "disabled");
     dojo.byId("divGraphHeader").style.cursor = "default";
-    if (share != "") {
-        shareOnLoad = false;
-    }
 }
 
 //Highlight the first metric pod in the subject group
@@ -1126,7 +1124,7 @@ function PopulateInfoPodDetails(store, value, graph) {
     }
 }
 
-//Create and display information for metric pod based on format defined in configuration file
+//Create and display information for metric pod based on format defined in configuration file 
 function CreateSummaryData(statsData, layer, title) {
     if (layer) {
         var divSummary = document.createElement("div");
@@ -1277,7 +1275,7 @@ function PopulateChart(chartData, data, xAxisData) {
     var maxVal = Number(arrsort[(chartData.length - 1)]) + 10;
 
     chart = new dojox.charting.Chart2D("chartNodePod");
-    //style the chart
+    //style the chart 
     chart.margins.l = 0;
     chart.margins.t = 18;
     chart.margins.r = 0;
@@ -1333,16 +1331,33 @@ function PopulateNotes(evt) {
         if (evt.getAttribute("state") == "unSelected") {
             dojo.byId("imgNotes").src = "images/imgNotes_hover.png";
             evt.setAttribute("state", "selected");
+            TogglePopup(false, ((!tempMap) ? map : tempMap));
         }
         else {
             dojo.byId("imgNotes").src = "images/imgNotes.png";
             evt.setAttribute("state", "unSelected");
+            TogglePopup(true, ((!tempMap) ? map : tempMap));
             if (!tempMap) {
                 notesLayerClicked = false;
             }
             else {
                 notesGraphicLayerClicked = false;
             }
+        }
+    }
+}
+
+//Toggle Popup
+function TogglePopup(click, mapCtrl) {
+    for (var p = 0; p < mapCtrl.graphicsLayerIds.length; p++) {
+        var layer = mapCtrl.getLayer(mapCtrl.graphicsLayerIds[p]);
+        if (click) {
+            layer.infoTemplate = layer.Info;
+            layer.Info = null;
+        }
+        else {
+            layer.Info = layer.infoTemplate;
+            layer.infoTemplate = null;
         }
     }
 }

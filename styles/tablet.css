@@ -19,19 +19,19 @@
 /* Use this file to perform the following: */
 /* 1.  Set the body styles                      - { Style(s) to look for: body } */
 /* 2.  Set styles for conatiners                - { Style(s) to look for: tblLoginScreenContainer,tblApplicationHeader,tblMapApplicationHeader,tblBottomContainer,
-                                                                          tblInfoContainer,tdLayerContainer,tdFeedContainer,divNAEDisplayContent } */
-/* 3.  Set the styles for text controls         - { Style(s) to look for: inputText,textarea}*/
+                                                                          tblInfoContainer,tdLayerContainer,tdFeedContainer,divNAEDisplayContent } */    
+/* 3.  Set the styles for text controls         - { Style(s) to look for: inputText,textarea}*/    
 /* 4.  Set the styles for Address Container,
-       Bookmark Container and More Container
+       Bookmark Container and More Container 
        Styles                                   - { Style(s) to look for: tdLabel,errMargin,tdSettingsHeader,tdHeader,imgOptions,divBookMarksResultsContent,
-                                                                          divMoreResultsContent,imgLocate,bottomborder}*/
-/* 5.  Set the styles for customized buttons    - { Style(s) to look for: customButton,customDisabledButton}*/
+                                                                          divMoreResultsContent,imgLocate,bottomborder}*/ 
+/* 5.  Set the styles for customized buttons    - { Style(s) to look for: customButton,customDisabledButton}*/                                                                                                                                         
 /* 6.  Set the styles for share container       - { Style(s) to look for: imgShare}*/
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 /* Styles for body*/
 
-body
+body 
 {
    font-size: 14px;
 }
@@ -91,7 +91,7 @@ body
 
 .tdSettingsHeader
 {
-    height:44px;
+    height:44px;  
 }
 
 .tdHeader
@@ -104,12 +104,12 @@ body
 {
     width:44px;
     height:44px;
-}
+} 
 
 .divBookMarksResultsContent
 {
     height:152px;
-}
+} 
 
 .divMoreResultsContent
 {
@@ -137,7 +137,7 @@ body
 }
 
 .customDisabledButton
-{
+{ 
     height: 44px;
     background-size:85px 44px;
 }
@@ -149,7 +149,7 @@ body
 {
     height: 44px !important;
     width: 44px !important;
-    vertical-align: middle;
+    vertical-align: middle;     
 }
 
  @media screen and (max-width: 768px) and (orientation : portrait)

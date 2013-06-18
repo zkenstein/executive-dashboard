@@ -214,8 +214,15 @@ function LocateGraphicOnMap(evt) {
 
 //Display the current location of the user
 function ShowMyLocation() {
+    var cTimeout = 8000 /* ms */, cBackupTimeout = 16000 /* ms */;
+
+    var backupTimeoutTimer = setTimeout(function () {
+        alert(messages.getElementsByTagName("geolocationTimeout")[0].childNodes[0].nodeValue);
+    }, cBackupTimeout)
+
     navigator.geolocation.getCurrentPosition(
     function (position) {
+        clearTimeout(backupTimeoutTimer);
         dojo.byId("imgGeolocation").src = "images/imgGeolocation_hover.png";
         ShowProgressIndicator();
         mapPoint = new esri.geometry.Point(position.coords.longitude, position.coords.latitude, new esri.SpatialReference({
@@ -246,6 +253,7 @@ function ShowMyLocation() {
         });
     },
     function (error) {
+        clearTimeout(backupTimeoutTimer);
         dojo.byId("imgGeolocation").src = "images/imgGeolocation.png";
         HideProgressIndicator();
         switch (error.code) {
@@ -263,6 +271,6 @@ function ShowMyLocation() {
                 break;
         }
     }, {
-        timeout: 10000
+        timeout: cTimeout
     });
 }

@@ -198,7 +198,8 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
                             }
                         });
                         mapDeferred.addErrback(function (error) {
-                            console.log("Map creation failed: ", dojo.toJson(error));
+                            HideProgressIndicator();
+                            alert(dojo.toJson(error));
                         });
 
                     }
@@ -901,8 +902,8 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         var spanImg = document.createElement("span");
         td1.appendChild(spanImg);
         var imgArr = document.createElement("img");
-        imgArr.style.width = "50px";
-        imgArr.style.height = "30px";
+        imgArr.style.width = "40px";
+        imgArr.style.height = "25px";
         imgArr.style.display = "block";
         spanImg.appendChild(imgArr);
 
@@ -912,12 +913,8 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         trInner1.appendChild(tdText);
 
         var spanText = document.createElement("span");
-        spanText.style.fontSize = "38px";
-        spanText.style.fontWeight = "bolder";
-        spanText.style.wordBreak = "break-all";
-
+        spanText.className = "spnMetricNumber";
         var featureCollection = true;
-
         if (statsData) {
             for (var c in statsData) {
                 if (webInfo[p].key == statsData[c].title) {
@@ -933,12 +930,11 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
 
                         try {
                             if (dojo.string.substitute(infoPodStatics[0].CurrentObservation, statsData[c].data)) {
-                                spanText.innerHTML = dojo.string.substitute(infoPodStatics[0].CurrentObservation, statsData[c].data);
+                                spanText.innerHTML = dojo.string.substitute(infoPodStatics[0].CurrentObservation, statsData[c].data).format();
                             }
                         }
                         catch (err) {
                             spanText.innerHTML = showNullValueAs;
-                            //spanText.innerHTML = 0;
                         }
                         try {
                             var diff = (dojo.string.substitute(infoPodStatics[0].CurrentObservation, statsData[c].data) - dojo.string.substitute(infoPodStatics[0].LatestObservation, statsData[c].data));
@@ -949,9 +945,14 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
                                     divPod.className = "divPodGreen";
                                     divPodInner.className = "divPodInnerGreen";
                                 }
-                                else {
+                                else if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, statsData[c].data) == "No") {
                                     divPod.className = "divPodRed";
                                     divPodInner.className = "divPodInnerRed";
+                                }
+                                else {
+                                    imgArr.style.display = "none";
+                                    divPod.className = "divPod";
+                                    divPodInner.className = "divPodInner";
                                 }
                                 if (diff == 0) {
                                     imgArr.style.display = "none";
@@ -966,9 +967,14 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
                                     divPod.className = "divPodRed";
                                     divPodInner.className = "divPodInnerRed";
                                 }
-                                else {
+                                else if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, statsData[c].data) == "No") {
                                     divPod.className = "divPodGreen";
                                     divPodInner.className = "divPodInnerGreen";
+                                }
+                                else {
+                                    imgArr.style.display = "none";
+                                    divPod.className = "divPod";
+                                    divPodInner.className = "divPodInner";
                                 }
                             }
                             else {

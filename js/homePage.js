@@ -145,6 +145,7 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
                     var imgArr = document.createElement("img");
                     imgArr.style.width = "40px";
                     imgArr.style.height = "25px";
+                    imgArr.style.display = "block";
                     spanImg.appendChild(imgArr);
 
                     var td1 = document.createElement("td");
@@ -162,7 +163,7 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
 
                     //Decide color of pod using Increase or decrease indicator, Current and Past observation
                     var diff = (dojo.string.substitute(infoPodStatics[0].CurrentObservation, indicatorState[j].value) - dojo.string.substitute(infoPodStatics[0].LatestObservation, indicatorState[j].value));
-                    if (diff > 0) {
+                    if (diff >= 0) {
                         imgArr.src = "images/up.png";
                         if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value)) {
                             if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value) == "Yes") {
@@ -179,6 +180,13 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
                         }
                         else {
                             CreateStyleforNeutralPods(divPod, divPodInner);
+                        }
+
+                        if (diff == 0) {
+                            imgArr.style.display = "none";
+                        }
+                        else {
+                            imgArr.style.display = "block";
                         }
                     }
                     else if (diff < 0) {
@@ -288,7 +296,8 @@ function createDataforPods(group, tag, webMapId, webMapTitle, visibility, token,
             });
 
             webmapDetails.addErrback(function (error) {
-                console.log("Map creation failed: ", dojo.toJson(error));
+                HideProgressIndicator();
+                alert(dojo.toJson(error));
             });
 
             dojo.byId("imgResize").setAttribute("webmapID", webMapId[id]);
@@ -370,6 +379,7 @@ function FetchStatData(webStats, inc, statsData, webInfo, groupdata, token) {
                 queryCounty.where = "1=1";
                 queryCounty.returnGeometry = false;
                 queryCounty.outFields = ["*"];
+                queryCounty.outSpatialReference = map.spatialReference;
                 queryTask.execute(queryCounty, function (featureSet) {
                     statsData.push({ title: webStats[inc].title, data: featureSet.features[0].attributes, fields: featureSet.fields, statsTitle: webStats[inc].statsTitle });
                     inc++;
@@ -683,18 +693,25 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
         }
 
         var comArray = dojo.fromJson(dojo.byId("imgResize").getAttribute("compareId"));
-        for (var comp = 0; comp < comArray.length; comp++) {
-            if (comArray[comp] == id) {
-                dojo.byId("imgResize").style.cursor = "pointer";
-                dojo.byId("imgResize").title = "Compare";
-                dojo.byId("imgResize").src = "images/resize.png";
-                break;
+        if (comArray) {
+            for (var comp = 0; comp < comArray.length; comp++) {
+                if (comArray[comp] == id) {
+                    dojo.byId("imgResize").style.cursor = "pointer";
+                    dojo.byId("imgResize").title = "Compare";
+                    dojo.byId("imgResize").src = "images/resize.png";
+                    break;
+                }
+                else {
+                    dojo.byId("imgResize").style.cursor = "default";
+                    dojo.byId("imgResize").title = "";
+                    dojo.byId("imgResize").src = "images/resize-disable.png";
+                }
             }
-            else {
-                dojo.byId("imgResize").style.cursor = "default";
-                dojo.byId("imgResize").title = "";
-                dojo.byId("imgResize").src = "images/resize-disable.png";
-            }
+        }
+        else {
+            dojo.byId("imgResize").style.cursor = "default";
+            dojo.byId("imgResize").title = "";
+            dojo.byId("imgResize").src = "images/resize-disable.png";
         }
 
         if (map) {
@@ -762,27 +779,30 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
                 startExtent = new esri.geometry.Extent(parseFloat(zoomExtent[0]), parseFloat(zoomExtent[1]), parseFloat(zoomExtent[2]), parseFloat(zoomExtent[3]), map.spatialReference);
             }
 
-            if (startExtent) {
-                mapDeferred = esri.arcgis.utils.createMap(id, "map", {
-                    mapOptions: {
-                        slider: true,
-                        extent: startExtent
-                    }
-                });
-            }
-            else {
-                mapDeferred = esri.arcgis.utils.createMap(id, "map", {
-                    mapOptions: {
-                        slider: true
-                    }
-                });
-            }
+            mapDeferred = esri.arcgis.utils.createMap(id, "map", {
+                mapOptions: {
+                    slider: true
+                }
+            });
+
             dojo.byId("imgResize").setAttribute("webmapID", id);
             dojo.byId("imgResize").setAttribute("webmapKey", webmapInfo.key);
             mapDeferred.addCallback(function (response) {
                 map = response.map;
-
-                startExtent = map.extent;
+                map.disableKeyboardNavigation();
+                var defaultExtent = map.extent;
+                dojo.create("div", {
+                    className: "esriSimpleSliderHomeButton",
+                    onclick: function () {
+                        map.setExtent(defaultExtent);
+                    }
+                }, dojo.query(".esriSimpleSliderIncrementButton")[0], "after");
+                if (startExtent) {
+                    map.setExtent(startExtent);
+                }
+                else {
+                    startExtent = map.extent;
+                }
                 baseMapExtent = response.itemInfo.itemData.baseMap.baseMapLayers[0].layerObject.fullExtent;
 
                 dojo.connect(map, "onExtentChange", function (evt) {
@@ -799,7 +819,8 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
 
             });
             mapDeferred.addErrback(function (error) {
-                console.log("Map creation failed: ", dojo.toJson(error));
+                HideProgressIndicator();
+                alert(dojo.toJson(error));
             });
         }, (state) ? 500 : 0);
     }
@@ -857,14 +878,19 @@ function ShowCompare(click) {
 
                     if (dojo.byId("imgResize").title != "Compare") {
                         if (dojo.byId("imgResize").getAttribute("webmapID")) {
-                            var mapDeferred = esri.arcgis.utils.createMap(dojo.byId("imgResize").getAttribute("webmapID"), "tempMap", {
-                                mapOptions: {
-                                    extent: (map) ? map.extent : ""
-                                }
-                            });
+                            var mapDeferred = esri.arcgis.utils.createMap(dojo.byId("imgResize").getAttribute("webmapID"), "tempMap");
                             mapDeferred.then(function (response) {
                                 HideProgressIndicator();
                                 tempMap = response.map;
+                                tempMap.disableKeyboardNavigation();
+                                var defaultTempMapExtent = tempMap.extent;
+                                dojo.create("div", {
+                                    className: "esriSimpleSliderHomeButton",
+                                    onclick: function () {
+                                        tempMap.setExtent(defaultTempMapExtent);
+                                    }
+                                }, dojo.query(".esriSimpleSliderIncrementButton")[1], "after");
+
                                 tempMap.setExtent(new esri.geometry.Extent(Number(map.extent.xmin), Number(map.extent.ymin), Number(map.extent.xmax), Number(map.extent.ymax), map.spatialReference));
 
                                 dojo.byId("imgSocialMedia").style.cursor = "default";
@@ -898,14 +924,15 @@ function ShowCompare(click) {
 
                                 CreateGraphicLayer(tempMap, "temp");
                             }, function (error) {
-                                console.log("Map creation failed: ", dojo.toJson(error));
+                                HideProgressIndicator();
+                                alert(dojo.toJson(error));
                             });
                         }
                     }
                 }, 1000);
 
             } else {
-                alert(messages.getElementsByTagName("selectLocation")[0].childNodes[0].nodeValue);            
+                alert(messages.getElementsByTagName("selectLocation")[0].childNodes[0].nodeValue);
             }
         }
     }
@@ -1409,7 +1436,7 @@ function CalculateCharactersCount(obj, geometry, key, note, shareContent) {
             }
         }
 
-        charCount = (1425 - urlSt.length);    
+        charCount = (1425 - urlSt.length);
         dojo.byId("imgSocialMedia").setAttribute("shareNotesLink", encodeURIComponent(dojo.toJson(nArray)));
     }
     obj.setAttribute("storeLen", encodeURIComponent(dojo.toJson(obj.value.trim()).substring(1, (dojo.toJson(obj.value.trim()).length - 1))).length);
@@ -1460,7 +1487,7 @@ function SaveNotes(geometry, key, note, store) {
     }
     sessionStorage.setItem("notes" + key, dojo.toJson(notesArray));
     dojo.byId("imgSocialMedia").setAttribute("noteGraphics", sessionStorage.getItem("notes" + key));
-    nArray = PopulateNotesData(key);  
+    nArray = PopulateNotesData(key);
     dojo.byId("imgSocialMedia").setAttribute("shareNotesLink", encodeURIComponent(dojo.toJson(nArray)));
 }
 

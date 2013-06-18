@@ -60,8 +60,7 @@ function CreateScrollbar(container, content) {
         if (window.addEventListener) {
             content.addEventListener('DOMMouseScroll', ScrollDiv, false);
         }
-        content.onmousewheel = function (evt) {
-            console.log(content.id);
+        content.onmousewheel = function (evt) {         
             ScrollDiv(evt);
         }
     }
@@ -292,6 +291,11 @@ function CheckMailFormat(emailValue) {
 String.prototype.trimString = function (len) {
     return (this.length > len) ? this.substring(0, len) + "..." : this;
 }
+
+String.prototype.format = function () {
+    return this.toString().split(/(?=(?:\d{3})+(?:\.|$))/g).join(",");
+};
+
 //Trim string
 String.prototype.trim = function () {
     return this.replace(/^\s*/, "").replace(/\s*$/, "");

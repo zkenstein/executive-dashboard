@@ -354,6 +354,14 @@ body,html
     box-shadow: 0 0 25px #AAAAAA;
 }
 
+.spnMetricNumber
+{
+    font-family:Arial;
+    font-size:36px;
+    font-weight:bolder;
+    word-break:break-all;
+}
+
 /*---------------------------------------------------------------------------------------------------------*/
 /* Styles for customized buttons*/
 
@@ -937,4 +945,12 @@ body,html
     cursor: default;
 }
 
-
+/*---------------------------------------------------------------------------------------------------------*/
+/*Styles for Home icon in esri slider*/
+.esriSimpleSliderHomeButton
+{
+    border-bottom: 2px solid #666666;
+    background-image: url('../images/home.png');
+    background-repeat: no-repeat;
+    background-position: center;
+}

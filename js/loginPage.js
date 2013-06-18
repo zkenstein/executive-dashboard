@@ -24,6 +24,7 @@ dojo.require("esri.layers.FeatureLayer");
 dojo.require("esri.tasks.geometry");
 dojo.require("esri.arcgis.utils");
 dojo.require("esri.arcgis.Portal");
+dojo.require("dojo.number");
 
 var authenticatedGroup; //variable for storing the group link for authentication
 var authenticatedLinks; //variable for storing the links for token generation
@@ -153,6 +154,20 @@ function Init() {
 
             // Read config.js file to set appropriate values
             var responseObject = new js.config();
+            document.title = responseObject.ApplicationName;
+
+            var link = document.createElement('link');
+            link.type = 'image/x-icon';
+            link.rel = 'shortcut icon';
+            link.href = responseObject.ApplicationFaviIcon;
+            document.getElementsByTagName('head')[0].appendChild(link);
+
+            var HomeLink = document.createElement('link');
+            HomeLink.type = 'image/png';
+            HomeLink.rel = 'apple-touch-icon';
+            HomeLink.href = responseObject.HomeScreenIcon;
+            document.getElementsByTagName('head')[0].appendChild(HomeLink);
+
             dojo.byId("lblAppName").innerHTML = responseObject.ApplicationName.trimString(19);
             dojo.byId("lblAppName").title = responseObject.ApplicationName;
             dojo.byId("divWelcomeContent").innerHTML = responseObject.WelcomeScreenMessage;
@@ -406,9 +421,9 @@ function FindArcGISGroup() {
                                     }
                                 });
                                 mapDeferred.addErrback(function (error) {
-                                    console.log("Map creation failed: ", dojo.toJson(error));
+                                    HideProgressIndicator();
+                                    alert(dojo.toJson(error));
                                 });
-                                break;
                             }
                             else if (orderedLayer[p][g].tags[h] == "Compare") {
                                 compareWebmaps.push(orderedLayer[p][g].webMapId);
@@ -510,7 +525,8 @@ function CreateBasemap(orderedLayer, groupdata, data) {
                     PopulateEventDetails(webmapInfo.id, orderedLayer, dojo.byId("lblAppName").innerHTML, webmapInfo, groupdata, data.token, true, false, null);
                 });
                 webmapDetails.addErrback(function (error) {
-                    console.log("Map creation failed: ", dojo.toJson(error));
+                    HideProgressIndicator();
+                    alert(dojo.toJson(error));
                 });
                 break;
             }
@@ -528,8 +544,7 @@ function CheckBasemap(orderedLayer, groupdata, data) {
             }
         }
     }
-    if (!baseLayer) {
-        HideProgressIndicator();
+    if (!baseLayer) {       
         dojo.byId("btnMap").style.color = "gray";
         dojo.byId("btnMap").style.cursor = "default";
     }
@@ -589,7 +604,8 @@ function PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer,
                 queryCounty.where = "1=1";
                 queryCounty.returnGeometry = false;
                 queryCounty.outFields = ["*"];
-                queryTask.execute(queryCounty, function (featureSet) {             
+                queryCounty.outSpatialReference = map.spatialReference;
+                queryTask.execute(queryCounty, function (featureSet) {
                     indicatorState.push({ key: keyIndicators[val].key, value: featureSet.features[0].attributes });
                     val++;
                     if (keyIndicators.length == val) {
@@ -599,7 +615,7 @@ function PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer,
                     }
                     PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer, token, groupdata);
                 },
-                        function (err) {                     
+                        function (err) {
                             alert(err.message);
                             val++;
                             if (keyIndicators.length == val) {

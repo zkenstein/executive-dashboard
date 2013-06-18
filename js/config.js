@@ -62,7 +62,14 @@ dojo.declare("js.config", null, {
     // ------------------------------------------------------------------------------------------------------------------------
     // GENERAL SETTINGS
     // ------------------------------------------------------------------------------------------------------------------------
-    //Set application title. 
+
+    //Set Favorite Icon
+    ApplicationFaviIcon: "images/appIcon.ico",
+
+    //Set Home Screen Icon for touch devices.
+    HomeScreenIcon: "images/appIcon.png",
+
+    //Set application name. 
     ApplicationName: "Executive Dashboard",
 
     //Message that appears when the application starts.
@@ -103,7 +110,7 @@ dojo.declare("js.config", null, {
     //Set locator settings
     LocatorSettings: {
         DisplayText: "Search by Address or County",
-        DefaultLocatorSymbol: "images/RedPushpin.png",
+        DefaultLocatorSymbol: "images/redPushpin.png",
         MarkupSymbolSize: { width: 35, height: 35 },
         DefaultValue: "1848 N Mill St Naperville IL 60563",
         LocatorParamaters: { SearchField: "text", SearchResultField: "outFields", SearchCountField: "maxLocations", SearchBoundaryField: "bbox", SpatialReferenceField: "outSR" },
@@ -150,7 +157,7 @@ dojo.declare("js.config", null, {
           { Tag: "Indicator", Images: ["images/indicators.png", "images/indicators-hover.png"], isPodVisible: true },
           { Tag: "Education", Images: ["images/education.png", "images/education-hover.png"], isPodVisible: true },
           { Tag: "ARRA", Images: ["images/reinvestment.png", "images/reinvestment-hover.png"], isPodVisible: true }
-    ],
+    ],  
 
     //Specify fields for the Metric pods.
     InfoPodStatics: [

@@ -22,41 +22,43 @@ dojo.declare("js.config", null, {
     //
     // Use this file to perform the following:
     //
-    // 1.  Specify application title                  - [ Tag(s) to look for: ApplicationName ]
-    // 2.  Set welcome screen message                 - [ Tag(s) to look for: WelcomeScreenMessage ]
-    // 3.  Set URL for help page                      - [ Tag(s) to look for: HelpURL ]
+    // 1.  Specify path for application favi icon        - [ Tag(s) to look for: ApplicationFaviIcon ]
+    // 2.  Specify path for application Home screen icon - [ Tag(s) to look for: HomeScreenIcon ]
+    // 3.  Specify application title                     - [ Tag(s) to look for: ApplicationName ]
+    // 4.  Set welcome screen message                    - [ Tag(s) to look for: WelcomeScreenMessage ]
+    // 5.  Set URL for help page                         - [ Tag(s) to look for: HelpURL ]
     //
-    // 4.  Specify URLs for basemaps                  - [ Tag(s) to look for: BaseMapLayers ]
+    // 6.  Specify URLs for basemaps                     - [ Tag(s) to look for: BaseMapLayers ]
     //
-    // 5.  Specify Authenticated links                - [ Tag(s) to look for: AuthenticatedLinks ]
+    // 7.  Specify Authenticated links                   - [ Tag(s) to look for: AuthenticatedLinks ]
     //
-    // 6.  Specify Authenticated group                - [ Tag(s) to look for: AuthenticatedGroup ]
+    // 8.  Specify Authenticated group                   - [ Tag(s) to look for: AuthenticatedGroup ]
     //
-    // 7.  Specify Bookmark Header                    - [ Tag(s) to look for: BookmarkHeader ]
+    // 9.  Specify Bookmark Header                       - [ Tag(s) to look for: BookmarkHeader ]
     //
-    // 8.  Specify state of retaining                 - [ Tag(s) to look for: RetainState ]
+    // 10.  Specify state of retaining                   - [ Tag(s) to look for: RetainState ]
     //
-    // 9. Customize data formatting                   - [ Tag(s) to look for: ShowNullValueAs, FormatDateAs ]
+    // 11. Customize data formatting                     - [ Tag(s) to look for: ShowNullValueAs, FormatDateAs ]
     //
-    // 10. Customize address search settings          - [ Tag(s) to look for: LocatorSettings ]
+    // 12. Customize address search settings             - [ Tag(s) to look for: LocatorSettings ]
     //
-    // 11. Set Fields for RSS                         - [ Tag(s) to look for: RSSFields ]
+    // 13. Set Fields for RSS                            - [ Tag(s) to look for: RSSFields ]
     //
-    // 12. Set Fields for Trends                      - [ Tag(s) to look for: TwitterDetails ]
+    // 14. Set Fields for Trends                         - [ Tag(s) to look for: TwitterDetails ]
     //
-    // 13. Specify images for welcome screen          - [ Tag(s) to look for: WelcomeScreenImages ]
+    // 15. Specify images for welcome screen             - [ Tag(s) to look for: WelcomeScreenImages ]
     //
-    // 14. Specify images for subject groups           - [ Tag(s) to look for: LayerImages ]
+    // 16. Specify images for subject groups             - [ Tag(s) to look for: LayerImages ]
     //
-    // 15. Set Fields for Metric pods                 - [ Tag(s) to look for: InfoPodStatics ]
+    // 17. Set Fields for Metric pods                    - [ Tag(s) to look for: InfoPodStatics ]
     //
-    // 16. Set Fields for Metric pods information     - [ Tag(s) to look for: PodInformation ]
+    // 18. Set Fields for Metric pods information        - [ Tag(s) to look for: PodInformation ]
     //
-    // 17. Set keyword to detect statistics layer     - [ Tag(s) to look for: StatisticsKeyword ]
+    // 19. Set keyword to detect statistics layer        - [ Tag(s) to look for: StatisticsKeyword ]
     //
-    // 18. Specify URLs for map sharing               - [ Tag(s) to look for:  ShareByMailLink ]
-    // 19.In case of changing the TinyURL service
-    //     Specify URL for the new service            - [ Tag(s) to look for: MapSharingOptions (set TinyURLServiceURL, TinyURLResponseAttribute) ]
+    // 20. Specify URLs for map sharing                  - [ Tag(s) to look for:  ShareByMailLink ]
+    // 21.In case of changing the TinyURL service
+    //     Specify URL for the new service               - [ Tag(s) to look for: MapSharingOptions (set TinyURLServiceURL, TinyURLResponseAttribute) ]
     //
     //
 
@@ -206,11 +208,11 @@ dojo.declare("js.config", null, {
     //Specify fields for the Metric pods.
     InfoPodStatics: [{
         CurrentObservation: "${OBSERVCURR}",
-        LatestObservation: "${OBSERV3}",
-        PreviousObservations: ["${OBSERV2}", "${OBSERV1}"],
+        LatestObservation: "${OBSERV1}",
+        PreviousObservations: ["${OBSERV2}", "${OBSERV3}"],
         StatisticsPosition: "${INCREASEPOS}"
     }, {
-        DateObservations: ["${DATECURR}", "${DATE3}", "${DATE2}", "${DATE1}"],
+        DateObservations: ["${DATECURR}", "${DATE1}", "${DATE2}", "${DATE3}"],
         DatePattern: "MMM dd, yyyy"
     }],
 

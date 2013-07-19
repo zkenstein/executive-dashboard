@@ -1,31 +1,31 @@
 ﻿/** @license
-| Version 10.2
-| Copyright 2012 Esri
-|
-| Licensed under the Apache License, Version 2.0 (the "License");
-| you may not use this file except in compliance with the License.
-| You may obtain a copy of the License at
-|
-|    http://www.apache.org/licenses/LICENSE-2.0
-|
-| Unless required by applicable law or agreed to in writing, software
-| distributed under the License is distributed on an "AS IS" BASIS,
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-| See the License for the specific language governing permissions and
-| limitations under the License.
-*/
+ | Version 10.2
+ | Copyright 2012 Esri
+ |
+ | Licensed under the Apache License, Version 2.0 (the "License");
+ | you may not use this file except in compliance with the License.
+ | You may obtain a copy of the License at
+ |
+ |    http://www.apache.org/licenses/LICENSE-2.0
+ |
+ | Unless required by applicable law or agreed to in writing, software
+ | distributed under the License is distributed on an "AS IS" BASIS,
+ | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ | See the License for the specific language governing permissions and
+ | limitations under the License.
+ */
 var searchAddress;
 
 //Get candidate address results for searched address
 function LocateAddress() {
     var thisSearchTime = lastSearchTime = (new Date()).getTime();
 
-    dojo.byId("imgSearchLoader").style.display = "block";
-    if (dojo.byId("txtAddress").value.trim() == '') {
-        dojo.byId("imgSearchLoader").style.display = "none";
-        RemoveChildren(dojo.byId('tblAddressResults'));
-        CreateScrollbar(dojo.byId("divAddressScrollContainer"), dojo.byId("divAddressScrollContent"));
-        if (dojo.byId("txtAddress").value != "") {
+    dojo.dom.byId("imgSearchLoader").style.display = "block";
+    if (dojo.dom.byId("txtAddress").value.trim() == '') {
+        dojo.dom.byId("imgSearchLoader").style.display = "none";
+        RemoveChildren(dojo.dom.byId('tblAddressResults'));
+        CreateScrollbar(dojo.dom.byId("divAddressScrollContainer"), dojo.dom.byId("divAddressScrollContent"));
+        if (dojo.dom.byId("txtAddress").value != "") {
             alert(messages.getElementsByTagName("addressToLocate")[0].childNodes[0].nodeValue);
         }
         return;
@@ -33,7 +33,7 @@ function LocateAddress() {
 
     var params = {};
     params["f"] = "json";
-    params[locatorSettings.LocatorParamaters.SearchField] = dojo.byId('txtAddress').value;
+    params[locatorSettings.LocatorParamaters.SearchField] = dojo.dom.byId('txtAddress').value;
     params[locatorSettings.LocatorParamaters.SpatialReferenceField] = ((map.spatialReference.wkid) ? ("{wkid:" + map.spatialReference.wkid + "}") : ("{wkt:" + map.spatialReference.wkt + "}"));
     params[locatorSettings.LocatorParamaters.SearchResultField] = locatorSettings.CandidateFields;
     params[locatorSettings.LocatorParamaters.SearchCountField] = locatorSettings.MaxResults;
@@ -49,7 +49,7 @@ function LocateAddress() {
             }
             ShowLocatedAddress(candidates.locations);
         }, error: function (err) {
-            dojo.byId("imgSearchLoader").style.display = "none";
+            dojo.dom.byId("imgSearchLoader").style.display = "none";
             LoctorErrBack("locatorService");
         }
     });
@@ -57,11 +57,11 @@ function LocateAddress() {
 
 //Populate candidate address list in address container
 function ShowLocatedAddress(candidates) {
-    RemoveChildren(dojo.byId('tblAddressResults'));
-    CreateScrollbar(dojo.byId("divAddressScrollContainer"), dojo.byId("divAddressScrollContent"));
+    RemoveChildren(dojo.dom.byId('tblAddressResults'));
+    CreateScrollbar(dojo.dom.byId("divAddressScrollContainer"), dojo.dom.byId("divAddressScrollContent"));
 
     if (candidates.length > 0) {
-        var table = dojo.byId("tblAddressResults");
+        var table = dojo.dom.byId("tblAddressResults");
         var tBody = document.createElement("tbody");
         table.appendChild(tBody);
         table.cellSpacing = 0;
@@ -79,7 +79,7 @@ function ShowLocatedAddress(candidates) {
         for (var i in candidates) {
             if (candidates[i].feature.attributes[locatorSettings.AddressMatchScore.Field] > locatorSettings.AddressMatchScore.Value) {
                 var locatePoint = new esri.geometry.Point(Number(candidates[i].feature.geometry.x), Number(candidates[i].feature.geometry.y), map.spatialReference);
-                for (j in searchFields) {
+                for (var j in searchFields) {
                     if (candidates[i].feature.attributes[locatorSettings.LocatorFieldName] == searchFields[j]) {
                         if (candidates[i].feature.attributes[locatorSettings.LocatorFieldName] == locatorSettings.CountyFields.LocatorFieldValue) {
                             if (candidates[i].feature.attributes[locatorSettings.CountyFields.FieldName] != locatorSettings.CountyFields.Value) {
@@ -115,16 +115,16 @@ function ShowLocatedAddress(candidates) {
                                 td1.setAttribute("county", dojo.toJson(candidate.extent));
                             }
                             else {
-                                td1.setAttribute("county", null);
+                                td1.setAttribute("county", "");
                             }
                             td1.onclick = function () {
-                                dojo.byId("txtAddress").value = this.innerHTML;
-                                lastSearchString = dojo.byId("txtAddress").value.trim();
-                                dojo.byId('txtAddress').setAttribute("defaultAddress", this.innerHTML);
+                                dojo.dom.byId("txtAddress").value = this.innerHTML;
+                                lastSearchString = dojo.dom.byId("txtAddress").value.trim();
+                                dojo.dom.byId('txtAddress').setAttribute("defaultAddress", this.innerHTML);
                                 mapPoint = new esri.geometry.Point(Number(this.getAttribute("x")), Number(this.getAttribute("y")), map.spatialReference);
-                                dojo.byId("txtAddress").setAttribute("defaultAddressTitle", this.innerHTML);
+                                dojo.dom.byId("txtAddress").setAttribute("defaultAddressTitle", this.innerHTML);
                                 LocateGraphicOnMap(this);
-                                dojo.byId("imgGeolocation").src = "images/imgGeolocation.png";
+                                dojo.dom.byId("imgGeolocation").src = "images/imgGeolocation.png";
                             }
                             tr.appendChild(td1);
                         }
@@ -139,20 +139,20 @@ function ShowLocatedAddress(candidates) {
             var td1 = document.createElement("td");
             td1.innerHTML = messages.getElementsByTagName("noSearchResults")[0].childNodes[0].nodeValue;
             tr.appendChild(td1);
-            dojo.byId("imgSearchLoader").style.display = "none";
+            dojo.dom.byId("imgSearchLoader").style.display = "none";
             return;
         }
-        dojo.byId("imgSearchLoader").style.display = "none";
+        dojo.dom.byId("imgSearchLoader").style.display = "none";
         SetAddressResultsHeight();
     } else {
-        dojo.byId("imgSearchLoader").style.display = "none";
+        dojo.dom.byId("imgSearchLoader").style.display = "none";
         LoctorErrBack("noSearchResults");
     }
 }
 
 //This function is called when locator service fails or does not return any data
 function LoctorErrBack(val) {
-    var table = dojo.byId("tblAddressResults");
+    var table = dojo.dom.byId("tblAddressResults");
     var tBody = document.createElement("tbody");
     table.appendChild(tBody);
     table.cellSpacing = 0;
@@ -165,12 +165,12 @@ function LoctorErrBack(val) {
     tr.appendChild(td1);
 }
 
-//Locate searched address on map with pushpin graphic  
+//Locate searched address on map with pushpin graphic
 function LocateGraphicOnMap(evt) {
     HideContainer("locate");
     setTimeout(function () {
         if (evt) {
-            if (evt.getAttribute("county") != "null") {
+            if (evt.getAttribute("county")) {
                 var countyExtent = dojo.fromJson(evt.getAttribute("county"));
                 var extent = new esri.geometry.Extent(parseFloat(countyExtent.xmin), parseFloat(countyExtent.ymin), parseFloat(countyExtent.xmax), parseFloat(countyExtent.ymax), map.spatialReference);
             }
@@ -223,7 +223,7 @@ function ShowMyLocation() {
     navigator.geolocation.getCurrentPosition(
     function (position) {
         clearTimeout(backupTimeoutTimer);
-        dojo.byId("imgGeolocation").src = "images/imgGeolocation_hover.png";
+        dojo.dom.byId("imgGeolocation").src = "images/imgGeolocation_hover.png";
         ShowProgressIndicator();
         mapPoint = new esri.geometry.Point(position.coords.longitude, position.coords.latitude, new esri.SpatialReference({
             wkid: 4326
@@ -254,7 +254,7 @@ function ShowMyLocation() {
     },
     function (error) {
         clearTimeout(backupTimeoutTimer);
-        dojo.byId("imgGeolocation").src = "images/imgGeolocation.png";
+        dojo.dom.byId("imgGeolocation").src = "images/imgGeolocation.png";
         HideProgressIndicator();
         switch (error.code) {
             case error.TIMEOUT:

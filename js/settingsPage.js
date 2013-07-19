@@ -1,78 +1,78 @@
 ﻿/** @license
-| Version 10.2
-| Copyright 2012 Esri
-|
-| Licensed under the Apache License, Version 2.0 (the "License");
-| you may not use this file except in compliance with the License.
-| You may obtain a copy of the License at
-|
-|    http://www.apache.org/licenses/LICENSE-2.0
-|
-| Unless required by applicable law or agreed to in writing, software
-| distributed under the License is distributed on an "AS IS" BASIS,
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-| See the License for the specific language governing permissions and
-| limitations under the License.
-*/
+ | Version 10.2
+ | Copyright 2012 Esri
+ |
+ | Licensed under the Apache License, Version 2.0 (the "License");
+ | you may not use this file except in compliance with the License.
+ | You may obtain a copy of the License at
+ |
+ |    http://www.apache.org/licenses/LICENSE-2.0
+ |
+ | Unless required by applicable law or agreed to in writing, software
+ | distributed under the License is distributed on an "AS IS" BASIS,
+ | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ | See the License for the specific language governing permissions and
+ | limitations under the License.
+ */
 var rss = []; //array for storing the rss feeds
 var trends = []; //array for storing the twitter trends
 
 //Create settings page according to feeds and trends for personalized RSS feeds and Twitter Trends stored in local storage
 function DisplaySettings() {
-    dojo.byId("btnSettings").className = "customDisabledButton";
+    dojo.dom.byId("btnSettings").className = "customDisabledButton";
     GetDataFromStorage();
-    dojo.byId("imgRSSAdd").onclick = function () {
-        if (!dojo.byId("txtRSSFeedName").value.trim()) {
-            if (!dojo.byId("txtRSSFeedURL").value.trim()) {
-                dojo.byId("RSSErrorMessage").innerHTML = messages.getElementsByTagName("enterRSS")[0].childNodes[0].nodeValue;
+    dojo.dom.byId("imgRSSAdd").onclick = function () {
+        if (!dojo.dom.byId("txtRSSFeedName").value.trim()) {
+            if (!dojo.dom.byId("txtRSSFeedURL").value.trim()) {
+                dojo.dom.byId("RSSErrorMessage").innerHTML = messages.getElementsByTagName("enterRSS")[0].childNodes[0].nodeValue;
                 return;
             }
         }
-        if (!dojo.byId("txtRSSFeedName").value.trim()) {
-            dojo.byId("RSSErrorMessage").innerHTML = messages.getElementsByTagName("RSSName")[0].childNodes[0].nodeValue;
+        if (!dojo.dom.byId("txtRSSFeedName").value.trim()) {
+            dojo.dom.byId("RSSErrorMessage").innerHTML = messages.getElementsByTagName("RSSName")[0].childNodes[0].nodeValue;
             return;
         }
-        if (!dojo.byId("txtRSSFeedURL").value.trim()) {
-            dojo.byId("RSSErrorMessage").innerHTML = messages.getElementsByTagName("RSSUrl")[0].childNodes[0].nodeValue;
+        if (!dojo.dom.byId("txtRSSFeedURL").value.trim()) {
+            dojo.dom.byId("RSSErrorMessage").innerHTML = messages.getElementsByTagName("RSSUrl")[0].childNodes[0].nodeValue;
             return;
         }
 
-        if (!(dojo.byId("txtRSSFeedURL").value.match("http:") || dojo.byId("txtRSSFeedURL").value.match("https:"))) {
-            dojo.byId("RSSErrorMessage").innerHTML = messages.getElementsByTagName("UrlFormat")[0].childNodes[0].nodeValue;
+        if (!(dojo.dom.byId("txtRSSFeedURL").value.match("http:") || dojo.dom.byId("txtRSSFeedURL").value.match("https:"))) {
+            dojo.dom.byId("RSSErrorMessage").innerHTML = messages.getElementsByTagName("UrlFormat")[0].childNodes[0].nodeValue;
             return;
         }
         if (rss) {
             for (var b = 0; b < rss.length; b++) {
-                if (dojo.byId("txtRSSFeedName").value.trim() == rss[b].name) {
-                    dojo.byId("RSSErrorMessage").innerHTML = messages.getElementsByTagName("existingFeed")[0].childNodes[0].nodeValue;
-                    dojo.byId("txtRSSFeedName").value = "";
+                if (dojo.dom.byId("txtRSSFeedName").value.trim() == rss[b].name) {
+                    dojo.dom.byId("RSSErrorMessage").innerHTML = messages.getElementsByTagName("existingFeed")[0].childNodes[0].nodeValue;
+                    dojo.dom.byId("txtRSSFeedName").value = "";
                     return;
                 }
             }
         }
         rss.push({
-            "name": dojo.byId("txtRSSFeedName").value.trim(),
-            "url": dojo.byId("txtRSSFeedURL").value,
+            "name": dojo.dom.byId("txtRSSFeedName").value.trim(),
+            "url": dojo.dom.byId("txtRSSFeedURL").value,
             "checked": false
         });
         PopulateFeedList();
     };
-    dojo.byId("imgTwiiterAdd").onclick = function () {
-        if (!dojo.byId("txtTwitterTrendName").value.trim()) {
-            dojo.byId("twitterErrorMessage").innerHTML = messages.getElementsByTagName("trendName")[0].childNodes[0].nodeValue;
+    dojo.dom.byId("imgTwiiterAdd").onclick = function () {
+        if (!dojo.dom.byId("txtTwitterTrendName").value.trim()) {
+            dojo.dom.byId("twitterErrorMessage").innerHTML = messages.getElementsByTagName("trendName")[0].childNodes[0].nodeValue;
             return;
         }
         if (trends) {
             for (var b = 0; b < trends.length; b++) {
-                if (dojo.byId("txtTwitterTrendName").value.trim() == trends[b].name) {
-                    dojo.byId("twitterErrorMessage").innerHTML = messages.getElementsByTagName("existingTrend")[0].childNodes[0].nodeValue;
-                    dojo.byId("txtTwitterTrendName").value = "";
+                if (dojo.dom.byId("txtTwitterTrendName").value.trim() == trends[b].name) {
+                    dojo.dom.byId("twitterErrorMessage").innerHTML = messages.getElementsByTagName("existingTrend")[0].childNodes[0].nodeValue;
+                    dojo.dom.byId("txtTwitterTrendName").value = "";
                     return;
                 }
             }
         }
         trends.push({
-            "name": dojo.byId("txtTwitterTrendName").value.trim()
+            "name": dojo.dom.byId("txtTwitterTrendName").value.trim()
         });
         PopulateTrendList();
     };
@@ -82,35 +82,35 @@ function DisplaySettings() {
 
 //Populate RSS feed list in the panel
 function PopulateFeedList() {
-    dojo.byId("RSSErrorMessage").innerHTML = "";
-    RemoveChildren(dojo.byId("divRSSFeedContent"));
+    dojo.dom.byId("RSSErrorMessage").innerHTML = "";
+    RemoveChildren(dojo.dom.byId("divRSSFeedContent"));
     var table = document.createElement("table");
     table.style.width = "100%";
     table.cellSpacing = 0;
     table.cellPadding = 0;
-    dojo.byId("divRSSFeedContent").appendChild(table);
+    dojo.dom.byId("divRSSFeedContent").appendChild(table);
     var tBody = document.createElement("tbody");
     table.appendChild(tBody);
     CreateSettingsListTemplate(rss, tBody, true);
-    dojo.byId("txtRSSFeedName").value = "";
-    dojo.byId("txtRSSFeedURL").value = "";
-    CreateScrollbar(dojo.byId('divRSSFeedContainer'), dojo.byId('divRSSFeedContent'));
+    dojo.dom.byId("txtRSSFeedName").value = "";
+    dojo.dom.byId("txtRSSFeedURL").value = "";
+    CreateScrollbar(dojo.dom.byId('divRSSFeedContainer'), dojo.dom.byId('divRSSFeedContent'));
 }
 
 //Populate Twitter Trends list in the panel
 function PopulateTrendList() {
-    dojo.byId("twitterErrorMessage").innerHTML = "";
-    RemoveChildren(dojo.byId("divTwitterFeedContent"));
+    dojo.dom.byId("twitterErrorMessage").innerHTML = "";
+    RemoveChildren(dojo.dom.byId("divTwitterFeedContent"));
     var table = document.createElement("table");
     table.style.width = "100%";
     table.cellSpacing = 0;
     table.cellPadding = 0;
-    dojo.byId("divTwitterFeedContent").appendChild(table);
+    dojo.dom.byId("divTwitterFeedContent").appendChild(table);
     var tBody = document.createElement("tbody");
     table.appendChild(tBody);
     CreateSettingsListTemplate(trends, tBody, false);
-    dojo.byId("txtTwitterTrendName").value = "";
-    CreateScrollbar(dojo.byId('divTwitterFeedContainer'), dojo.byId('divTwitterFeedContent'));
+    dojo.dom.byId("txtTwitterTrendName").value = "";
+    CreateScrollbar(dojo.dom.byId('divTwitterFeedContainer'), dojo.dom.byId('divTwitterFeedContent'));
 }
 
 //Move up the position of respective RSS feed or Twitter Trend from list
@@ -299,17 +299,17 @@ function CreateSettingsListTemplate(arrayList, tBody, feed) {
                 tdCheck.style.borderBottom = "1px #000 solid";
                 tdCheck.align = "center";
                 tdCheck.className = 'imgOptions';
-                                
+
 
                 var check = document.createElement("img");
                 check.className = 'imgOptions';
 
                 if (arrayList[r].checked) {
                     check.src = "images/checked.png";
-                    check.setAttribute("checked", true);                 
+                    check.setAttribute("checked", true);
                 } else {
                     check.src = "images/unchecked.png";
-                    check.setAttribute("checked", false);                   
+                    check.setAttribute("checked", false);
                 }
                 check.onclick = function () {
                     if (this.getAttribute("checked").bool()) {
@@ -338,11 +338,11 @@ function CreateSettingsListTemplate(arrayList, tBody, feed) {
 
 //Save changed settings
 function SaveSettings() {
-    dojo.byId("btnSettings").className = "customButton";
-    dojo.byId("btnSettings").style.cursor = "pointer";
+    dojo.dom.byId("btnSettings").className = "customButton";
+    dojo.dom.byId("btnSettings").style.cursor = "pointer";
     if (rss) {
         for (var l = 0; l < rss.length; l++) {
-            if (dojo.byId("chkBox" + rss[l].name).getAttribute("checked").bool()) {
+            if (dojo.dom.byId("chkBox" + rss[l].name).getAttribute("checked").bool()) {
                 rss[l].checked = true;
             } else {
                 rss[l].checked = false;
@@ -352,22 +352,22 @@ function SaveSettings() {
 
     localStorage.setItem("RSSFeedCollection", dojo.toJson(rss));
     localStorage.setItem("TwitterTrendCollection", dojo.toJson(trends));
-    PopulateNews(dojo.byId("btnNews"));
-    dojo.byId("divSettingsContainer").style.display = "none";
-    dojo.byId("divInfoContainer").style.display = "block";
+    PopulateNews(dojo.dom.byId("btnNews"));
+    dojo.dom.byId("divSettingsContainer").style.display = "none";
+    dojo.dom.byId("divInfoContainer").style.display = "block";
     if (isTablet) {
         SetHomePageHeight();
     }
 }
 
-//Cancel changes to settings 
-function CancelSettings() { 
-    dojo.byId("btnSettings").className = "customButton";
-    dojo.byId("btnSettings").style.cursor = "pointer";
-    dojo.byId("divInfoContainer").style.display = "block";
-    dojo.byId("divSettingsContainer").style.display = "none";
+//Cancel changes to settings
+function CancelSettings() {
+    dojo.dom.byId("btnSettings").className = "customButton";
+    dojo.dom.byId("btnSettings").style.cursor = "pointer";
+    dojo.dom.byId("divInfoContainer").style.display = "block";
+    dojo.dom.byId("divSettingsContainer").style.display = "none";
     GetDataFromStorage();
-  
+
     if (isTablet) {
         SetHomePageHeight();
     }

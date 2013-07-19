@@ -1,19 +1,19 @@
 ﻿/** @license
-| Version 10.2
-| Copyright 2012 Esri
-|
-| Licensed under the Apache License, Version 2.0 (the "License");
-| you may not use this file except in compliance with the License.
-| You may obtain a copy of the License at
-|
-|    http://www.apache.org/licenses/LICENSE-2.0
-|
-| Unless required by applicable law or agreed to in writing, software
-| distributed under the License is distributed on an "AS IS" BASIS,
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-| See the License for the specific language governing permissions and
-| limitations under the License.
-*/
+ | Version 10.2
+ | Copyright 2012 Esri
+ |
+ | Licensed under the Apache License, Version 2.0 (the "License");
+ | you may not use this file except in compliance with the License.
+ | You may obtain a copy of the License at
+ |
+ |    http://www.apache.org/licenses/LICENSE-2.0
+ |
+ | Unless required by applicable law or agreed to in writing, software
+ | distributed under the License is distributed on an "AS IS" BASIS,
+ | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ | See the License for the specific language governing permissions and
+ | limitations under the License.
+ */
 dojo.require("js.date");
 dojo.require("dojo.window");
 dojo.require("dojo.string");
@@ -25,6 +25,9 @@ dojo.require("esri.tasks.geometry");
 dojo.require("esri.arcgis.utils");
 dojo.require("esri.arcgis.Portal");
 dojo.require("dojo.number");
+dojo.require("dojo.dom");
+dojo.require("dojo.dom-geometry");
+dojo.require("dojo.dom-class");
 
 var authenticatedGroup; //variable for storing the group link for authentication
 var authenticatedLinks; //variable for storing the links for token generation
@@ -50,7 +53,7 @@ var showNullValueAs; //variable for storing values to be shown for null values
 var startExtent; //variable for storing the default extent
 var statisticsKeyword; // variable for identifying statistics layer
 var tempGraphicsLayerId = 'tempGraphicsLayerID';  //variable to store graphics layer ID
-var temporaryGraphicsLayerId = 'temporaryGraphicsLayerId'; //variable to store graphics layer ID for temporary map 
+var temporaryGraphicsLayerId = 'temporaryGraphicsLayerId'; //variable to store graphics layer ID for temporary map
 var twitterDetails; //variable for storing twitter link and fields
 var podInformation; //variable for storing information of pods
 var welcomeScreenImages; //variable for storing images for welcome screen
@@ -87,8 +90,8 @@ function Init() {
 
             share = GetQuerystring('extent');
             if (share != "") {
-                dojo.byId("divTextContainer").style.display = "none";
-                dojo.byId("divMapContainer").style.display = "none";
+                dojo.dom.byId("divTextContainer").style.display = "none";
+                dojo.dom.byId("divMapContainer").style.display = "none";
 
                 ShowProgressIndicator();
 
@@ -102,36 +105,36 @@ function Init() {
                 }
             }
             else {
-                dojo.byId("divTextContainer").style.display = "block";
+                dojo.dom.byId("divTextContainer").style.display = "block";
             }
 
             var userAgent = window.navigator.userAgent;
 
             if ((userAgent.indexOf("iPad") >= 0) || (userAgent.indexOf("Android") >= 0)) {
                 isTablet = true;
-                dojo.byId('dynamicStyleSheet').href = "styles/tablet.css";
+                dojo.dom.byId('dynamicStyleSheet').href = "styles/tablet.css";
             }
             else {
                 isBrowser = true;
-                dojo.byId('dynamicStyleSheet').href = "styles/browser.css";
+                dojo.dom.byId('dynamicStyleSheet').href = "styles/browser.css";
             }
 
             dojo.connect(window, 'onresize', function (evt) {
                 setTimeout(function () {
-                    CreateScrollbar(dojo.byId('divLayerContainer'), dojo.byId('divLayerContent'));
+                    CreateScrollbar(dojo.dom.byId('divLayerContainer'), dojo.dom.byId('divLayerContent'));
                 }, 500);
                 if (map) {
-                    if (dojo.byId("map").style.display != "none") {
-                        dojo.byId('map').style.marginLeft = (dojo.coords("holder").l) + "px";
-                        dojo.byId('divFrozen').style.marginLeft = (dojo.coords("holder").l) + "px";
-                        dojo.byId('showHide').style.right = (dojo.coords("holder").l + 15) + "px";
+                    if (dojo.dom.byId("map").style.display != "none") {
+                        dojo.dom.byId('map').style.marginLeft = (dojo['dom-geometry'].getMarginBox("holder").l) + "px";
+                        dojo.dom.byId('divFrozen').style.marginLeft = (dojo['dom-geometry'].getMarginBox("holder").l) + "px";
+                        dojo.dom.byId('showHide').style.right = (dojo['dom-geometry'].getMarginBox("holder").l + 15) + "px";
                         ToggleContainers();
                         map.reposition();
                         map.resize();
                         ResetSlideControls();
-                        dojo.byId("divTempMap").style.left = ((dojo.coords("mapContainer").w + (dojo.coords("holder").l)) - dojo.coords("divMap").w) + "px";
+                        dojo.dom.byId("divTempMap").style.left = ((dojo['dom-geometry'].getMarginBox("mapContainer").w + (dojo['dom-geometry'].getMarginBox("holder").l)) - dojo['dom-geometry'].getMarginBox("divMap").w) + "px";
                         setTimeout(function () {
-                            dojo.byId("divFrozen").style.height = (map.height - 140) + "px";
+                            dojo.dom.byId("divFrozen").style.height = (map.height - 140) + "px";
                         }, 500);
                         ResizeChartContainer();
                     }
@@ -139,7 +142,7 @@ function Init() {
             });
 
             dojo.connect(window, 'onkeyup', function (evt) {
-                if (dojo.byId("divLoginScreenContainer").style.display != "none") {
+                if (dojo.dom.byId("divLoginScreenContainer").style.display != "none") {
                     if (evt.keyCode == dojo.keys.ESCAPE) {
                         HideProgressIndicator();
                     }
@@ -148,8 +151,8 @@ function Init() {
 
             if (isTablet) {
                 SetLoginPageHeight();
-                dojo.byId("tdMapControls").style.width = ((window.matchMedia("(orientation: portrait)").matches) ? "300px" : "330px");
-                dojo.byId("tdMapButtons").style.width = ((window.matchMedia("(orientation: portrait)").matches) ? "300px" : "330px");
+                dojo.dom.byId("tdMapControls").style.width = ((window.matchMedia("(orientation: portrait)").matches) ? "300px" : "330px");
+                dojo.dom.byId("tdMapButtons").style.width = ((window.matchMedia("(orientation: portrait)").matches) ? "300px" : "330px");
             }
 
             // Read config.js file to set appropriate values
@@ -168,10 +171,10 @@ function Init() {
             HomeLink.href = responseObject.HomeScreenIcon;
             document.getElementsByTagName('head')[0].appendChild(HomeLink);
 
-            dojo.byId("lblAppName").innerHTML = responseObject.ApplicationName.trimString(19);
-            dojo.byId("lblAppName").title = responseObject.ApplicationName;
-            dojo.byId("divWelcomeContent").innerHTML = responseObject.WelcomeScreenMessage;
-            dojo.byId("tdSearchHeader").innerHTML = responseObject.LocatorSettings.DisplayText;
+            dojo.dom.byId("lblAppName").innerHTML = responseObject.ApplicationName.trimString(19);
+            dojo.dom.byId("lblAppName").title = responseObject.ApplicationName;
+            dojo.dom.byId("divWelcomeContent").innerHTML = responseObject.WelcomeScreenMessage;
+            dojo.dom.byId("tdSearchHeader").innerHTML = responseObject.LocatorSettings.DisplayText;
             welcomeScreenImages = responseObject.WelcomeScreenImages;
             authenticatedGroup = responseObject.AuthenticatedGroup;
             authenticatedLinks = responseObject.AuthenticatedLinks;
@@ -184,30 +187,30 @@ function Init() {
             geometryService = new esri.tasks.GeometryService("http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
             rssFields = responseObject.RSSFields;
             statisticsKeyword = responseObject.StatisticsKeyword;
-            dojo.byId("tdGraphTab").innerHTML = responseObject.GraphTabName.trimString(10);
-            dojo.byId("tdGraphTab").title = responseObject.GraphTabName;
+            dojo.dom.byId("tdGraphTab").innerHTML = responseObject.GraphTabName.trimString(10);
+            dojo.dom.byId("tdGraphTab").title = responseObject.GraphTabName;
             defaultNewsFields = responseObject.DefaultNewsFields;
-            dojo.byId("tdHeaderBookmark").innerHTML = responseObject.BookmarkHeader;
+            dojo.dom.byId("tdHeaderBookmark").innerHTML = responseObject.BookmarkHeader;
             locatorSettings = responseObject.LocatorSettings;
 
             // Set address search parameters
-            dojo.byId("txtAddress").setAttribute("defaultAddress", responseObject.LocatorSettings.DefaultValue);
-            dojo.byId('txtAddress').value = responseObject.LocatorSettings.DefaultValue;
-            lastSearchString = dojo.byId("txtAddress").value.trim();
-            dojo.byId("txtAddress").setAttribute("defaultAddressTitle", responseObject.LocatorSettings.DefaultValue);
-            dojo.byId("txtAddress").style.color = "gray";
-            dojo.connect(dojo.byId('txtAddress'), "ondblclick", ClearDefaultText);
-            dojo.connect(dojo.byId('txtAddress'), "onfocus", function (evt) {
+            dojo.dom.byId("txtAddress").setAttribute("defaultAddress", responseObject.LocatorSettings.DefaultValue);
+            dojo.dom.byId('txtAddress').value = responseObject.LocatorSettings.DefaultValue;
+            lastSearchString = dojo.dom.byId("txtAddress").value.trim();
+            dojo.dom.byId("txtAddress").setAttribute("defaultAddressTitle", responseObject.LocatorSettings.DefaultValue);
+            dojo.dom.byId("txtAddress").style.color = "gray";
+            dojo.connect(dojo.dom.byId('txtAddress'), "ondblclick", ClearDefaultText);
+            dojo.connect(dojo.dom.byId('txtAddress'), "onfocus", function (evt) {
                 this.style.color = "#000";
             });
-            dojo.connect(dojo.byId('txtAddress'), "onblur", ReplaceDefaultText);
+            dojo.connect(dojo.dom.byId('txtAddress'), "onblur", ReplaceDefaultText);
 
             // Identify the key presses while implementing auto-complete and assign appropriate actions
-            dojo.connect(dojo.byId("txtAddress"), 'onkeyup', function (evt) {
+            dojo.connect(dojo.dom.byId("txtAddress"), 'onkeyup', function (evt) {
                 if (evt) {
                     if (evt.keyCode == dojo.keys.ENTER) {
-                        if (dojo.byId("txtAddress").value != '') {
-                            dojo.byId("imgSearchLoader").style.display = "block";
+                        if (dojo.dom.byId("txtAddress").value != '') {
+                            dojo.dom.byId("imgSearchLoader").style.display = "block";
                             LocateAddress();
                             return;
                         }
@@ -219,41 +222,41 @@ function Init() {
                         return;
                     }
 
-                    if (dojo.coords("divAddressContent").h > 0) {
-                        if (dojo.byId("txtAddress").value.trim() != '') {
-                            if (lastSearchString != dojo.byId("txtAddress").value.trim()) {
-                                lastSearchString = dojo.byId("txtAddress").value.trim();
-                                RemoveChildren(dojo.byId('tblAddressResults'));
+                    if (dojo['dom-geometry'].getMarginBox("divAddressContent").h > 0) {
+                        if (dojo.dom.byId("txtAddress").value.trim() != '') {
+                            if (lastSearchString != dojo.dom.byId("txtAddress").value.trim()) {
+                                lastSearchString = dojo.dom.byId("txtAddress").value.trim();
+                                RemoveChildren(dojo.dom.byId('tblAddressResults'));
 
                                 // Clear any staged search
                                 clearTimeout(stagedSearch);
 
-                                if (dojo.byId("txtAddress").value.trim().length > 0) {
-                                    // Stage a new search, which will launch if no new searches show up 
+                                if (dojo.dom.byId("txtAddress").value.trim().length > 0) {
+                                    // Stage a new search, which will launch if no new searches show up
                                     // before the timeout
                                     stagedSearch = setTimeout(function () {
-                                        dojo.byId("imgSearchLoader").style.display = "block";
+                                        dojo.dom.byId("imgSearchLoader").style.display = "block";
                                         LocateAddress();
                                     }, 500);
                                 }
                             }
                         } else {
-                            lastSearchString = dojo.byId("txtAddress").value.trim();
-                            dojo.byId("imgSearchLoader").style.display = "none";
-                            RemoveChildren(dojo.byId('tblAddressResults'));
-                            CreateScrollbar(dojo.byId("divAddressScrollContainer"), dojo.byId("divAddressScrollContent"));
+                            lastSearchString = dojo.dom.byId("txtAddress").value.trim();
+                            dojo.dom.byId("imgSearchLoader").style.display = "none";
+                            RemoveChildren(dojo.dom.byId('tblAddressResults'));
+                            CreateScrollbar(dojo.dom.byId("divAddressScrollContainer"), dojo.dom.byId("divAddressScrollContent"));
                         }
                     }
                 }
             });
 
-            dojo.connect(dojo.byId("txtAddress"), 'onpaste', function (evt) {
+            dojo.connect(dojo.dom.byId("txtAddress"), 'onpaste', function (evt) {
                 setTimeout(function () {
                     LocateAddress();
                 }, 100);
             });
 
-            dojo.connect(dojo.byId("txtAddress"), 'oncut', function (evt) {
+            dojo.connect(dojo.dom.byId("txtAddress"), 'oncut', function (evt) {
                 setTimeout(function () {
                     LocateAddress();
                 }, 100);
@@ -264,21 +267,21 @@ function Init() {
             baseMapLayer = responseObject.BaseMapLayer;
 
             for (var i = 0; i < welcomeScreenImages.length; i++) {
-                dojo.byId("span" + i + "Welcome").innerHTML = welcomeScreenImages[i].Name;
-                dojo.byId("img" + i + "Welcome").src = welcomeScreenImages[i].Image;
+                dojo.dom.byId("span" + i + "Welcome").innerHTML = welcomeScreenImages[i].Name;
+                dojo.dom.byId("img" + i + "Welcome").src = welcomeScreenImages[i].Image;
             }
 
             // Open help page upon clicking help button on dashboard page
-            dojo.connect(dojo.byId('btnHelp'), "onclick", function () {
+            dojo.connect(dojo.dom.byId('btnHelp'), "onclick", function () {
                 window.open(responseObject.HelpURL);
             });
             // Open help page upon clicking help button on map page
-            dojo.connect(dojo.byId('btnMapHelp'), "onclick", function () {
+            dojo.connect(dojo.dom.byId('btnMapHelp'), "onclick", function () {
                 window.open(responseObject.HelpURL);
             });
             // Create scroll bar for welcome text on home page
             setTimeout(function () {
-                CreateScrollbar(dojo.byId('divWelcomeContainer'), dojo.byId('divWelcomeContent'));
+                CreateScrollbar(dojo.dom.byId('divWelcomeContainer'), dojo.dom.byId('divWelcomeContent'));
             }, 500);
         }
     });
@@ -288,7 +291,7 @@ dojo.addOnLoad(Init);
 //This function is used to authenticate the user
 function AuthenticateUser() {
     ShowProgressIndicator();
-    var signInLink = dojo.byId('tdPanelSign');
+    var signInLink = dojo.dom.byId('tdPanelSign');
     if (signInLink.innerHTML.indexOf('In') !== -1) {
         portal.signIn().then(function (loggedInUser) {
             portalUser = loggedInUser;
@@ -318,7 +321,7 @@ function AuthenticateUser() {
     });
 }
 
-//Function to find the authenticated group 
+//Function to find the authenticated group
 //This function is used to find the group by its groupId; It also identifies webmaps for each subject group
 function FindArcGISGroup() {
     var params = {
@@ -329,24 +332,24 @@ function FindArcGISGroup() {
     portal.queryItems(params).then(function (groupdata) {
         var data = portalUser.credential;
 
-        RemoveChildren(dojo.byId("divLayerContent"));
+        RemoveChildren(dojo.dom.byId("divLayerContent"));
         arrSubjectGroups = [];
 
-        dojo.byId("btnSettings").className = "customButton";
-        dojo.byId("tdPanelSign").innerHTML = "Sign Out";
-        dojo.byId("btnMap").className = "customButton";
-        dojo.byId("divLoginScreenContainer").style.display = "none";
-        dojo.byId("divInfoContainer").style.display = "block";
-        dojo.byId("btnSettings").style.cursor = "pointer";
-        dojo.byId("btnMap").style.cursor = "pointer";
+        dojo.dom.byId("btnSettings").className = "customButton";
+        dojo.dom.byId("tdPanelSign").innerHTML = "Sign Out";
+        dojo.dom.byId("btnMap").className = "customButton";
+        dojo.dom.byId("divLoginScreenContainer").style.display = "none";
+        dojo.dom.byId("divInfoContainer").style.display = "block";
+        dojo.dom.byId("btnSettings").style.cursor = "pointer";
+        dojo.dom.byId("btnMap").style.cursor = "pointer";
 
         if (isTablet) {
             SetHomePageHeight();
         }
-        CreateScrollbar(dojo.byId('divLayerContainer'), dojo.byId('divLayerContent'));
-        CreateScrollbar(dojo.byId('divNAEDisplayContainer'), dojo.byId('divNAEDisplayContent'));
-        CreateScrollbar(dojo.byId('divRSSFeedContainer'), dojo.byId('divRSSFeedContent'));
-        CreateScrollbar(dojo.byId('divTwitterFeedContainer'), dojo.byId('divTwitterFeedContent'));
+        CreateScrollbar(dojo.dom.byId('divLayerContainer'), dojo.dom.byId('divLayerContent'));
+        CreateScrollbar(dojo.dom.byId('divNAEDisplayContainer'), dojo.dom.byId('divNAEDisplayContent'));
+        CreateScrollbar(dojo.dom.byId('divRSSFeedContainer'), dojo.dom.byId('divRSSFeedContent'));
+        CreateScrollbar(dojo.dom.byId('divTwitterFeedContainer'), dojo.dom.byId('divTwitterFeedContent'));
 
         var userGroupDetails = authenticatedLinks.split("${0}");
         var userGroupLink = userGroupDetails[0] + authenticatedGroup + userGroupDetails[1] + data.token;
@@ -405,14 +408,14 @@ function FindArcGISGroup() {
                                         slider: false
                                     }
                                 });
-                                dojo.byId("imgResize").setAttribute("webmapID", orderedLayer[p][g].webMapId);
+                                dojo.dom.byId("imgResize").setAttribute("webmapID", orderedLayer[p][g].webMapId);
                                 mapDeferred.addCallback(function (response) {
                                     map = response.map;
                                     map.destroy();
                                     responseCounter++;
                                     var webmapInfo = {};
                                     webmapInfo.key = response.itemInfo.item.title;
-                                    dojo.byId("imgResize").setAttribute("webmapKey", webmapInfo.key);
+                                    dojo.dom.byId("imgResize").setAttribute("webmapKey", webmapInfo.key);
                                     webmapInfo.operationalLayers = response.itemInfo.itemData.operationalLayers;
                                     webmapInfo.baseMap = response.itemInfo.itemData.baseMap.baseMapLayers;
                                     keyIndicators.push(webmapInfo);
@@ -432,19 +435,19 @@ function FindArcGISGroup() {
                     }
                 }
                 if (compareWebmaps.length > 0) {
-                    dojo.byId("imgResize").setAttribute("compareId", dojo.toJson(compareWebmaps));
+                    dojo.dom.byId("imgResize").setAttribute("compareId", dojo.toJson(compareWebmaps));
                 }
 
                 //Display News and Events panel when none groups have key indicator
                 if (keyCounter == 0) {
                     CreateLayerPods(orderedLayer, data.token, groupdata, null);
-                    PopulateNews(dojo.byId("btnNews"));
+                    PopulateNews(dojo.dom.byId("btnNews"));
                 }
                 CheckBasemap(orderedLayer, groupdata, data);
 
                 //Create basemap when clicked on Map button on dashboard page
-                mapClick = dojo.connect(dojo.byId('btnMap'), "onclick", function (evt) {
-                    if (dojo.byId("btnMap").style.cursor == "pointer") {
+                mapClick = dojo.connect(dojo.dom.byId('btnMap'), "onclick", function (evt) {
+                    if (dojo.dom.byId("btnMap").style.cursor == "pointer") {
                         ShowProgressIndicator();
                         if (map) {
                             map.destroy();
@@ -469,17 +472,17 @@ function FindArcGISGroup() {
                 }
             }
         }, { useProxy: true });
-        dojo.byId("map").style.display = "none";
+        dojo.dom.byId("map").style.display = "none";
         //Open Setting page upon clicking 'Settings' on dashboard page
-        dojo.byId("btnSettings").onclick = function () {
-            if (dojo.byId("btnSettings").className != "customDisabledButton") {
-                if (dojo.byId("divSettingsContainer").style.display != "block") {
-                    dojo.byId("divInfoContainer").style.display = "none";
-                    dojo.byId("divSettingsContainer").style.display = "block";
+        dojo.dom.byId("btnSettings").onclick = function () {
+            if (dojo.dom.byId("btnSettings").className != "customDisabledButton") {
+                if (dojo.dom.byId("divSettingsContainer").style.display != "block") {
+                    dojo.dom.byId("divInfoContainer").style.display = "none";
+                    dojo.dom.byId("divSettingsContainer").style.display = "block";
                     if (isTablet) {
                         SetSettingsHeight();
                     }
-                    dojo.byId("btnSettings").style.cursor = "default";
+                    dojo.dom.byId("btnSettings").style.cursor = "default";
                     DisplaySettings();
                 }
             }
@@ -497,7 +500,7 @@ function CreateBasemap(orderedLayer, groupdata, data) {
                         slider: false
                     }
                 });
-                dojo.byId("imgResize").setAttribute("webmapID", groupdata.items[q].id);
+                dojo.dom.byId("imgResize").setAttribute("webmapID", groupdata.items[q].id);
                 webmapDetails.addCallback(function (response) {
                     map = response.map;
                     map.destroy();
@@ -505,24 +508,24 @@ function CreateBasemap(orderedLayer, groupdata, data) {
                     var webmapInfo = {};
                     webmapInfo.id = response.itemInfo.item.id;
                     webmapInfo.key = response.itemInfo.item.title;
-                    dojo.byId("imgResize").setAttribute("webmapKey", webmapInfo.key);
+                    dojo.dom.byId("imgResize").setAttribute("webmapKey", webmapInfo.key);
                     webmapInfo.operationalLayers = response.itemInfo.itemData.operationalLayers;
                     webmapInfo.baseMap = response.itemInfo.itemData.baseMap.baseMapLayers;
 
-                    dojo.byId("divServiceDetails").style.display = "none";
-                    RemoveChildren(dojo.byId("trBottomHeaders"));
-                    RemoveChildren(dojo.byId("trBottomTags"));
-                    RemoveChildren(dojo.byId("tblMoreResults"));
+                    dojo.dom.byId("divServiceDetails").style.display = "none";
+                    RemoveChildren(dojo.dom.byId("trBottomHeaders"));
+                    RemoveChildren(dojo.dom.byId("trBottomTags"));
+                    RemoveChildren(dojo.dom.byId("tblMoreResults"));
 
-                    dojo.replaceClass("divGraphComponent", "hideContainerHeight", "showContainerHeight");
-                    dojo.byId('divGraphComponent').style.height = '0px';
-                    dojo.byId('showHide').style.top = '59px';
-                    dojo.byId("divGraphHeader").style.display = "none";
-                    dojo.byId("divGraphHeader").style.color = "gray";
-                    dojo.byId("divGraphHeader").setAttribute("state", "disabled");
-                    dojo.byId("divGraphHeader").style.cursor = "default";
+                    dojo['dom-class'].replace("divGraphComponent", "hideContainerHeight", "showContainerHeight");
+                    dojo.dom.byId('divGraphComponent').style.height = '0px';
+                    dojo.dom.byId('showHide').style.top = '59px';
+                    dojo.dom.byId("divGraphHeader").style.display = "none";
+                    dojo.dom.byId("divGraphHeader").style.color = "gray";
+                    dojo.dom.byId("divGraphHeader").setAttribute("state", "disabled");
+                    dojo.dom.byId("divGraphHeader").style.cursor = "default";
 
-                    PopulateEventDetails(webmapInfo.id, orderedLayer, dojo.byId("lblAppName").innerHTML, webmapInfo, groupdata, data.token, true, false, null);
+                    PopulateEventDetails(webmapInfo.id, orderedLayer, dojo.dom.byId("lblAppName").innerHTML, webmapInfo, groupdata, data.token, true, false, null);
                 });
                 webmapDetails.addErrback(function (error) {
                     HideProgressIndicator();
@@ -544,9 +547,9 @@ function CheckBasemap(orderedLayer, groupdata, data) {
             }
         }
     }
-    if (!baseLayer) {       
-        dojo.byId("btnMap").style.color = "gray";
-        dojo.byId("btnMap").style.cursor = "default";
+    if (!baseLayer) {
+        dojo.dom.byId("btnMap").style.color = "gray";
+        dojo.dom.byId("btnMap").style.cursor = "default";
     }
 }
 
@@ -556,39 +559,39 @@ function SignOut() {
     startExtent = "";
     dojo.disconnect(mapClick);
 
-    RemoveChildren(dojo.byId("divLayerContent"));
-    RemoveChildren(dojo.byId("divNAEDisplayContent"));
+    RemoveChildren(dojo.dom.byId("divLayerContent"));
+    RemoveChildren(dojo.dom.byId("divNAEDisplayContent"));
 
-    dojo.replaceClass("divGraphComponent", "hideContainerHeight", "showContainerHeight");
-    dojo.byId('divGraphComponent').style.height = '0px';
-    dojo.byId('showHide').style.top = '59px';
+    dojo['dom-class'].replace("divGraphComponent", "hideContainerHeight", "showContainerHeight");
+    dojo.dom.byId('divGraphComponent').style.height = '0px';
+    dojo.dom.byId('showHide').style.top = '59px';
 
-    dojo.byId("imgBookmark").src = "images/imgBookmark.png";
-    dojo.replaceClass("divBookmarkContent", "hideContainerHeight", "showContainerHeight");
-    dojo.byId('divBookmarkContent').style.height = '0px';
+    dojo.dom.byId("imgBookmark").src = "images/imgBookmark.png";
+    dojo['dom-class'].replace("divBookmarkContent", "hideContainerHeight", "showContainerHeight");
+    dojo.dom.byId('divBookmarkContent').style.height = '0px';
 
-    dojo.byId("imgSearch").src = "images/locate.png";
-    dojo.replaceClass("divAddressContent", "hideContainerHeight", "showContainerHeight");
-    dojo.byId('divAddressContent').style.height = '0px';
+    dojo.dom.byId("imgSearch").src = "images/locate.png";
+    dojo['dom-class'].replace("divAddressContent", "hideContainerHeight", "showContainerHeight");
+    dojo.dom.byId('divAddressContent').style.height = '0px';
 
-    if (dojo.byId("imgMore")) {
-        dojo.byId("imgMore").src = "images/more.png";
+    if (dojo.dom.byId("imgMore")) {
+        dojo.dom.byId("imgMore").src = "images/more.png";
     }
-    dojo.replaceClass("divMoreContent", "hideContainerHeight", "showContainerHeight");
-    dojo.byId('divMoreContent').style.height = '0px';
+    dojo['dom-class'].replace("divMoreContent", "hideContainerHeight", "showContainerHeight");
+    dojo.dom.byId('divMoreContent').style.height = '0px';
 
-    dojo.byId("imgGeolocation").src = "images/imgGeolocation.png";
+    dojo.dom.byId("imgGeolocation").src = "images/imgGeolocation.png";
 
-    dojo.byId("btnSettings").style.cursor = "default";
-    dojo.byId("btnMap").style.cursor = "default";
+    dojo.dom.byId("btnSettings").style.cursor = "default";
+    dojo.dom.byId("btnMap").style.cursor = "default";
 
-    dojo.byId("divInfoContainer").style.display = "none";
-    dojo.byId("divSettingsContainer").style.display = "none";
+    dojo.dom.byId("divInfoContainer").style.display = "none";
+    dojo.dom.byId("divSettingsContainer").style.display = "none";
 
-    dojo.byId("btnSettings").className = "customDisabledButton";
-    dojo.byId("tdPanelSign").innerHTML = "Sign In";
-    dojo.byId("btnMap").className = "customDisabledButton";
-    dojo.byId("divLoginScreenContainer").style.display = "block";
+    dojo.dom.byId("btnSettings").className = "customDisabledButton";
+    dojo.dom.byId("tdPanelSign").innerHTML = "Sign In";
+    dojo.dom.byId("btnMap").className = "customDisabledButton";
+    dojo.dom.byId("divLoginScreenContainer").style.display = "block";
     if (isTablet) {
         SetLoginPageHeight();
     }
@@ -596,21 +599,25 @@ function SignOut() {
 
 //For every subject group query statistics layer that consists of key indicators then transfer the data to create pods for subject groups
 function PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer, token, groupdata) {
+    var statsFlag = false;
     if (keyIndicators[val]) {
         for (var b = 0; b < keyIndicators[val].operationalLayers.length; b++) {
             if (keyIndicators[val].operationalLayers[b].title.indexOf(statisticsKeyword) >= 0) {
-                queryTask = new esri.tasks.QueryTask(keyIndicators[val].operationalLayers[b].url);
+                statsFlag = true;
+                var queryDate = (new Date()).getTime();
+                var queryTask = new esri.tasks.QueryTask(keyIndicators[val].operationalLayers[b].url);
                 var queryCounty = new esri.tasks.Query();
-                queryCounty.where = "1=1";
+                queryCounty.where = "1=1 AND " + queryDate + "=" + queryDate;
                 queryCounty.returnGeometry = false;
                 queryCounty.outFields = ["*"];
                 queryCounty.outSpatialReference = map.spatialReference;
+
                 queryTask.execute(queryCounty, function (featureSet) {
                     indicatorState.push({ key: keyIndicators[val].key, value: featureSet.features[0].attributes });
                     val++;
                     if (keyIndicators.length == val) {
                         CreateLayerPods(orderedLayer, token, groupdata, indicatorState);
-                        PopulateNews(dojo.byId("btnNews"));
+                        PopulateNews(dojo.dom.byId("btnNews"));
                         return;
                     }
                     PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer, token, groupdata);
@@ -620,13 +627,21 @@ function PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer,
                             val++;
                             if (keyIndicators.length == val) {
                                 CreateLayerPods(orderedLayer, token, groupdata, indicatorState);
-                                PopulateNews(dojo.byId("btnNews"));
+                                PopulateNews(dojo.dom.byId("btnNews"));
                                 return;
                             }
                             PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer, token, groupdata);
                         });
             }
         }
+        if (!statsFlag) {
+            val++;
+            if (keyIndicators.length == val) {
+                CreateLayerPods(orderedLayer, token, groupdata, indicatorState);
+                PopulateNews(dojo.dom.byId("btnNews"));
+                return;
+            }
+            PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer, token, groupdata);
+        }
     }
 }
-

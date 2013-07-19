@@ -1,31 +1,32 @@
 ﻿/** @license
-| Version 10.2
-| Copyright 2012 Esri
-|
-| Licensed under the Apache License, Version 2.0 (the "License");
-| you may not use this file except in compliance with the License.
-| You may obtain a copy of the License at
-|
-|    http://www.apache.org/licenses/LICENSE-2.0
-|
-| Unless required by applicable law or agreed to in writing, software
-| distributed under the License is distributed on an "AS IS" BASIS,
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-| See the License for the specific language governing permissions and
-| limitations under the License.
-*/
-var shareOnLoad = true; //flag set for shared link 
-var chart; // variable used to store created chart object for trends 
+ | Version 10.2
+ | Copyright 2012 Esri
+ |
+ | Licensed under the Apache License, Version 2.0 (the "License");
+ | you may not use this file except in compliance with the License.
+ | You may obtain a copy of the License at
+ |
+ |    http://www.apache.org/licenses/LICENSE-2.0
+ |
+ | Unless required by applicable law or agreed to in writing, software
+ | distributed under the License is distributed on an "AS IS" BASIS,
+ | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ | See the License for the specific language governing permissions and
+ | limitations under the License.
+ */
+var shareOnLoad = true; //flag set for shared link
+var chart; // variable used to store created chart object for trends
+var mapExtent;
 
 //Create bottom panel for subject groups with respective images
 function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, bottomOffset) {
-    RemoveChildren(dojo.byId("trBottomHeaders"));
-    RemoveChildren(dojo.byId("trBottomTags"));
-    RemoveChildren(dojo.byId("tblMoreResults"));
+    RemoveChildren(dojo.dom.byId("trBottomHeaders"));
+    RemoveChildren(dojo.dom.byId("trBottomTags"));
+    RemoveChildren(dojo.dom.byId("tblMoreResults"));
 
-    dojo.byId("divMoreResultsContent").setAttribute("header", dojo.toJson(selectedLayer));
-    dojo.byId("divMoreResultsContent").setAttribute("groupdata", dojo.toJson(groupdata));
-    dojo.byId("divMoreResultsContent").setAttribute("token", dojo.toJson(token));
+    dojo.dom.byId("divMoreResultsContent").setAttribute("header", dojo.toJson(selectedLayer));
+    dojo.dom.byId("divMoreResultsContent").setAttribute("groupdata", dojo.toJson(groupdata));
+    dojo.dom.byId("divMoreResultsContent").setAttribute("token", dojo.toJson(token));
     var ord = 0;
     var lastMetric = 0;
     for (var col in arrSubjectGroups) {
@@ -43,7 +44,7 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
         var webId = "";
         var webTag = "";
         var webTitle = "";
-        for (t in arrSubjectGroups[col]) {
+        for (var t in arrSubjectGroups[col]) {
             webId += arrSubjectGroups[col][t].webMapId + ",";
             webTag += col + ",";
             webTitle += arrSubjectGroups[col][t].title + ",";
@@ -82,10 +83,10 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
             //Upon clicking/tapping on the subject group image; the data for selected subject group will be transferred to function PopulateEventDetails to create map page.
             if (this.style.cursor == "pointer") {
                 ShowCompare(false);
-                if (dojo.coords("divMoreContent").h > 0) {
-                    dojo.byId("imgMore").src = "images/more.png";
-                    dojo.replaceClass("divMoreContent", "hideContainerHeight", "showContainerHeight");
-                    dojo.byId('divMoreContent').style.height = '0px';
+                if (dojo['dom-geometry'].getMarginBox("divMoreContent").h > 0) {
+                    dojo.dom.byId("imgMore").src = "images/more.png";
+                    dojo['dom-class'].replace("divMoreContent", "hideContainerHeight", "showContainerHeight");
+                    dojo.dom.byId('divMoreContent').style.height = '0px';
                 }
                 if (share != "") {
                     shareOnLoad = false;
@@ -96,14 +97,14 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
                 var visibility = this.getAttribute("podVisible");
                 var mContainer = this.getAttribute("con");
                 var pOrder = this.getAttribute("parentOrder");
-                if (dojo.byId("trMore" + this.getAttribute("parentOrder"))) {
-                    var lOrder = dojo.byId("trMore" + this.getAttribute("parentOrder")).getAttribute("btnMore");
+                if (dojo.dom.byId("trMore" + this.getAttribute("parentOrder"))) {
+                    var lOrder = dojo.dom.byId("trMore" + this.getAttribute("parentOrder")).getAttribute("btnMore");
                 }
 
-                dojo.byId("tdEventName").innerHTML = tag.split(",")[0];
+                dojo.dom.byId("tdEventName").innerHTML = tag.split(",")[0];
                 for (var d in arrSubjectGroups) {
-                    dojo.byId("imgBottomHeader" + d).src = dojo.byId("imgBottomHeader" + d).getAttribute("orgImage");
-                    dojo.byId("imgBottomHeader" + d).style.cursor = "pointer";
+                    dojo.dom.byId("imgBottomHeader" + d).src = dojo.dom.byId("imgBottomHeader" + d).getAttribute("orgImage");
+                    dojo.dom.byId("imgBottomHeader" + d).style.cursor = "pointer";
                 }
                 ShowProgressIndicator();
                 this.src = this.getAttribute("selImage");
@@ -146,11 +147,11 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
                                     return 0 //default return value (no sorting)
                                 })
 
-                                dojo.byId("divMoreResultsContent").setAttribute("header", dojo.toJson(tag.split(",")[0]));
-                                dojo.byId("divMoreResultsContent").setAttribute("groupdata", dojo.toJson(groupdata));
-                                dojo.byId("divMoreResultsContent").setAttribute("token", dojo.toJson(token));
+                                dojo.dom.byId("divMoreResultsContent").setAttribute("header", dojo.toJson(tag.split(",")[0]));
+                                dojo.dom.byId("divMoreResultsContent").setAttribute("groupdata", dojo.toJson(groupdata));
+                                dojo.dom.byId("divMoreResultsContent").setAttribute("token", dojo.toJson(token));
 
-                                RemoveChildren(dojo.byId("divServiceContainer"));
+                                RemoveChildren(dojo.dom.byId("divServiceContainer"));
                                 if (mContainer == "more") {
                                     var bottomLayer = [];
                                     for (var lay in arrSubjectGroups) {
@@ -166,10 +167,10 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
                                         swappedLayer[bottomLayer[z].obj] = [];
                                         swappedLayer[bottomLayer[z].obj] = bottomLayer[z].arr;
                                     }
-                                    RemoveChildren(dojo.byId("trBottomHeaders"));
-                                    RemoveChildren(dojo.byId("trBottomTags"));
-                                    RemoveChildren(dojo.byId("tblMoreResults"));
-                                    PopulateEventDetails(webInfo[0].id, swappedLayer, tag.split(",")[0], webInfo[0], groupdata, token, false, visibility, dojo.byId("trBottomHeaders").getAttribute("offset"));
+                                    RemoveChildren(dojo.dom.byId("trBottomHeaders"));
+                                    RemoveChildren(dojo.dom.byId("trBottomTags"));
+                                    RemoveChildren(dojo.dom.byId("tblMoreResults"));
+                                    PopulateEventDetails(webInfo[0].id, swappedLayer, tag.split(",")[0], webInfo[0], groupdata, token, false, visibility, dojo.dom.byId("trBottomHeaders").getAttribute("offset"));
                                 } else {
                                     PopulateEventDetails(webInfo[0].id, null, tag.split(",")[0], webInfo[0], groupdata, token, false, visibility, null);
                                 }
@@ -192,7 +193,7 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
                                     FetchStatData(webStats, 0, statsData, webInfo, groupdata, token);
                                 }
                                 else {
-                                    dojo.byId("divServiceDetails").style.display = "none";
+                                    dojo.dom.byId("divServiceDetails").style.display = "none";
                                     HideGraphContainer();
                                 }
                             }
@@ -207,8 +208,8 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
             }
         }
         //Display more button if the number of subject groups can not be accommodated in the bottom panel
-        if ((((bottomOffset) ? bottomOffset : dojo.byId("divGroupHolder").offsetWidth) - ((lay == ord) ? 0 : 100)) > (lay * 100)) {
-            dojo.byId("trBottomHeaders").appendChild(td);
+        if ((((bottomOffset) ? bottomOffset : dojo.dom.byId("divGroupHolder").offsetWidth) - ((lay == ord) ? 0 : 100)) > (lay * 100)) {
+            dojo.dom.byId("trBottomHeaders").appendChild(td);
         } else {
             var trMoreResults = document.createElement("tr");
             trMoreResults.id = "trMore" + lay;
@@ -222,7 +223,7 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
             } else {
                 trMoreResults.className = "listLightColor";
             }
-            dojo.byId("tblMoreResults").appendChild(trMoreResults);
+            dojo.dom.byId("tblMoreResults").appendChild(trMoreResults);
             trMoreResults.appendChild(td);
             imgHeader.setAttribute("con", "more");
         }
@@ -237,8 +238,8 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
         td1.align = "center";
         td1.style.fontWeight = "bold";
         td1.style.verticalAlign = "top";
-        if ((((bottomOffset) ? bottomOffset : dojo.byId("divGroupHolder").offsetWidth) - ((lay == ord) ? 0 : 100)) > (lay * 100)) {
-            dojo.byId("trBottomTags").appendChild(td1);
+        if ((((bottomOffset) ? bottomOffset : dojo.dom.byId("divGroupHolder").offsetWidth) - ((lay == ord) ? 0 : 100)) > (lay * 100)) {
+            dojo.dom.byId("trBottomTags").appendChild(td1);
         }
         else {
             td1.style.verticalAlign = "middle";
@@ -247,7 +248,7 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
         }
     }
     if (bottomOffset == null) {
-        dojo.byId("trBottomHeaders").setAttribute("offset", dojo.byId("divGroupHolder").offsetWidth);
+        dojo.dom.byId("trBottomHeaders").setAttribute("offset", dojo.dom.byId("divGroupHolder").offsetWidth);
     }
     var tdMore = document.createElement("td");
     tdMore.align = "center";
@@ -255,7 +256,7 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
     tdMore.id = "tdMore";
     tdMore.style.paddingRight = "2px";
     tdMore.style.paddingTop = "7px";
-    dojo.byId("trBottomHeaders").appendChild(tdMore);
+    dojo.dom.byId("trBottomHeaders").appendChild(tdMore);
 
     var imgMore = document.createElement("img");
     imgMore.id = "imgMore";
@@ -273,8 +274,8 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
     else {
         tdMore.style.display = "none";
         imgMore.src = "images/more.png";
-        dojo.replaceClass("divMoreContent", "hideContainerHeight", "showContainerHeight");
-        dojo.byId('divMoreContent').style.height = '0px';
+        dojo['dom-class'].replace("divMoreContent", "hideContainerHeight", "showContainerHeight");
+        dojo.dom.byId('divMoreContent').style.height = '0px';
     }
 
     var tdMoreText = document.createElement("td");
@@ -291,64 +292,64 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
     else {
         tdMoreText.style.display = "none";
     }
-    dojo.byId("trBottomTags").appendChild(tdMoreText);
+    dojo.dom.byId("trBottomTags").appendChild(tdMoreText);
 }
 
 //Display container to show images in bottom panel
 function ShowMoreContainer() {
     ToggleHeaderPanels();
-    if (dojo.coords("divMoreContent").h <= 0) {
-        dojo.byId("imgMore").src = "images/more_hover.png";
-        dojo.byId('divMoreContent').style.height = "300px";
-        dojo.byId('divMoreContent').style.right = (dojo.coords("holder").l + 15) + "px";
-        dojo.replaceClass("divMoreContent", "showContainerHeight", "hideContainerHeight");
+    if (dojo['dom-geometry'].getMarginBox("divMoreContent").h <= 0) {
+        dojo.dom.byId("imgMore").src = "images/more_hover.png";
+        dojo.dom.byId('divMoreContent').style.height = "300px";
+        dojo.dom.byId('divMoreContent').style.right = (dojo['dom-geometry'].getMarginBox("holder").l + 15) + "px";
+        dojo['dom-class'].replace("divMoreContent", "showContainerHeight", "hideContainerHeight");
 
-        CreateScrollbar(dojo.byId("divMoreResultsContainer"), dojo.byId("divMoreResultsContent"));
+        CreateScrollbar(dojo.dom.byId("divMoreResultsContainer"), dojo.dom.byId("divMoreResultsContent"));
     }
 }
 
 //Go back to the dashboard page with the animation effects
 function BackToPods() {
     ShowCompare(false);
-    dojo.byId("divServiceDetails").style.display = "none";
+    dojo.dom.byId("divServiceDetails").style.display = "none";
     newLeft = 0;
-    dojo.byId('carouselscroll').style.left = "0px";
-    dojo.byId("divMapContainer").style.width = dojo.window.getBox().w + "px";
-    dojo.byId("divMapContainer").style.height = dojo.window.getBox().h + "px";
-    dojo.byId("map").style.display = "none";
+    dojo.dom.byId('carouselscroll').style.left = "0px";
+    dojo.dom.byId("divMapContainer").style.width = dojo.window.getBox().w + "px";
+    dojo.dom.byId("divMapContainer").style.height = dojo.window.getBox().h + "px";
+    dojo.dom.byId("map").style.display = "none";
     HideInfoContainer();
     map.removeAllLayers();
     map.destroy();
     if (share != "") {
         shareOnLoad = false;
     }
-    FadeIn(dojo.byId('divApplicationHeader'));
-    FadeIn(dojo.byId('divInfoContainer'));
-    FadeIn(dojo.byId('divSettingsContainer'));
-    FadeOut(dojo.byId('divMapApplicationHeader'));
-    FadeOut(dojo.byId("divBottomContainer"));
-    FadeOut(dojo.byId('map'));
-    FadeOut(dojo.byId('divServiceDetails'));
-    FadeOut(dojo.byId('showHide'));
+    FadeIn(dojo.dom.byId('divApplicationHeader'));
+    FadeIn(dojo.dom.byId('divInfoContainer'));
+    FadeIn(dojo.dom.byId('divSettingsContainer'));
+    FadeOut(dojo.dom.byId('divMapApplicationHeader'));
+    FadeOut(dojo.dom.byId("divBottomContainer"));
+    FadeOut(dojo.dom.byId('map'));
+    FadeOut(dojo.dom.byId('divServiceDetails'));
+    FadeOut(dojo.dom.byId('showHide'));
     //retainState variable is used to store the state of header containers
     if (retainState) {
-        FadeOut(dojo.byId('divGraphComponent'));
-        FadeOut(dojo.byId('divBookmarkContent'));
-        FadeOut(dojo.byId('divAddressContent'));
+        FadeOut(dojo.dom.byId('divGraphComponent'));
+        FadeOut(dojo.dom.byId('divBookmarkContent'));
+        FadeOut(dojo.dom.byId('divAddressContent'));
     }
     setTimeout(function () {
         if (!retainState) {
             ToggleHeaderPanels();
         }
-        dojo.byId("divMapContainer").style.width = "100%";
-        dojo.byId("divMapContainer").style.height = "100%";
-        dojo.byId("divMapContainer").style.display = "none";
-        dojo.byId("divTextContainer").style.display = "block";
+        dojo.dom.byId("divMapContainer").style.width = "100%";
+        dojo.dom.byId("divMapContainer").style.height = "100%";
+        dojo.dom.byId("divMapContainer").style.display = "none";
+        dojo.dom.byId("divTextContainer").style.display = "block";
         if (isTablet) {
             SetHomePageHeight();
         }
-        CreateScrollbar(dojo.byId('divLayerContainer'), dojo.byId('divLayerContent'));
-        CreateScrollbar(dojo.byId('divNAEDisplayContainer'), dojo.byId('divNAEDisplayContent'));
+        CreateScrollbar(dojo.dom.byId('divLayerContainer'), dojo.dom.byId('divLayerContent'));
+        CreateScrollbar(dojo.dom.byId('divNAEDisplayContainer'), dojo.dom.byId('divNAEDisplayContent'));
     }, 500);
 }
 
@@ -388,31 +389,31 @@ function RemoveHiglightGraphic() {
 //Show bookmark container with wipe-in animation
 function ShowBookmarkContainer() {
     ToggleHeaderPanels();
-    if (dojo.coords("divBookmarkContent").h <= 0) {
-        dojo.byId("showHide").style.display = "none";
+    if (dojo['dom-geometry'].getMarginBox("divBookmarkContent").h <= 0) {
+        dojo.dom.byId("showHide").style.display = "none";
 
-        dojo.byId("imgBookmark").src = "images/imgBookmark_hover.png";
-        dojo.byId('divBookmarkContent').style.height = "300px";
-        dojo.byId('divBookmarkContent').style.right = (dojo.coords("holder").l + 15) + "px";
-        dojo.replaceClass("divBookmarkContent", "showContainerHeight", "hideContainerHeight");
-        dojo.byId("imgAddBookmark").onclick = function () {
+        dojo.dom.byId("imgBookmark").src = "images/imgBookmark_hover.png";
+        dojo.dom.byId('divBookmarkContent').style.height = "300px";
+        dojo.dom.byId('divBookmarkContent').style.right = (dojo['dom-geometry'].getMarginBox("holder").l + 15) + "px";
+        dojo['dom-class'].replace("divBookmarkContent", "showContainerHeight", "hideContainerHeight");
+        dojo.dom.byId("imgAddBookmark").onclick = function () {
             var bookmarks = [];
             if (dojo.fromJson(localStorage.getItem("BookmarkCollection"))) {
                 bookmarks = dojo.fromJson(localStorage.getItem("BookmarkCollection"));
             }
-            if (!dojo.byId("txtBookmark").value.trim()) {
-                dojo.byId("bookmarkErrorMessage").innerHTML = messages.getElementsByTagName("bookmarkName")[0].childNodes[0].nodeValue;
+            if (!dojo.dom.byId("txtBookmark").value.trim()) {
+                dojo.dom.byId("bookmarkErrorMessage").innerHTML = messages.getElementsByTagName("bookmarkName")[0].childNodes[0].nodeValue;
                 return;
             }
             for (var b = 0; b < bookmarks.length; b++) {
-                if (dojo.byId("txtBookmark").value.trim() == bookmarks[b].name) {
-                    dojo.byId("bookmarkErrorMessage").innerHTML = messages.getElementsByTagName("existingBookmark")[0].childNodes[0].nodeValue;
-                    dojo.byId("txtBookmark").value = "";
+                if (dojo.dom.byId("txtBookmark").value.trim() == bookmarks[b].name) {
+                    dojo.dom.byId("bookmarkErrorMessage").innerHTML = messages.getElementsByTagName("existingBookmark")[0].childNodes[0].nodeValue;
+                    dojo.dom.byId("txtBookmark").value = "";
                     return;
                 }
             }
             bookmarks.push({
-                "name": dojo.byId("txtBookmark").value.trim(),
+                "name": dojo.dom.byId("txtBookmark").value.trim(),
                 "extent": (!tempMap) ? map.extent : tempMap.extent
             });
             localStorage.setItem("BookmarkCollection", dojo.toJson(bookmarks));
@@ -424,14 +425,14 @@ function ShowBookmarkContainer() {
 
 //Create list of bookmarks from local storage
 function PopulateBookmarkList() {
-    dojo.byId("bookmarkErrorMessage").innerHTML = "";
-    RemoveChildren(dojo.byId("divBookMarksResultsContent"));
+    dojo.dom.byId("bookmarkErrorMessage").innerHTML = "";
+    RemoveChildren(dojo.dom.byId("divBookMarksResultsContent"));
     var table = document.createElement("table");
     table.style.width = "96%";
     table.cellSpacing = 0;
     table.cellPadding = 0;
     table.align = "left";
-    dojo.byId("divBookMarksResultsContent").appendChild(table);
+    dojo.dom.byId("divBookMarksResultsContent").appendChild(table);
     var tBody = document.createElement("tbody");
     table.appendChild(tBody);
     var arrayBookmarks = dojo.fromJson(localStorage.getItem("BookmarkCollection"));
@@ -474,7 +475,7 @@ function PopulateBookmarkList() {
             }
 
             td.onclick = function (evt) {
-                //Upon clicking/tapping on this cell map will pan to the respective stored extent of this bookmark            
+                //Upon clicking/tapping on this cell map will pan to the respective stored extent of this bookmark
                 for (var b = 0; b < arrayBookmarks.length; b++) {
                     if (this.getAttribute("bookmarkName") == arrayBookmarks[b].name) {
                         if (!tempMap) {
@@ -555,31 +556,31 @@ function PopulateBookmarkList() {
             }
             tdClose.appendChild(imgClose);
         }
-        dojo.byId("txtBookmark").value = "";
-        CreateScrollbar(dojo.byId('divBookMarksResultsContainer'), dojo.byId('divBookMarksResultsContent'));
+        dojo.dom.byId("txtBookmark").value = "";
+        CreateScrollbar(dojo.dom.byId('divBookMarksResultsContainer'), dojo.dom.byId('divBookMarksResultsContent'));
     }
 }
 
 //Display address container
 function ShowLocateContainer() {
     ToggleHeaderPanels();
-    if (dojo.coords("divAddressContent").h <= 0) {
-        dojo.byId("showHide").style.display = "none";
-        dojo.byId("imgSearch").src = "images/locate_hover.png";
-        dojo.byId('divAddressContent').style.height = "300px";
-        dojo.byId('divAddressContent').style.right = (dojo.coords("holder").l + 15) + "px";
-        dojo.replaceClass("divAddressContent", "showContainerHeight", "hideContainerHeight");
-        dojo.byId("txtAddress").value = dojo.byId("txtAddress").getAttribute("defaultAddress");
+    if (dojo['dom-geometry'].getMarginBox("divAddressContent").h <= 0) {
+        dojo.dom.byId("showHide").style.display = "none";
+        dojo.dom.byId("imgSearch").src = "images/locate_hover.png";
+        dojo.dom.byId('divAddressContent').style.height = "300px";
+        dojo.dom.byId('divAddressContent').style.right = (dojo['dom-geometry'].getMarginBox("holder").l + 15) + "px";
+        dojo['dom-class'].replace("divAddressContent", "showContainerHeight", "hideContainerHeight");
+        dojo.dom.byId("txtAddress").value = dojo.dom.byId("txtAddress").getAttribute("defaultAddress");
 
-        dojo.byId("txtAddress").blur();
-        if (dojo.byId("txtAddress").getAttribute("defaultAddress") == dojo.byId("txtAddress").getAttribute("defaultAddressTitle")) {
-            dojo.byId("txtAddress").style.color = "gray";
+        dojo.dom.byId("txtAddress").blur();
+        if (dojo.dom.byId("txtAddress").getAttribute("defaultAddress") == dojo.dom.byId("txtAddress").getAttribute("defaultAddressTitle")) {
+            dojo.dom.byId("txtAddress").style.color = "gray";
         }
         else {
-            dojo.byId("txtAddress").style.color = "#000";
+            dojo.dom.byId("txtAddress").style.color = "#000";
         }
     }
-    RemoveChildren(dojo.byId('tblAddressResults'));
+    RemoveChildren(dojo.dom.byId('tblAddressResults'));
     SetAddressResultsHeight();
 }
 
@@ -600,26 +601,26 @@ function GetMapExtent() {
 //Open Email client with shared link
 function ShareLink(ext) {
     if (!tempMap) {
-        dojo.byId("imgSocialMedia").src = "images/imgSocialMedia_hover.png";
+        dojo.dom.byId("imgSocialMedia").src = "images/imgSocialMedia_hover.png";
         tinyUrl = null;
         mapExtent = GetMapExtent();
         var url = esri.urlToObject(window.location.toString());
         var urlStr;
-        if (dojo.byId("imgSocialMedia").getAttribute("shareNotesLink")) {
-            if (dojo.byId("imgSocialMedia").getAttribute("shareNotesLink").length > 5) {
-                var shareContent = "?extent=" + mapExtent + "$t=" + dojo.byId("imgSocialMedia").getAttribute("mapName") + "$n=";
-                urlStr = encodeURI(url.path) + shareContent + dojo.byId("imgSocialMedia").getAttribute("shareNotesLink");
+        if (dojo.dom.byId("imgSocialMedia").getAttribute("shareNotesLink")) {
+            if (dojo.dom.byId("imgSocialMedia").getAttribute("shareNotesLink").length > 5) {
+                var shareContent = "?extent=" + mapExtent + "$t=" + dojo.dom.byId("imgSocialMedia").getAttribute("mapName") + "$n=";
+                urlStr = encodeURI(url.path) + shareContent + dojo.dom.byId("imgSocialMedia").getAttribute("shareNotesLink");
             }
             else {
-                urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$t=" + dojo.byId("imgSocialMedia").getAttribute("mapName").replace("&", "@");
+                urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$t=" + dojo.dom.byId("imgSocialMedia").getAttribute("mapName").replace("&", "@");
             }
         }
         else {
-            urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$t=" + dojo.byId("imgSocialMedia").getAttribute("mapName").replace("&", "@");
+            urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$t=" + dojo.dom.byId("imgSocialMedia").getAttribute("mapName").replace("&", "@");
         }
         url = dojo.string.substitute(mapSharingOptions.TinyURLServiceURL, [urlStr]);
         setTimeout(function () {
-            dojo.byId("imgSocialMedia").src = "images/imgSocialMedia.png";
+            dojo.dom.byId("imgSocialMedia").src = "images/imgSocialMedia.png";
         }, 500);
         dojo.io.script.get({
             url: url,
@@ -632,7 +633,7 @@ function ShareLink(ext) {
                     tinyUrl = tinyUrl[attr[x]];
                 }
                 if (tinyUrl) {
-                    parent.location = dojo.string.substitute(mapSharingOptions.ShareByMailLink, [dojo.byId("imgSocialMedia").getAttribute("mapName").replace("&", "and") + " - " + tinyUrl]);
+                    parent.location = dojo.string.substitute(mapSharingOptions.ShareByMailLink, [dojo.dom.byId("imgSocialMedia").getAttribute("mapName").replace("&", "and") + " - " + tinyUrl]);
 
                 } else {
                     alert(messages.getElementsByTagName("tinyURLEngine")[0].childNodes[0].nodeValue);
@@ -652,44 +653,44 @@ function ShareLink(ext) {
     }
 }
 
-//Set height for address results list and create scrollbar 
+//Set height for address results list and create scrollbar
 function SetAddressResultsHeight() {
-    var height = dojo.coords(dojo.byId('divAddressContent')).h;
+    var height = dojo['dom-geometry'].getMarginBox(dojo.dom.byId('divAddressContent')).h;
     if (height > 0) {
-        dojo.byId('divAddressScrollContent').style.height = (height - ((isTablet) ? 150 : 130)) + "px";
+        dojo.dom.byId('divAddressScrollContent').style.height = (height - ((isTablet) ? 150 : 130)) + "px";
     }
-    CreateScrollbar(dojo.byId("divAddressScrollContainer"), dojo.byId("divAddressScrollContent"));
+    CreateScrollbar(dojo.dom.byId("divAddressScrollContainer"), dojo.dom.byId("divAddressScrollContent"));
 }
 
-//Show progress indicator 
+//Show progress indicator
 function ShowProgressIndicator() {
-    dojo.byId('divLoadingIndicator').style.display = "block";
+    dojo.dom.byId('divLoadingIndicator').style.display = "block";
 }
 
 //Hide progress indicator
 function HideProgressIndicator() {
-    dojo.byId('divLoadingIndicator').style.display = "none";
+    dojo.dom.byId('divLoadingIndicator').style.display = "none";
 }
 
 //Create metric pods for subject groups
-//For each pod this function determines Key indicator, Increase or decrease indicator, Color of pod. This function also handles on click event for each pod. 
+//For each pod this function determines Key indicator, Increase or decrease indicator, Color of pod. This function also handles on click event for each pod.
 function CreateGroupPods(webInfo, groupdata, token, statsData) {
-    dojo.byId('carouselscroll').style.paddingLeft = "0px";
-    dojo.byId("divServiceDetails").style.display = "block";
+    dojo.dom.byId('carouselscroll').style.paddingLeft = "0px";
+    dojo.dom.byId("divServiceDetails").style.display = "block";
 
-    dojo.byId("divServiceDetails").style.left = (dojo.coords("holder").l) + "px";
-    dojo.byId("divServiceData").style.width = (webInfo.length * 220) + "px";
+    dojo.dom.byId("divServiceDetails").style.left = (dojo['dom-geometry'].getMarginBox("holder").l) + "px";
+    dojo.dom.byId("divServiceData").style.width = (webInfo.length * 220) + "px";
 
-    dojo.byId('carouselscroll').style.left = "0px";
+    dojo.dom.byId('carouselscroll').style.left = "0px";
     newLeft = 0;
 
-    RemoveChildren(dojo.byId("divServiceContainer"));
+    RemoveChildren(dojo.dom.byId("divServiceContainer"));
     var table = document.createElement("table");
     table.id = "tblMetricPods";
     table.style.visibility = "hidden";
     table.cellSpacing = 0;
     table.cellPadding = 0;
-    dojo.byId("divServiceContainer").appendChild(table);
+    dojo.dom.byId("divServiceContainer").appendChild(table);
     var tBody = document.createElement("tbody");
     table.appendChild(tBody);
     var tr = document.createElement("tr");
@@ -723,9 +724,9 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
 
         divPod.onclick = function (evt) {
             //Upon clicking/tapping on the pod, the data for selected pod will be transferred to function to create map page.
-            if (!((dojo.hasClass("div" + this.getAttribute("layer") + "Pod", "divPodRedSelected")) || (dojo.hasClass("div" + this.getAttribute("layer") + "Pod", "divPodGreenSelected")) || (dojo.hasClass("div" + this.getAttribute("layer") + "Pod", "divPodGraySelected")))) {
+            if (!((dojo['dom-class'].contains("div" + this.getAttribute("layer") + "Pod", "divPodRedSelected")) || (dojo['dom-class'].contains("div" + this.getAttribute("layer") + "Pod", "divPodGreenSelected")) || (dojo['dom-class'].contains("div" + this.getAttribute("layer") + "Pod", "divPodGraySelected")))) {
                 ShowProgressIndicator();
-                RemoveChildren(dojo.byId("divGraphContent"));
+                RemoveChildren(dojo.dom.byId("divGraphContent"));
                 if (map) {
                     for (var e in map._layers) {
                         if (e.match("eventLayerId")) {
@@ -734,65 +735,65 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
                     }
                 }
                 for (var w in webInfo) {
-                    dojo.removeClass("div" + w + "Pod", "divPodRedSelected");
-                    dojo.removeClass("div" + w + "Pod", "divPodGreenSelected");
-                    dojo.removeClass("div" + w + "Pod", "divPodGraySelected");
+                     dojo['dom-class'].remove("div" + w + "Pod", "divPodRedSelected");
+                     dojo['dom-class'].remove("div" + w + "Pod", "divPodGreenSelected");
+                     dojo['dom-class'].remove("div" + w + "Pod", "divPodGraySelected");
                 }
                 //Highlight selected pod depending on its pod color
                 if (this.className == "divPodRed") {
-                    dojo.addClass("div" + this.getAttribute("layer") + "Pod", "divPodRedSelected");
+                    dojo['dom-class'].add("div" + this.getAttribute("layer") + "Pod", "divPodRedSelected");
                 }
                 else if (this.className == "divPodGreen") {
-                    dojo.addClass("div" + this.getAttribute("layer") + "Pod", "divPodGreenSelected");
+                    dojo['dom-class'].add("div" + this.getAttribute("layer") + "Pod", "divPodGreenSelected");
                 } else {
-                    dojo.addClass("div" + this.getAttribute("layer") + "Pod", "divPodGraySelected");
+                    dojo['dom-class'].add("div" + this.getAttribute("layer") + "Pod", "divPodGraySelected");
                 }
 
                 for (var r in webInfo) {
-                    if ((dojo.hasClass("div" + r + "Pod", "divPodRedSelected")) || (dojo.hasClass("div" + r + "Pod", "divPodGreenSelected")) || (dojo.hasClass("div" + r + "Pod", "divPodGraySelected"))) {
-                        dojo.byId("imgSocialMedia").setAttribute("key", webInfo[r].key);
+                    if ((dojo['dom-class'].contains("div" + r + "Pod", "divPodRedSelected")) || (dojo['dom-class'].contains("div" + r + "Pod", "divPodGreenSelected")) || (dojo['dom-class'].contains("div" + r + "Pod", "divPodGraySelected"))) {
+                        dojo.dom.byId("imgSocialMedia").setAttribute("key", webInfo[r].key);
                         break;
                     }
                 }
-                dojo.byId("imgSocialMedia").setAttribute("statistical", dojo.toJson(statsData));
+                dojo.dom.byId("imgSocialMedia").setAttribute("statistical", dojo.toJson(statsData));
 
                 for (var c in webInfo) {
-                    if (dojo.byId("divSummary" + c + "Pod")) {
-                        FadeOut(dojo.byId("divSummary" + c + "Pod"));
-                        dojo.byId("divSummary" + c + "Pod").style.display = "none";
+                    if (dojo.dom.byId("divSummary" + c + "Pod")) {
+                        FadeOut(dojo.dom.byId("divSummary" + c + "Pod"));
+                        dojo.dom.byId("divSummary" + c + "Pod").style.display = "none";
                     }
-                    if (dojo.byId("divContainer" + c + "Pod")) {
-                        FadeIn(dojo.byId("divContainer" + c + "Pod"));
-                        dojo.byId("divContainer" + c + "Pod").style.display = "block";
+                    if (dojo.dom.byId("divContainer" + c + "Pod")) {
+                        FadeIn(dojo.dom.byId("divContainer" + c + "Pod"));
+                        dojo.dom.byId("divContainer" + c + "Pod").style.display = "block";
                     }
                 }
-                PopulateEventDetails(webInfo[dojo.fromJson(this.getAttribute("info"))].id, null, dojo.byId("tdEventName").innerHTML, webInfo[dojo.fromJson(this.getAttribute("info"))], groupdata, token, false, "Yes", null);
+                PopulateEventDetails(webInfo[dojo.fromJson(this.getAttribute("info"))].id, null, dojo.dom.byId("tdEventName").innerHTML, webInfo[dojo.fromJson(this.getAttribute("info"))], groupdata, token, false, "Yes", null);
 
 
                 infoClicked = false;
 
-                if (!dojo.byId("divChartPod")) {
+                if (!dojo.dom.byId("divChartPod")) {
                     CreateLineChart(statsData, webInfo[this.getAttribute("layer")].key);
                 }
-                if (dojo.byId("divChart" + this.getAttribute("layer") + "Pod")) {
+                if (dojo.dom.byId("divChart" + this.getAttribute("layer") + "Pod")) {
                     setTimeout("PopulateInfoPodDetails(" + this.getAttribute('layer') + "," + true + "," + true + ")", 500);
                 }
             }
             else if (infoClicked) {
                 //infoClicked variable determines whether pod is selected or not
-                if (!dojo.byId("divSummary" + this.getAttribute("layer") + "Pod")) {
+                if (!dojo.dom.byId("divSummary" + this.getAttribute("layer") + "Pod")) {
                     CreateSummaryData(statsData, this.getAttribute("layer"), webInfo[this.getAttribute("layer")].key);
                 }
-                if (dojo.byId("divSummary" + this.getAttribute("layer") + "Pod")) {
-                    if (dojo.byId("divSummary" + this.getAttribute("layer") + "Pod").style.display != "none") {
-                        FadeOut(dojo.byId("divSummary" + this.getAttribute("layer") + "Pod"));
-                        FadeIn(dojo.byId("divContainer" + this.getAttribute("layer") + "Pod"));
+                if (dojo.dom.byId("divSummary" + this.getAttribute("layer") + "Pod")) {
+                    if (dojo.dom.byId("divSummary" + this.getAttribute("layer") + "Pod").style.display != "none") {
+                        FadeOut(dojo.dom.byId("divSummary" + this.getAttribute("layer") + "Pod"));
+                        FadeIn(dojo.dom.byId("divContainer" + this.getAttribute("layer") + "Pod"));
                         setTimeout("PopulateInfoPodDetails(" + this.getAttribute('layer') + "," + true + "," + false + ")", 500);
                         infoClicked = false;
                     }
                     else {
-                        FadeOut(dojo.byId("divContainer" + this.getAttribute("layer") + "Pod"));
-                        FadeIn(dojo.byId("divSummary" + this.getAttribute("layer") + "Pod"));
+                        FadeOut(dojo.dom.byId("divContainer" + this.getAttribute("layer") + "Pod"));
+                        FadeIn(dojo.dom.byId("divSummary" + this.getAttribute("layer") + "Pod"));
                         setTimeout("PopulateInfoPodDetails(" + this.getAttribute('layer') + "," + false + "," + false + ")", 500);
                     }
                 }
@@ -922,10 +923,10 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
                     //If stats keyword mentioned in config file is available in layer then show color, indicator and value for the pod
                     if (statsData[c].statsTitle.indexOf(statisticsKeyword) >= 0) {
                         if (webInfo[0].key) {
-                            dojo.byId("divGraphHeader").style.display = "block";
-                            dojo.byId("divGraphHeader").style.color = "#FFFFFF";
-                            dojo.byId("divGraphHeader").setAttribute("state", "enabled");
-                            dojo.byId("divGraphHeader").style.cursor = "pointer";
+                            dojo.dom.byId("divGraphHeader").style.display = "block";
+                            dojo.dom.byId("divGraphHeader").style.color = "#FFFFFF";
+                            dojo.dom.byId("divGraphHeader").setAttribute("state", "enabled");
+                            dojo.dom.byId("divGraphHeader").style.cursor = "pointer";
                         }
 
                         try {
@@ -993,8 +994,8 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
                         imgArr.style.display = "none";
                         CreateNeutralPod(divPod, divPodInner, p);
                         if (p == 0) {
-                            if (dojo.byId("divChartPod")) {
-                                RemoveChildren(dojo.byId("divChartPod"));
+                            if (dojo.dom.byId("divChartPod")) {
+                                RemoveChildren(dojo.dom.byId("divChartPod"));
                             }
                             HideGraphContainer();
                         }
@@ -1024,12 +1025,12 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
             if (shareOnLoad) {
                 if (webInfo[p].key == group) {
                     if (divPod.className == "divPodRed") {
-                        dojo.addClass("div" + p + "Pod", "divPodRedSelected");
+                        dojo['dom-class'].add("div" + p + "Pod", "divPodRedSelected");
                     }
                     else if (divPod.className == "divPodGreen") {
-                        dojo.addClass("div" + p + "Pod", "divPodGreenSelected");
+                        dojo['dom-class'].add("div" + p + "Pod", "divPodGreenSelected");
                     } else {
-                        dojo.addClass("div" + p + "Pod", "divPodGraySelected");
+                        dojo['dom-class'].add("div" + p + "Pod", "divPodGraySelected");
                         HideGraphContainer();
                     }
                 }
@@ -1044,7 +1045,7 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         count++;
     }
 
-    dojo.byId("imgSocialMedia").setAttribute("statistical", dojo.toJson(statsData));
+    dojo.dom.byId("imgSocialMedia").setAttribute("statistical", dojo.toJson(statsData));
 
     if (share != "") {
         if (shareOnLoad) {
@@ -1058,12 +1059,12 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         CreateLineChart(statsData, webInfo[0].key);
     }
 
-    if (dojo.byId("divChartPod")) {
+    if (dojo.dom.byId("divChartPod")) {
         setTimeout("PopulateInfoPodDetails(" + 0 + "," + true + "," + true + ")", 500);
     }
 
     setTimeout(function () {
-        dojo.byId("divServiceDetails").style.display = "block";
+        dojo.dom.byId("divServiceDetails").style.display = "block";
         ResetSlideControls();
         HideProgressIndicator();
         shareOnLoad = false;
@@ -1074,22 +1075,22 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
 function CreateNeutralPod(divPod, divPodInner, p) {
     divPod.className = "divPod";
     divPodInner.className = "divPodInner";
-    dojo.byId("img" + p).style.display = "none";
-    if (dojo.byId("divChartPod")) {
-        RemoveChildren(dojo.byId("divChartPod"));
+    dojo.dom.byId("img" + p).style.display = "none";
+    if (dojo.dom.byId("divChartPod")) {
+        RemoveChildren(dojo.dom.byId("divChartPod"));
     }
     HideGraphContainer();
 }
 
 //Hide graph container
 function HideGraphContainer() {
-    dojo.replaceClass("divGraphComponent", "hideContainerHeight", "showContainerHeight");
-    dojo.byId('divGraphComponent').style.height = '0px';
-    dojo.byId('showHide').style.top = '59px';
-    dojo.byId("divGraphHeader").style.display = "none";
-    dojo.byId("divGraphHeader").style.color = "gray";
-    dojo.byId("divGraphHeader").setAttribute("state", "disabled");
-    dojo.byId("divGraphHeader").style.cursor = "default";
+    dojo['dom-class'].replace("divGraphComponent", "hideContainerHeight", "showContainerHeight");
+    dojo.dom.byId('divGraphComponent').style.height = '0px';
+    dojo.dom.byId('showHide').style.top = '59px';
+    dojo.dom.byId("divGraphHeader").style.display = "none";
+    dojo.dom.byId("divGraphHeader").style.color = "gray";
+    dojo.dom.byId("divGraphHeader").setAttribute("state", "disabled");
+    dojo.dom.byId("divGraphHeader").style.cursor = "default";
 }
 
 //Highlight the first metric pod in the subject group
@@ -1097,13 +1098,13 @@ function HighlightMetricPod(divPod, count, p) {
     //count parameter to check the order of metric
     if (count == 0) {
         if (divPod.className == "divPodRed") {
-            dojo.addClass("div" + p + "Pod", "divPodRedSelected");
+            dojo['dom-class'].add("div" + p + "Pod", "divPodRedSelected");
         }
         else if (divPod.className == "divPodGreen") {
-            dojo.addClass("div" + p + "Pod", "divPodGreenSelected");
+            dojo['dom-class'].add("div" + p + "Pod", "divPodGreenSelected");
         }
         else {
-            dojo.addClass("div" + p + "Pod", "divPodGraySelected");
+            dojo['dom-class'].add("div" + p + "Pod", "divPodGraySelected");
             HideGraphContainer();
         }
     }
@@ -1113,24 +1114,24 @@ function HighlightMetricPod(divPod, count, p) {
 function PopulateInfoPodDetails(store, value, graph) {
     if (value) {
         if (!graph) {
-            dojo.byId("divSummary" + store + "Pod").style.display = "none";
+            dojo.dom.byId("divSummary" + store + "Pod").style.display = "none";
         }
-        dojo.byId("divContainer" + store + "Pod").style.display = "block";
+        dojo.dom.byId("divContainer" + store + "Pod").style.display = "block";
     }
     else {
         if (graph) {
-            if (dojo.byId("divChartPod")) {
-                dojo.byId("divChartPod").style.display = "block";
+            if (dojo.dom.byId("divChartPod")) {
+                dojo.dom.byId("divChartPod").style.display = "block";
             }
         }
         else {
-            dojo.byId("divContainer" + store + "Pod").style.display = "none";
-            dojo.byId("divSummary" + store + "Pod").style.display = "block";
+            dojo.dom.byId("divContainer" + store + "Pod").style.display = "none";
+            dojo.dom.byId("divSummary" + store + "Pod").style.display = "block";
         }
     }
 }
 
-//Create and display information for metric pod based on format defined in configuration file 
+//Create and display information for metric pod based on format defined in configuration file
 function CreateSummaryData(statsData, layer, title) {
     if (layer) {
         var divSummary = document.createElement("div");
@@ -1140,7 +1141,7 @@ function CreateSummaryData(statsData, layer, title) {
         divSummary.style.display = "none";
         divSummary.className = "rounded";
         divSummary.style.margin = "10px";
-        dojo.byId("divPodInner" + layer + "Pod").appendChild(divSummary);
+        dojo.dom.byId("divPodInner" + layer + "Pod").appendChild(divSummary);
 
         var table = document.createElement("table");
         table.cellSpacing = 0;
@@ -1162,8 +1163,8 @@ function CreateSummaryData(statsData, layer, title) {
         td.appendChild(spanSummary);
     }
     if (!layer) {
-        title = dojo.byId("imgSocialMedia").getAttribute("key");
-        statsData = dojo.fromJson(dojo.byId("imgSocialMedia").getAttribute("statistical"));
+        title = dojo.dom.byId("imgSocialMedia").getAttribute("key");
+        statsData = dojo.fromJson(dojo.dom.byId("imgSocialMedia").getAttribute("statistical"));
         var spanSummary = document.createElement("span");
     }
 
@@ -1205,7 +1206,7 @@ function CreateLineChart(statsData, title) {
                 if (statsData[y].title == title) {
                     if (statsData[y].statsTitle.indexOf(statisticsKeyword) >= 0) {
 
-                        dojo.byId("tdMetricHeader").innerHTML = statsData[y].statsTitle.split(statisticsKeyword)[0];
+                        dojo.dom.byId("tdMetricHeader").innerHTML = statsData[y].statsTitle.split(statisticsKeyword)[0];
 
                         var chartData = [];
                         try {
@@ -1239,17 +1240,17 @@ function CreateLineChart(statsData, title) {
         }
     }
     else {
-        if (dojo.byId("divChartPod")) {
-            RemoveChildren(dojo.byId("divChartPod"));
+        if (dojo.dom.byId("divChartPod")) {
+            RemoveChildren(dojo.dom.byId("divChartPod"));
         }
         HideGraphContainer();
     }
     //chartData determines whether the layer has statistical data or not
     if (chartData) {
         var divChart;
-        if (dojo.byId("divChartPod")) {
-            RemoveChildren(dojo.byId("divChartPod"));
-            divChart = dojo.byId("divChartPod");
+        if (dojo.dom.byId("divChartPod")) {
+            RemoveChildren(dojo.dom.byId("divChartPod"));
+            divChart = dojo.dom.byId("divChartPod");
         }
         else {
             divChart = document.createElement("div");
@@ -1257,7 +1258,7 @@ function CreateLineChart(statsData, title) {
             divChart.style.height = "80%";
             divChart.style.width = "90%";
             divChart.style.margin = "10px";
-            dojo.byId("divGraphContent").appendChild(divChart);
+            dojo.dom.byId("divGraphContent").appendChild(divChart);
         }
 
         var chartNode = document.createElement("div");
@@ -1266,8 +1267,8 @@ function CreateLineChart(statsData, title) {
         setTimeout("PopulateChart(" + dojo.toJson(chartData) + "," + dojo.toJson(chartData) + "," + dojo.toJson(xAxisData) + ")", 1000);
     }
     else {
-        if (dojo.byId("divChartPod")) {
-            RemoveChildren(dojo.byId("divChartPod"));
+        if (dojo.dom.byId("divChartPod")) {
+            RemoveChildren(dojo.dom.byId("divChartPod"));
         }
         HideGraphContainer();
     }
@@ -1281,7 +1282,7 @@ function PopulateChart(chartData, data, xAxisData) {
     var maxVal = Number(arrsort[(chartData.length - 1)]) + 10;
 
     chart = new dojox.charting.Chart2D("chartNodePod");
-    //style the chart 
+    //style the chart
     chart.margins.l = 0;
     chart.margins.t = 18;
     chart.margins.r = 0;
@@ -1323,24 +1324,24 @@ function PopulateChart(chartData, data, xAxisData) {
     chart.render();
 
     //Enable the graph container tab
-    dojo.byId("divGraphHeader").style.display = "block";
-    dojo.byId("divGraphHeader").style.color = "#FFFFFF";
-    dojo.byId("divGraphHeader").setAttribute("state", "enabled");
-    dojo.byId("divGraphHeader").style.cursor = "pointer";
+    dojo.dom.byId("divGraphHeader").style.display = "block";
+    dojo.dom.byId("divGraphHeader").style.color = "#FFFFFF";
+    dojo.dom.byId("divGraphHeader").setAttribute("state", "enabled");
+    dojo.dom.byId("divGraphHeader").style.cursor = "pointer";
 
     ResizeChartContainer();
 }
 
 //Toggle notes icon
 function PopulateNotes(evt) {
-    if (dojo.byId("imgNotes").title == "Add Notes") {
+    if (dojo.dom.byId("imgNotes").title == "Add Notes") {
         if (evt.getAttribute("state") == "unSelected") {
-            dojo.byId("imgNotes").src = "images/imgNotes_hover.png";
+            dojo.dom.byId("imgNotes").src = "images/imgNotes_hover.png";
             evt.setAttribute("state", "selected");
             TogglePopup(false, ((!tempMap) ? map : tempMap));
         }
         else {
-            dojo.byId("imgNotes").src = "images/imgNotes.png";
+            dojo.dom.byId("imgNotes").src = "images/imgNotes.png";
             evt.setAttribute("state", "unSelected");
             TogglePopup(true, ((!tempMap) ? map : tempMap));
             if (!tempMap) {
@@ -1370,13 +1371,13 @@ function TogglePopup(click, mapCtrl) {
 
 //Display graph container with Wipe-in animation
 function ShowGraphDetails() {
-    if (dojo.byId("divGraphHeader").getAttribute("state") == "enabled") {
+    if (dojo.dom.byId("divGraphHeader").getAttribute("state") == "enabled") {
         ToggleHeaderPanels();
-        if (dojo.coords("divGraphComponent").h <= 0) {
-            dojo.byId('divGraphComponent').style.right = (dojo.coords("holder").l + 15) + "px";
-            dojo.byId('divGraphComponent').style.height = "300px";
-            dojo.replaceClass("divGraphComponent", "showContainerHeight", "hideContainerHeight");
-            dojo.byId('showHide').style.top = '358px';
+        if (dojo['dom-geometry'].getMarginBox("divGraphComponent").h <= 0) {
+            dojo.dom.byId('divGraphComponent').style.right = (dojo['dom-geometry'].getMarginBox("holder").l + 15) + "px";
+            dojo.dom.byId('divGraphComponent').style.height = "300px";
+            dojo['dom-class'].replace("divGraphComponent", "showContainerHeight", "hideContainerHeight");
+            dojo.dom.byId('showHide').style.top = '358px';
             ResizeChartContainer();
         }
     }
@@ -1384,49 +1385,49 @@ function ShowGraphDetails() {
 
 //Wipe-out panels for Address,Graph,More,Bookmark
 function ToggleHeaderPanels() {
-    if (dojo.coords("divAddressContent").h > 0) {
-        dojo.byId("imgSearch").src = "images/locate.png";
-        dojo.byId("imgLocate").src = "images/locate.png";
-        dojo.replaceClass("divAddressContent", "hideContainerHeight", "showContainerHeight");
-        dojo.byId('divAddressContent').style.height = '0px';
-        dojo.byId("imgSearchLoader").style.display = "none";
+    if (dojo['dom-geometry'].getMarginBox("divAddressContent").h > 0) {
+        dojo.dom.byId("imgSearch").src = "images/locate.png";
+        dojo.dom.byId("imgLocate").src = "images/locate.png";
+        dojo['dom-class'].replace("divAddressContent", "hideContainerHeight", "showContainerHeight");
+        dojo.dom.byId('divAddressContent').style.height = '0px';
+        dojo.dom.byId("imgSearchLoader").style.display = "none";
     }
-    if (dojo.coords("divMoreContent").h > 0) {
-        dojo.byId("imgMore").src = "images/more.png";
-        dojo.replaceClass("divMoreContent", "hideContainerHeight", "showContainerHeight");
-        dojo.byId('divMoreContent').style.height = '0px';
+    if (dojo['dom-geometry'].getMarginBox("divMoreContent").h > 0) {
+        dojo.dom.byId("imgMore").src = "images/more.png";
+        dojo['dom-class'].replace("divMoreContent", "hideContainerHeight", "showContainerHeight");
+        dojo.dom.byId('divMoreContent').style.height = '0px';
     }
-    if (dojo.coords("divBookmarkContent").h > 0) {
-        dojo.byId("imgBookmark").src = "images/imgBookmark.png";
-        dojo.replaceClass("divBookmarkContent", "hideContainerHeight", "showContainerHeight");
-        dojo.byId('divBookmarkContent').style.height = '0px';
+    if (dojo['dom-geometry'].getMarginBox("divBookmarkContent").h > 0) {
+        dojo.dom.byId("imgBookmark").src = "images/imgBookmark.png";
+        dojo['dom-class'].replace("divBookmarkContent", "hideContainerHeight", "showContainerHeight");
+        dojo.dom.byId('divBookmarkContent').style.height = '0px';
     }
-    if (dojo.coords("divGraphComponent").h > 0) {
-        dojo.replaceClass("divGraphComponent", "hideContainerHeight", "showContainerHeight");
-        dojo.byId('divGraphComponent').style.height = '0px';
-        dojo.byId('showHide').style.top = '59px';
+    if (dojo['dom-geometry'].getMarginBox("divGraphComponent").h > 0) {
+        dojo['dom-class'].replace("divGraphComponent", "hideContainerHeight", "showContainerHeight");
+        dojo.dom.byId('divGraphComponent').style.height = '0px';
+        dojo.dom.byId('showHide').style.top = '59px';
     }
-    dojo.byId("showHide").style.display = "block";
+    dojo.dom.byId("showHide").style.display = "block";
 }
 
 //Hide containers
 function HideContainer(value) {
     switch (value) {
         case 'locate':
-            dojo.byId("imgSearch").src = "images/locate.png";
-            dojo.replaceClass("divAddressContent", "hideContainerHeight", "showContainerHeight");
-            dojo.byId('divAddressContent').style.height = '0px';
+            dojo.dom.byId("imgSearch").src = "images/locate.png";
+            dojo['dom-class'].replace("divAddressContent", "hideContainerHeight", "showContainerHeight");
+            dojo.dom.byId('divAddressContent').style.height = '0px';
             break;
         case 'bookmark':
-            dojo.byId("imgBookmark").src = "images/imgBookmark.png";
-            dojo.replaceClass("divBookmarkContent", "hideContainerHeight", "showContainerHeight");
-            dojo.byId('divBookmarkContent').style.height = '0px';
+            dojo.dom.byId("imgBookmark").src = "images/imgBookmark.png";
+            dojo['dom-class'].replace("divBookmarkContent", "hideContainerHeight", "showContainerHeight");
+            dojo.dom.byId('divBookmarkContent').style.height = '0px';
             break;
         case 'more':
-            dojo.byId("imgMore").src = "images/more.png";
-            dojo.replaceClass("divMoreContent", "hideContainerHeight", "showContainerHeight");
-            dojo.byId('divMoreContent').style.height = '0px';
+            dojo.dom.byId("imgMore").src = "images/more.png";
+            dojo['dom-class'].replace("divMoreContent", "hideContainerHeight", "showContainerHeight");
+            dojo.dom.byId('divMoreContent').style.height = '0px';
             break;
     }
-    dojo.byId("showHide").style.display = "block";
+    dojo.dom.byId("showHide").style.display = "block";
 }

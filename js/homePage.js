@@ -17,7 +17,6 @@
 var baseMapExtent; //variable to store the basemap extent
 var notesArray = []; //array to store the notes
 var noteCount = 0; //variable to count the notes symbols
-var noteGraphicCount = 0; //variable to count the notes symbols for temp map
 var notesLayerClicked = false; //flag set to know whether notes layer is clicked or not
 var notesGraphicLayerClicked = false; //flag set to know whether notes layer is clicked or not
 var infoContentFocus = null; //variable for storing the info content value when it is focused
@@ -161,57 +160,64 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
                     spanText.innerHTML = arrSubjectGroups[p][g].title;
                     td1.appendChild(spanText);
 
-                    //Decide color of pod using Increase or decrease indicator, Current and Past observation
-                    var diff = (dojo.string.substitute(infoPodStatics[0].CurrentObservation, indicatorState[j].value) - dojo.string.substitute(infoPodStatics[0].LatestObservation, indicatorState[j].value));
-                    if (diff >= 0) {
-                        imgArr.src = "images/up.png";
-                        if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value)) {
-                            if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value) == "Yes") {
-                                divPod.className = "divPodGreen";
-                                divPodInner.className = "divPodInnerGreen";
-                            }
-                            else if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value) == "No") {
-                                divPod.className = "divPodRed";
-                                divPodInner.className = "divPodInnerRed";
+                    try {
+                        //Decide color of pod using Increase or decrease indicator, Current and Past observation
+                        var diff = (dojo.string.substitute(infoPodStatics[0].CurrentObservation, indicatorState[j].value) - dojo.string.substitute(infoPodStatics[0].LatestObservation, indicatorState[j].value));
+                        if (diff >= 0) {
+                            imgArr.src = "images/up.png";
+                            if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value)) {
+                                if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value) == "Yes") {
+                                    divPod.className = "divPodGreen";
+                                    divPodInner.className = "divPodInnerGreen";
+                                }
+                                else if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value) == "No") {
+                                    divPod.className = "divPodRed";
+                                    divPodInner.className = "divPodInnerRed";
+                                }
+                                else {
+                                    CreateStyleforNeutralPods(divPod, divPodInner, imgArr);
+                                }
                             }
                             else {
-                                CreateStyleforNeutralPods(divPod, divPodInner);
+                                CreateStyleforNeutralPods(divPod, divPodInner, imgArr);
                             }
-                        }
-                        else {
-                            CreateStyleforNeutralPods(divPod, divPodInner);
-                        }
 
-                        if (diff == 0) {
-                            imgArr.style.display = "none";
-                        }
-                        else {
-                            imgArr.style.display = "block";
-                        }
-                    }
-                    else if (diff < 0) {
-                        imgArr.src = "images/down.png";
-                        if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value)) {
-                            if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value) == "Yes") {
-                                divPod.className = "divPodRed";
-                                divPodInner.className = "divPodInnerRed";
-                            }
-                            else if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value) == "No") {
-                                divPod.className = "divPodGreen";
-                                divPodInner.className = "divPodInnerGreen";
+                            if (diff == 0) {
+                                imgArr.style.display = "none";
                             }
                             else {
-                                CreateStyleforNeutralPods(divPod, divPodInner);
+                                imgArr.style.display = "block";
+                            }
+                        }
+                        else if (diff < 0) {
+                            imgArr.src = "images/down.png";
+                            if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value)) {
+                                if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value) == "Yes") {
+                                    divPod.className = "divPodRed";
+                                    divPodInner.className = "divPodInnerRed";
+                                }
+                                else if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value) == "No") {
+                                    divPod.className = "divPodGreen";
+                                    divPodInner.className = "divPodInnerGreen";
+                                }
+                                else {
+                                    CreateStyleforNeutralPods(divPod, divPodInner, imgArr);
+                                }
+                            }
+                            else {
+                                CreateStyleforNeutralPods(divPod, divPodInner, imgArr);
                             }
                         }
                         else {
-                            CreateStyleforNeutralPods(divPod, divPodInner);
+                            CreateStyleforNeutralPods(divPod, divPodInner, imgArr);
                         }
+                        break;
                     }
-                    else {
-                        CreateStyleforNeutralPods(divPod, divPodInner);
+                    catch (err) {
+                        CreateStyleforNeutralPods(divPod, divPodInner, imgArr);
+                        HideProgressIndicator();
+                        alert(dojo.string.substitute(messages.getElementsByTagName("nullValue")[0].childNodes[0].nodeValue, [arrSubjectGroups[p][g].title]));
                     }
-                    break;
                 }
             }
         }
@@ -277,9 +283,10 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
 }
 
 //This function assigns style classes to neutral pods
-function CreateStyleforNeutralPods(divPod, divPodInner) {
+function CreateStyleforNeutralPods(divPod, divPodInner, imgArr) {
     divPod.className = "divPod";
     divPodInner.className = "divPodInner";
+    imgArr.style.display = "none";
 }
 
 //Function to get data for the sub group(metric) pods(eg:Thefts,Ems Runs etc)
@@ -786,7 +793,7 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
                 var defExtent = res.map.extent.xmin + "," + res.map.extent.ymin + "," + res.map.extent.xmax + "," + res.map.extent.ymax;
                 res.map.destroy();
 
-                if (startExtent) {
+                if (startExtent && (!loadInitialExtentForWebmap)) {
                     mapDeferred = esri.arcgis.utils.createMap(id, "map", {
                         mapOptions: {
                             slider: true,
@@ -946,7 +953,7 @@ function ShowCompare(click) {
 
                                     dojo.query(".esriPopup")[1].style.zIndex = "1005";
 
-                                    CreateGraphicLayer(tempMap, "temp");
+                                    CreateGraphicLayer(tempMap, dojo.dom.byId("imgResize").getAttribute("webmapKey"));
                                 }, function (error) {
                                     HideProgressIndicator();
                                     alert(dojo.toJson(error));
@@ -975,12 +982,7 @@ function BackToRegularMode() {
             dojo.query(".esriPopup .contentPane")[0].style.overflow = "auto";
         }
     }
-    sessionStorage.setItem("temp", null);
-    if (dojo.dom.byId("imgResize").getAttribute("webmapKey")) {
-        var noteArray = PopulateNotesData(dojo.dom.byId("imgResize").getAttribute("webmapKey"));
-        dojo.dom.byId("imgSocialMedia").setAttribute("shareNotesLink", encodeURIComponent(dojo.toJson(noteArray)));
-    }
-    noteGraphicCount = 0;
+
     dojo.dom.byId("imgSocialMedia").style.cursor = "pointer";
     dojo.dom.byId("imgSocialMedia").title = "Share";
     dojo.dom.byId("imgSocialMedia").src = "images/imgSocialMedia.png";
@@ -1000,6 +1002,29 @@ function BackToRegularMode() {
     if (tempMap) {
         tempMap.destroy();
         tempMap = null;
+    }
+    if (dojo.dom.byId("imgResize").getAttribute("webmapKey")) {
+        var tempNotesArray = PopulateNotesData("temp" + dojo.dom.byId("imgResize").getAttribute("webmapKey"));
+
+        nArray = PopulateNotesData(dojo.dom.byId("imgResize").getAttribute("webmapKey"));
+        for (var b = 0; b < tempNotesArray.length; b++) {
+            nArray.push(tempNotesArray[b]);
+        }
+        for (var c = 0; c < notesArray.length; c++) {
+            if (notesArray[c][0].key == "temp" + dojo.dom.byId("imgResize").getAttribute("webmapKey")) {
+                notesArray[c][0].key = dojo.dom.byId("imgResize").getAttribute("webmapKey");
+            }
+        }
+        sessionStorage.setItem("notes" + dojo.dom.byId("imgResize").getAttribute("webmapKey"), dojo.toJson(notesArray));
+        dojo.dom.byId("imgSocialMedia").setAttribute("noteGraphics", sessionStorage.getItem("notes" + dojo.dom.byId("imgResize").getAttribute("webmapKey")));
+        nArray = PopulateNotesData(dojo.dom.byId("imgResize").getAttribute("webmapKey"));
+        dojo.dom.byId("imgSocialMedia").setAttribute("shareNotesLink", encodeURIComponent(dojo.toJson(nArray)));
+
+        var webmapInfo = {};
+        webmapInfo.key = dojo.dom.byId("imgResize").getAttribute("webmapKey");
+        sessionStorage.setItem("temp" + webmapInfo.key, null);
+        map.getLayer("tempNotesLayerId").clear();
+        CreateGraphic(notesArray, webmapInfo, true);
     }
     ResetSlideControls();
 }
@@ -1185,7 +1210,12 @@ function PopulateNotesData(key) {
 function ShowNotesInfo(feature, geometry, key, render, note) {
     mapExtent = GetMapExtent();
     var url = esri.urlToObject(window.location.toString());
+
     nArray = PopulateNotesData(key);
+    var tempArray = PopulateNotesData(key.split("temp")[1]);
+    for (var t = 0; t < tempArray.length; t++) {
+        nArray.push(tempArray[t]);
+    }
 
     var urlStr;
     var notesLength;
@@ -1446,6 +1476,10 @@ function CalculateCharactersCount(obj, geometry, key, note, shareContent) {
     mapExtent = GetMapExtent();
     var url = esri.urlToObject(window.location.toString());
     nArray = PopulateNotesData(key);
+    var tempArray = PopulateNotesData(key.split("temp")[1]);
+    for (var t = 0; t < tempArray.length; t++) {
+        nArray.push(tempArray[t]);
+    }
     var urlSt;
 
     if (nArray.length > 0) {
@@ -1538,23 +1572,12 @@ function RemoveGraphic(render, note, key, btnclick) {
                 }
             }
             var notes = [];
-            if (!tempMap) {
-                noteCount = 0;
-            }
-            else {
-                noteGraphicCount = 0;
-            }
+            noteCount = 0;
             for (var d = 0; d < notesArray.length; d++) {
                 if (notesArray[d][0].key == key) {
                     if (notesArray[d][0].count != note) {
-                        if (!tempMap) {
-                            noteCount++;
-                            notesArray[d][0].count = noteCount;
-                        }
-                        else {
-                            noteGraphicCount++;
-                            notesArray[d][0].count = noteGraphicCount;
-                        }
+                        noteCount++;
+                        notesArray[d][0].count = noteCount;
                         notes.push(notesArray[d]);
                     }
                 }
@@ -1628,10 +1651,10 @@ function CreateGraphicLayer(mapCtrl, webmapInfo) {
             }
 
         } else {
-            RemoveGraphic(null, ((!tempMap) ? noteCount : noteGraphicCount), (!tempMap) ? webmapInfo.key : "temp", null);
+            RemoveGraphic(null, noteCount, (!tempMap) ? webmapInfo.key : "temp" + webmapInfo, null);
         }
 
-        ShowNotesInfo(evt.graphic.attributes[0], evt.graphic.geometry, ((!tempMap) ? webmapInfo.key : "temp"), evt.graphic, Number(evt.graphic.attributes[0].count));
+        ShowNotesInfo(evt.graphic.attributes[0], evt.graphic.geometry, ((!tempMap) ? webmapInfo.key : "temp" + webmapInfo), evt.graphic, Number(evt.graphic.attributes[0].count));
     });
     mapCtrl.addLayer(gLayer1);
 
@@ -1640,16 +1663,10 @@ function CreateGraphicLayer(mapCtrl, webmapInfo) {
             HideInfoContainer();
             var iconSize = ((isBrowser) ? 30 : 44);
             var symbol = new esri.symbol.PictureMarkerSymbol("images/notesGraphic.png", iconSize, iconSize);
-            if (!tempMap) {
-                noteCount++;
-            }
-            else {
-                noteGraphicCount++;
-            }
+            noteCount++;
             var att = [];
-            att.push({ count: ((!tempMap) ? noteCount : noteGraphicCount) });
+            att.push({ count: noteCount });
             var graphic = new esri.Graphic(evt.mapPoint, symbol, att, null);
-
 
             if (!tempMap) {
                 notesLayerClicked = true;
@@ -1658,7 +1675,7 @@ function CreateGraphicLayer(mapCtrl, webmapInfo) {
                 notesGraphicLayerClicked = true;
                 mapCtrl.getLayer("tempNotesGraphicLayerId").add(graphic);
             }
-            ShowNotesInfo(null, evt.mapPoint, ((!tempMap) ? webmapInfo.key : "temp"), null, ((!tempMap) ? noteCount : noteGraphicCount));
+            ShowNotesInfo(null, evt.mapPoint, ((!tempMap) ? webmapInfo.key : "temp" + webmapInfo), null, noteCount);
         }
         else if (((!tempMap) ? (!notesLayerClicked) : (!notesGraphicLayerClicked))) {
             mapCtrl.infoWindow.hide();
@@ -1695,7 +1712,7 @@ function CreateGraphicLayer(mapCtrl, webmapInfo) {
                     }, 2000);
                 }
             }
-            RemoveGraphic(null, ((!tempMap) ? noteCount : noteGraphicCount), ((!tempMap) ? webmapInfo.key : "temp"), null);
+            RemoveGraphic(null, noteCount, ((!tempMap) ? webmapInfo.key : "temp" + webmapInfo), null);
         }
     });
 }

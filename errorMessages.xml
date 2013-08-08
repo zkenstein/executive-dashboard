@@ -27,6 +27,8 @@
     <exceededLimit>characters exceeded to create notes.</exceededLimit>
     <addressToLocate>Enter address to locate.</addressToLocate>
     <unableToLocate>Unable to locate specified address.</unableToLocate>
+    <nullValue>Trend information not available for '${0}' due to null values.</nullValue>
+    <podInformation>This report was not updated for due to null values.</podInformation>
     <enterRSS>Please enter RSS feed name and URL.</enterRSS>
     <RSSName>Please enter RSS feed name.</RSSName>
     <RSSUrl>Please enter RSS feed URL.</RSSUrl>

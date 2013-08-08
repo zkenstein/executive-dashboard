@@ -64,6 +64,7 @@ var share; //flag to determine whether the application is shared or not
 var lastSearchString; //variable for storing the last search string value
 var stagedSearch; //variable for storing the time limit for search
 var lastSearchTime; //variable for storing the time of last searched value
+var loadInitialExtentForWebmap; //Flag for retaining the webmap initial extent
 
 //This initialization function is called when the DOM elements are ready
 function Init() {
@@ -184,6 +185,7 @@ function Init() {
             formatDateAs = responseObject.FormatDateAs;
             podInformation = responseObject.PodInformation;
             layerImages = responseObject.LayerImages;
+            loadInitialExtentForWebmap = responseObject.LoadInitialExtentForWebmap;
             geometryService = new esri.tasks.GeometryService("http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
             rssFields = responseObject.RSSFields;
             statisticsKeyword = responseObject.StatisticsKeyword;

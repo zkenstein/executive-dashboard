@@ -71,18 +71,18 @@ function ShowLocatedAddress(candidates) {
         var counter = 0;
         var validResult = true;
         var searchFields = [];
-        for (var s in locatorSettings.LocatorFieldValues) {
-            searchFields.push(locatorSettings.LocatorFieldValues[s]);
+        for (var s in locatorSettings.AddressSearch.FieldValue) {
+            searchFields.push(locatorSettings.AddressSearch.FieldValue[s]);
         }
 
-        searchFields.push(locatorSettings.CountyFields.LocatorFieldValue);
+        searchFields.push(locatorSettings.LocationSearch.LocatorFieldValue);
         for (var i in candidates) {
             if (candidates[i].feature.attributes[locatorSettings.AddressMatchScore.Field] > locatorSettings.AddressMatchScore.Value) {
                 var locatePoint = new esri.geometry.Point(Number(candidates[i].feature.geometry.x), Number(candidates[i].feature.geometry.y), map.spatialReference);
                 for (var j in searchFields) {
-                    if (candidates[i].feature.attributes[locatorSettings.LocatorFieldName] == searchFields[j]) {
-                        if (candidates[i].feature.attributes[locatorSettings.LocatorFieldName] == locatorSettings.CountyFields.LocatorFieldValue) {
-                            if (candidates[i].feature.attributes[locatorSettings.CountyFields.FieldName] != locatorSettings.CountyFields.Value) {
+                    if (candidates[i].feature.attributes[locatorSettings.AddressSearch.FieldName] == searchFields[j]) {
+                        if (candidates[i].feature.attributes[locatorSettings.AddressSearch.FieldName] == locatorSettings.LocationSearch.LocatorFieldValue) {
+                            if (candidates[i].feature.attributes[locatorSettings.LocationSearch.FieldName] != locatorSettings.LocationSearch.FieldValue) {
                                 validResult = false;
                             }
                             else {
@@ -111,7 +111,7 @@ function ShowLocatedAddress(candidates) {
                             td1.setAttribute("x", candidate.feature.geometry.x);
                             td1.setAttribute("y", candidate.feature.geometry.y);
                             td1.setAttribute("address", dojo.string.substitute(locatorSettings.DisplayField, candidate.feature.attributes));
-                            if (candidate.feature.attributes[locatorSettings.CountyFields.FieldName] == locatorSettings.CountyFields.Value) {
+                            if (candidate.feature.attributes[locatorSettings.LocationSearch.FieldName] == locatorSettings.LocationSearch.FieldValue) {
                                 td1.setAttribute("county", dojo.toJson(candidate.extent));
                             }
                             else {

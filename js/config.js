@@ -36,28 +36,28 @@ dojo.declare("js.config", null, {
     //
     // 9.  Specify Bookmark Header                       - [ Tag(s) to look for: BookmarkHeader ]
     //
-    // 10.  Specify state of retaining                   - [ Tag(s) to look for: RetainState ]
+    // 11.  Specify state of retaining                   - [ Tag(s) to look for: RetainState ] 
+    //  
+    // 12. Customize data formatting                     - [ Tag(s) to look for: ShowNullValueAs, FormatDateAs ]
     //
-    // 11. Customize data formatting                     - [ Tag(s) to look for: ShowNullValueAs, FormatDateAs ]
-    //
-    // 12. Customize address search settings             - [ Tag(s) to look for: LocatorSettings ]
-    //
-    // 13. Set Fields for RSS                            - [ Tag(s) to look for: RSSFields ]
-    //
-    // 14. Set Fields for Trends                         - [ Tag(s) to look for: TwitterDetails ]
-    //
-    // 15. Specify images for welcome screen             - [ Tag(s) to look for: WelcomeScreenImages ]
-    //
-    // 16. Specify images for subject groups             - [ Tag(s) to look for: LayerImages ]
-    //
-    // 17. Set Fields for Metric pods                    - [ Tag(s) to look for: InfoPodStatics ]
-    //
-    // 18. Set Fields for Metric pods information        - [ Tag(s) to look for: PodInformation ]
-    //
-    // 19. Set keyword to detect statistics layer        - [ Tag(s) to look for: StatisticsKeyword ]
-    //
-    // 20. Specify URLs for map sharing                  - [ Tag(s) to look for:  ShareByMailLink ]
-    // 21.In case of changing the TinyURL service
+    // 13. Customize address search settings             - [ Tag(s) to look for: LocatorSettings ]
+    //    
+    // 14. Set Fields for RSS                            - [ Tag(s) to look for: RSSFields ]
+    // 
+    // 15. Set Fields for Trends                         - [ Tag(s) to look for: TwitterDetails ]
+    // 
+    // 16. Specify images for welcome screen             - [ Tag(s) to look for: WelcomeScreenImages ]
+    // 
+    // 17. Specify images for subject groups             - [ Tag(s) to look for: LayerImages ]
+    //    
+    // 18. Set Fields for Metric pods                    - [ Tag(s) to look for: InfoPodStatics ]
+    // 
+    // 19. Set Fields for Metric pods information        - [ Tag(s) to look for: PodInformation ]
+    // 
+    // 20. Set keyword to detect statistics layer        - [ Tag(s) to look for: StatisticsKeyword ]
+    // 
+    // 21. Specify URLs for map sharing                  - [ Tag(s) to look for:  ShareByMailLink ]
+    // 22.In case of changing the TinyURL service
     //     Specify URL for the new service               - [ Tag(s) to look for: MapSharingOptions (set TinyURLServiceURL, TinyURLResponseAttribute) ]
     //
     //
@@ -91,6 +91,9 @@ dojo.declare("js.config", null, {
 
     //Authenticated group id for dashboard group.
     AuthenticatedGroup: "4cd8df6c536347399d67314a89117f4f",
+
+    //Flag for retaining the webmap initial extent when changing from one webmap to another.
+    LoadInitialExtentForWebmap: true,
 
     //Title for bookmarks header
     BookmarkHeader: "Bookmarks",
@@ -131,12 +134,14 @@ dojo.declare("js.config", null, {
             Field: "Score",
             Value: 80
         },
-        LocatorFieldName: 'Addr_type',
-        LocatorFieldValues: ["StreetAddress", "StreetName", "PointAddress"],
-        CountyFields: {
+        AddressSearch: {
+	    FieldName: 'Addr_type',
+            FieldValue: ["StreetAddress", "StreetName", "PointAddress"]
+        },
+        LocationSearch: {
             LocatorFieldValue: 'POI',
             FieldName: 'Type',
-            Value: 'county'
+            FieldValue: 'county'
         },
         MaxResults: 100
     },
@@ -209,10 +214,10 @@ dojo.declare("js.config", null, {
     InfoPodStatics: [{
         CurrentObservation: "${OBSERVCURR}",
         LatestObservation: "${OBSERV1}",
-        PreviousObservations: ["${OBSERV2}", "${OBSERV3}"],
         StatisticsPosition: "${INCREASEPOS}"
     }, {
-        DateObservations: ["${DATECURR}", "${DATE1}", "${DATE2}", "${DATE3}"],
+        DateObservations: ["${DATE1}", "${DATE2}", "${DATE3}", "${DATECURR}"],
+        CountObservations: ["${OBSERV1}", "${OBSERV2}", "${OBSERV3}", "${OBSERVCURR}"],
         DatePattern: "MMM dd, yyyy"
     }],
 
@@ -220,7 +225,7 @@ dojo.declare("js.config", null, {
     PodInformation: "This report was updated on ${LASTUPDATE} and includes data from ${STARTDATE} to ${ENDDATE}.",
 
     //Keyword to detect the statistics layer.
-    StatisticsKeyword: "- Stats",
+    StatisticsKeyword: "@ Stats",
 
     // ------------------------------------------------------------------------------------------------------------------------
     // SETTINGS FOR MAP SHARING

@@ -984,6 +984,7 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
                             }
                         }
                         catch (err) {
+                            alert(dojo.string.substitute(messages.getElementsByTagName("nullValue")[0].childNodes[0].nodeValue, [webInfo[p].key]));
                             imgArr.style.display = "none";
                             divPod.className = "divPod";
                             divPodInner.className = "divPodInner";
@@ -1189,7 +1190,12 @@ function CreateSummaryData(statsData, layer, title) {
                     }
                 }
             }
-            spanSummary.innerHTML = dojo.string.substitute(podInformation, statsData[y].data);
+            try {
+                spanSummary.innerHTML = dojo.string.substitute(podInformation, statsData[y].data);
+            }
+            catch (err) {
+                spanSummary.innerHTML = messages.getElementsByTagName("podInformation")[0].childNodes[0].nodeValue;
+            }
             if (!layer) {
                 return dojo.string.substitute(podInformation, statsData[y].data);
             }
@@ -1209,27 +1215,22 @@ function CreateLineChart(statsData, title) {
                         dojo.dom.byId("tdMetricHeader").innerHTML = statsData[y].statsTitle.split(statisticsKeyword)[0];
 
                         var chartData = [];
-                        try {
-                            chartData.push(Number(dojo.string.substitute(infoPodStatics[0].CurrentObservation, statsData[y].data)));
-                        }
-                        catch (err) {
-                            chartData.push(0);
-                        }
-                        chartData.push(Number(dojo.string.substitute(infoPodStatics[0].LatestObservation, statsData[y].data)));
-                        for (var z = 0; z < infoPodStatics[0].PreviousObservations.length; z++) {
+                        for (var z = 0; z < infoPodStatics[1].CountObservations.length; z++) {
                             try {
-                                chartData.push(Number(dojo.string.substitute(infoPodStatics[0].PreviousObservations[z], statsData[y].data)));
-                            }
-                            catch (err) {
-                                chartData.push(0);
+                                chartData.push(Number(dojo.string.substitute(infoPodStatics[1].CountObservations[z], statsData[y].data)));
+                            } catch (err) {
+                                chartData.push(showNullValueAs);
                             }
                         }
-
                         var date = new js.date();
                         var xAxisData = [];
                         for (var a = 0; a < infoPodStatics[1].DateObservations.length; a++) {
-                            var utcMilliseconds = Number(dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data));
-                            xAxisData.push(dojo.date.locale.format(date.utcTimestampFromMs(utcMilliseconds), { datePattern: infoPodStatics[1].DatePattern, selector: "date" }));
+                            try {
+                                var utcMilliseconds = Number(dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data));
+                                xAxisData.push(dojo.date.locale.format(date.utcTimestampFromMs(utcMilliseconds), { datePattern: infoPodStatics[1].DatePattern, selector: "date" }));                          
+                            } catch (err) {
+                                xAxisData.push(showNullValueAs);
+                            }
                         }
                     }
                 }
@@ -1276,8 +1277,23 @@ function CreateLineChart(statsData, title) {
 
 //Populate chart for the metric pod
 function PopulateChart(chartData, data, xAxisData) {
+    for (var c = 0; c < data.length; c++) {
+        if ((chartData[c] == showNullValueAs) && (xAxisData[c] == showNullValueAs)) {
+            chartData.splice(c, 1);
+            xAxisData.splice(c, 1);
+            data.splice(c, 1);
+        }
+        else if (chartData[c] == showNullValueAs) {
+            chartData[c] = 0;
+            data[c] = 0;
+        }
+    }
+
     var arrsort = chartData;
-    arrsort.sort();
+    arrsort.sort(function (x, y) {
+        return x - y
+    });
+
     var minVal = Number(arrsort[0]) - 10;
     var maxVal = Number(arrsort[(chartData.length - 1)]) + 10;
 
@@ -1312,7 +1328,7 @@ function PopulateChart(chartData, data, xAxisData) {
 
 
     chart.addAxis("x", {
-        stroke: "white", min: 0, max: (xAxisData.length + 1), fontColor: "white", minorTicks: false, minorLabels: false, microTicks: false, font: "normal normal normal 9pt verdana",
+        stroke: "white", min: 1, max: (xAxisData.length + 1), fontColor: "white", minorTicks: false, minorLabels: false, microTicks: false, font: "normal normal normal 9pt verdana",
         hMajorLines: false, hMinorLines: false, fixLower: "major", fixUpper: "major", includeZero: false, title: "Reporting Period", titleGap: 10, titleFontColor: "#FFF", titleOrientation: "away",
         labels: label
     });

@@ -163,7 +163,7 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
                     try {
                         //Decide color of pod using Increase or decrease indicator, Current and Past observation
                         var diff = (dojo.string.substitute(infoPodStatics[0].CurrentObservation, indicatorState[j].value) - dojo.string.substitute(infoPodStatics[0].LatestObservation, indicatorState[j].value));
-                        if (diff >= 0) {
+                        if (diff > 0) {
                             imgArr.src = "images/up.png";
                             if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value)) {
                                 if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, indicatorState[j].value) == "Yes") {
@@ -180,14 +180,7 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
                             }
                             else {
                                 CreateStyleforNeutralPods(divPod, divPodInner, imgArr);
-                            }
-
-                            if (diff == 0) {
-                                imgArr.style.display = "none";
-                            }
-                            else {
-                                imgArr.style.display = "block";
-                            }
+                            }                          
                         }
                         else if (diff < 0) {
                             imgArr.src = "images/down.png";

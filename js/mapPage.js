@@ -940,7 +940,7 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
                         try {
                             var diff = (dojo.string.substitute(infoPodStatics[0].CurrentObservation, statsData[c].data) - dojo.string.substitute(infoPodStatics[0].LatestObservation, statsData[c].data));
                             // Calculate increase or decrease indicator; Accordingly set the color and arrow symbol for the pod
-                            if (diff >= 0) {
+                            if (diff > 0) {
                                 imgArr.src = "images/up.png";
                                 if (dojo.string.substitute(infoPodStatics[0].StatisticsPosition, statsData[c].data) == "Yes") {
                                     divPod.className = "divPodGreen";
@@ -979,6 +979,7 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
                                 }
                             }
                             else {
+                                imgArr.style.display = "none";
                                 divPod.className = "divPod";
                                 divPodInner.className = "divPodInner";
                             }
@@ -1175,17 +1176,9 @@ function CreateSummaryData(statsData, layer, title) {
             for (var i in statsData[y].fields) {
                 if (statsData[y].fields[i].type == "esriFieldTypeDate") {
                     if (statsData[y].fields[i].name) {
-                        if (Number(statsData[y].data[statsData[y].fields[i].name])) {
-                            var field = 0;
-                            for (var a = 0; a < infoPodStatics[1].DateObservations.length; a++) {
-                                if (infoPodStatics[1].DateObservations[a] != "${" + statsData[y].fields[i].name + "}") {
-                                    field++;
-                                }
-                            }
-                            if (field == infoPodStatics[1].DateObservations.length) {
-                                var utcMilliseconds = Number(statsData[y].data[statsData[y].fields[i].name]);
-                                statsData[y].data[statsData[y].fields[i].name] = dojo.date.locale.format(date.utcTimestampFromMs(utcMilliseconds), { datePattern: formatDateAs, selector: "date" });
-                            }
+                        if (Number(statsData[y].data[statsData[y].fields[i].name]) == statsData[y].data[statsData[y].fields[i].name]) {
+                            var utcMilliseconds = Number(statsData[y].data[statsData[y].fields[i].name]);
+                            statsData[y].data[statsData[y].fields[i].name] = dojo.date.locale.format(new Date(utcMilliseconds), { datePattern: formatDateAs, selector: "date" });
                         }
                     }
                 }
@@ -1226,8 +1219,13 @@ function CreateLineChart(statsData, title) {
                         var xAxisData = [];
                         for (var a = 0; a < infoPodStatics[1].DateObservations.length; a++) {
                             try {
-                                var utcMilliseconds = Number(dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data));
-                                xAxisData.push(dojo.date.locale.format(date.utcTimestampFromMs(utcMilliseconds), { datePattern: infoPodStatics[1].DatePattern, selector: "date" }));                          
+                                if (Number(dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data)) == dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data)) {
+                                    var utcMilliseconds = Number(dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data));
+                                    xAxisData.push(dojo.date.locale.format(date.utcTimestampFromMs(utcMilliseconds), { datePattern: infoPodStatics[1].DatePattern, selector: "date" }));
+                                }
+                                else {                                   
+                                    xAxisData.push(dojo.date.locale.format(new Date(dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data)), { datePattern: infoPodStatics[1].DatePattern, selector: "date" }));
+                                }
                             } catch (err) {
                                 xAxisData.push(showNullValueAs);
                             }

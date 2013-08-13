@@ -17,7 +17,7 @@
 -->
 <Messages>
     <browserSupport>Browser not supported.</browserSupport>
-    <nonAuthenticatedMember>You are not the member of this group to log in.</nonAuthenticatedMember>
+    <nonAuthenticatedMember>The username and password are valid, but you don't have access to this resource.</nonAuthenticatedMember>
     <noResults>No results found for</noResults>
     <noSearchResults>No search results found.</noSearchResults>
     <locatorService>Locator service is not working; please try again after some time.</locatorService>

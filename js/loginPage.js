@@ -332,161 +332,175 @@ function FindArcGISGroup() {
     }
 
     portal.queryItems(params).then(function (groupdata) {
-        var data = portalUser.credential;
+        if (groupdata.results.length > 0) {
+            var data = portalUser.credential;
 
-        RemoveChildren(dojo.dom.byId("divLayerContent"));
-        arrSubjectGroups = [];
+            RemoveChildren(dojo.dom.byId("divLayerContent"));
+            arrSubjectGroups = [];
 
-        dojo.dom.byId("btnSettings").className = "customButton";
-        dojo.dom.byId("tdPanelSign").innerHTML = "Sign Out";
-        dojo.dom.byId("btnMap").className = "customButton";
-        dojo.dom.byId("divLoginScreenContainer").style.display = "none";
-        dojo.dom.byId("divInfoContainer").style.display = "block";
-        dojo.dom.byId("btnSettings").style.cursor = "pointer";
-        dojo.dom.byId("btnMap").style.cursor = "pointer";
+            dojo.dom.byId("btnSettings").className = "customButton";
+            dojo.dom.byId("tdPanelSign").innerHTML = "Sign Out";
+            dojo.dom.byId("btnMap").className = "customButton";
+            dojo.dom.byId("divLoginScreenContainer").style.display = "none";
+            dojo.dom.byId("divInfoContainer").style.display = "block";
+            dojo.dom.byId("btnSettings").style.cursor = "pointer";
+            dojo.dom.byId("btnMap").style.cursor = "pointer";
 
-        if (isTablet) {
-            SetHomePageHeight();
-        }
-        CreateScrollbar(dojo.dom.byId('divLayerContainer'), dojo.dom.byId('divLayerContent'));
-        CreateScrollbar(dojo.dom.byId('divNAEDisplayContainer'), dojo.dom.byId('divNAEDisplayContent'));
-        CreateScrollbar(dojo.dom.byId('divRSSFeedContainer'), dojo.dom.byId('divRSSFeedContent'));
-        CreateScrollbar(dojo.dom.byId('divTwitterFeedContainer'), dojo.dom.byId('divTwitterFeedContent'));
+            if (isTablet) {
+                SetHomePageHeight();
+            }
+            CreateScrollbar(dojo.dom.byId('divLayerContainer'), dojo.dom.byId('divLayerContent'));
+            CreateScrollbar(dojo.dom.byId('divNAEDisplayContainer'), dojo.dom.byId('divNAEDisplayContent'));
+            CreateScrollbar(dojo.dom.byId('divRSSFeedContainer'), dojo.dom.byId('divRSSFeedContent'));
+            CreateScrollbar(dojo.dom.byId('divTwitterFeedContainer'), dojo.dom.byId('divTwitterFeedContent'));
 
-        var userGroupDetails = authenticatedLinks.split("${0}");
-        var userGroupLink = userGroupDetails[0] + authenticatedGroup + userGroupDetails[1] + data.token;
-        esri.request({
-            url: userGroupLink,
-            callbackParamName: "callback",
-            load: function (groupdata) {
-                var compareWebmaps = [];
-                for (var t = 0; t < groupdata.items.length; t++) {
-                    for (var u = 0; u < groupdata.items[t].tags.length; u++) {
-                        if (groupdata.items[t].type == "Web Map") {
-                            if (groupdata.items[t].tags[u] != baseMapLayer[0].MapValue) {
-                                if (groupdata.items[t].tags[u] != "Key Indicator") {
-                                    if (arrSubjectGroups[groupdata.items[t].tags[u]]) {
-                                        arrSubjectGroups[groupdata.items[t].tags[u]].push({ "webMapId": groupdata.items[t].id, "title": groupdata.items[t].title, "tags": groupdata.items[t].tags });
+            var userGroupDetails = authenticatedLinks.split("${0}");
+            var userGroupLink = userGroupDetails[0] + authenticatedGroup + userGroupDetails[1] + data.token;
+            esri.request({
+                url: userGroupLink,
+                callbackParamName: "callback",
+                load: function (groupdata) {
+                    var compareWebmaps = [];
+                    for (var t = 0; t < groupdata.items.length; t++) {
+                        for (var u = 0; u < groupdata.items[t].tags.length; u++) {
+                            if (groupdata.items[t].type == "Web Map") {
+                                if (groupdata.items[t].tags[u] != baseMapLayer[0].MapValue) {
+                                    if (groupdata.items[t].tags[u] != "Key Indicator") {
+                                        if (arrSubjectGroups[groupdata.items[t].tags[u]]) {
+                                            arrSubjectGroups[groupdata.items[t].tags[u]].push({ "webMapId": groupdata.items[t].id, "title": groupdata.items[t].title, "tags": groupdata.items[t].tags });
+                                        }
+                                        else {
+                                            arrSubjectGroups[groupdata.items[t].tags[u]] = [];
+                                            arrSubjectGroups[groupdata.items[t].tags[u]].push({ "webMapId": groupdata.items[t].id, "title": groupdata.items[t].title, "tags": groupdata.items[t].tags });
+                                        }
                                     }
-                                    else {
-                                        arrSubjectGroups[groupdata.items[t].tags[u]] = [];
-                                        arrSubjectGroups[groupdata.items[t].tags[u]].push({ "webMapId": groupdata.items[t].id, "title": groupdata.items[t].title, "tags": groupdata.items[t].tags });
+                                }
+                                else {
+                                    if (groupdata.items[t].tags[u] == "Compare") {
+                                        compareWebmaps.push(groupdata.items[t].id);
                                     }
                                 }
                             }
-                            else {
-                                if (groupdata.items[t].tags[u] == "Compare") {
-                                    compareWebmaps.push(groupdata.items[t].id);
+                        }
+                    }
+
+                    //Arrange dashboard pods as per the order specified in configuration file
+                    var orderedLayer = [];
+                    for (var u in layerImages) {
+                        for (var v in arrSubjectGroups) {
+                            if (layerImages[u].Tag == v) {
+                                orderedLayer[v] = [];
+                                orderedLayer[v] = arrSubjectGroups[v];
+                            }
+                        }
+                    }
+
+                    //For each group, identify webmaps having key indicators and get it's statistical information
+                    var keyCounter = 0;
+                    var responseCounter = 0;
+                    var keyIndicators = [];
+                    var indicatorState = [];
+
+                    for (var p in orderedLayer) {
+                        for (var g in orderedLayer[p]) {
+                            for (var h in orderedLayer[p][g].tags) {
+                                if (orderedLayer[p][g].tags[h] == "Key Indicator") {
+                                    keyCounter++;
+                                    var mapDeferred = esri.arcgis.utils.createMap(orderedLayer[p][g].webMapId, "map", {
+                                        mapOptions: {
+                                            slider: false
+                                        }
+                                    });
+                                    dojo.dom.byId("imgResize").setAttribute("webmapID", orderedLayer[p][g].webMapId);
+                                    mapDeferred.addCallback(function (response) {
+                                        map = response.map;
+                                        map.destroy();
+                                        responseCounter++;
+                                        var webmapInfo = {};
+                                        webmapInfo.key = response.itemInfo.item.title;
+                                        dojo.dom.byId("imgResize").setAttribute("webmapKey", webmapInfo.key);
+                                        webmapInfo.operationalLayers = response.itemInfo.itemData.operationalLayers;
+                                        webmapInfo.baseMap = response.itemInfo.itemData.baseMap.baseMapLayers;
+                                        keyIndicators.push(webmapInfo);
+                                        if (keyCounter == responseCounter) {
+                                            PopulateIndicatorData(keyIndicators, 0, indicatorState, orderedLayer, data.token, groupdata);
+                                        }
+                                    });
+                                    mapDeferred.addErrback(function (error) {
+                                        HideProgressIndicator();
+                                        alert(dojo.toJson(error));
+                                    });
+                                }
+                                else if (orderedLayer[p][g].tags[h] == "Compare") {
+                                    compareWebmaps.push(orderedLayer[p][g].webMapId);
                                 }
                             }
                         }
                     }
-                }
-
-                //Arrange dashboard pods as per the order specified in configuration file
-                var orderedLayer = [];
-                for (var u in layerImages) {
-                    for (var v in arrSubjectGroups) {
-                        if (layerImages[u].Tag == v) {
-                            orderedLayer[v] = [];
-                            orderedLayer[v] = arrSubjectGroups[v];
-                        }
+                    if (compareWebmaps.length > 0) {
+                        dojo.dom.byId("imgResize").setAttribute("compareId", dojo.toJson(compareWebmaps));
                     }
-                }
 
-                //For each group, identify webmaps having key indicators and get it's statistical information
-                var keyCounter = 0;
-                var responseCounter = 0;
-                var keyIndicators = [];
-                var indicatorState = [];
+                    //Display News and Events panel when none groups have key indicator
+                    if (keyCounter == 0) {
+                        CreateLayerPods(orderedLayer, data.token, groupdata, null);
+                        PopulateNews(dojo.dom.byId("btnNews"));
+                    }
+                    CheckBasemap(orderedLayer, groupdata, data);
 
-                for (var p in orderedLayer) {
-                    for (var g in orderedLayer[p]) {
-                        for (var h in orderedLayer[p][g].tags) {
-                            if (orderedLayer[p][g].tags[h] == "Key Indicator") {
-                                keyCounter++;
-                                var mapDeferred = esri.arcgis.utils.createMap(orderedLayer[p][g].webMapId, "map", {
-                                    mapOptions: {
-                                        slider: false
-                                    }
-                                });
-                                dojo.dom.byId("imgResize").setAttribute("webmapID", orderedLayer[p][g].webMapId);
-                                mapDeferred.addCallback(function (response) {
-                                    map = response.map;
-                                    map.destroy();
-                                    responseCounter++;
-                                    var webmapInfo = {};
-                                    webmapInfo.key = response.itemInfo.item.title;
-                                    dojo.dom.byId("imgResize").setAttribute("webmapKey", webmapInfo.key);
-                                    webmapInfo.operationalLayers = response.itemInfo.itemData.operationalLayers;
-                                    webmapInfo.baseMap = response.itemInfo.itemData.baseMap.baseMapLayers;
-                                    keyIndicators.push(webmapInfo);
-                                    if (keyCounter == responseCounter) {
-                                        PopulateIndicatorData(keyIndicators, 0, indicatorState, orderedLayer, data.token, groupdata);
-                                    }
-                                });
-                                mapDeferred.addErrback(function (error) {
-                                    HideProgressIndicator();
-                                    alert(dojo.toJson(error));
-                                });
+                    //Create basemap when clicked on Map button on dashboard page
+                    mapClick = dojo.connect(dojo.dom.byId('btnMap'), "onclick", function (evt) {
+                        if (dojo.dom.byId("btnMap").style.cursor == "pointer") {
+                            ShowProgressIndicator();
+                            if (map) {
+                                map.destroy();
                             }
-                            else if (orderedLayer[p][g].tags[h] == "Compare") {
-                                compareWebmaps.push(orderedLayer[p][g].webMapId);
-                            }
+                            CreateBasemap(orderedLayer, groupdata, data);
+                        }
+                    });
+                    //Decode the shared URL when shared application is accessed
+                    if (share != "") {
+                        var group;
+                        if (window.location.href.split("$n=").length > 1) {
+                            group = window.location.href.split("$t=")[1].split("$n=")[0];
+                        }
+                        else {
+                            group = window.location.href.split("$t=")[1];
+                        }
+                        group = group.replace(/%20/g, " ");
+                        group = group.replace("@", "&");
+                        if (group == baseMapLayer[0].MapValue) {
+                            CreateBasemap(orderedLayer, groupdata, data);
                         }
                     }
                 }
-                if (compareWebmaps.length > 0) {
-                    dojo.dom.byId("imgResize").setAttribute("compareId", dojo.toJson(compareWebmaps));
-                }
-
-                //Display News and Events panel when none groups have key indicator
-                if (keyCounter == 0) {
-                    CreateLayerPods(orderedLayer, data.token, groupdata, null);
-                    PopulateNews(dojo.dom.byId("btnNews"));
-                }
-                CheckBasemap(orderedLayer, groupdata, data);
-
-                //Create basemap when clicked on Map button on dashboard page
-                mapClick = dojo.connect(dojo.dom.byId('btnMap'), "onclick", function (evt) {
-                    if (dojo.dom.byId("btnMap").style.cursor == "pointer") {
-                        ShowProgressIndicator();
-                        if (map) {
-                            map.destroy();
+            }, { useProxy: true });
+            dojo.dom.byId("map").style.display = "none";
+            //Open Setting page upon clicking 'Settings' on dashboard page
+            dojo.dom.byId("btnSettings").onclick = function () {
+                if (dojo.dom.byId("btnSettings").className != "customDisabledButton") {
+                    if (dojo.dom.byId("divSettingsContainer").style.display != "block") {
+                        dojo.dom.byId("divInfoContainer").style.display = "none";
+                        dojo.dom.byId("divSettingsContainer").style.display = "block";
+                        if (isTablet) {
+                            SetSettingsHeight();
                         }
-                        CreateBasemap(orderedLayer, groupdata, data);
-                    }
-                });
-                //Decode the shared URL when shared application is accessed
-                if (share != "") {
-                    var group;
-                    if (window.location.href.split("$n=").length > 1) {
-                        group = window.location.href.split("$t=")[1].split("$n=")[0];
-                    }
-                    else {
-                        group = window.location.href.split("$t=")[1];
-                    }
-                    group = group.replace(/%20/g, " ");
-                    group = group.replace("@", "&");
-                    if (group == baseMapLayer[0].MapValue) {
-                        CreateBasemap(orderedLayer, groupdata, data);
+                        dojo.dom.byId("btnSettings").style.cursor = "default";
+                        DisplaySettings();
                     }
                 }
             }
-        }, { useProxy: true });
-        dojo.dom.byId("map").style.display = "none";
-        //Open Setting page upon clicking 'Settings' on dashboard page
-        dojo.dom.byId("btnSettings").onclick = function () {
-            if (dojo.dom.byId("btnSettings").className != "customDisabledButton") {
-                if (dojo.dom.byId("divSettingsContainer").style.display != "block") {
-                    dojo.dom.byId("divInfoContainer").style.display = "none";
-                    dojo.dom.byId("divSettingsContainer").style.display = "block";
-                    if (isTablet) {
-                        SetSettingsHeight();
-                    }
-                    dojo.dom.byId("btnSettings").style.cursor = "default";
-                    DisplaySettings();
-                }
+        }
+        else {            
+            portal.signOut();
+            portal.signIn().then(function (loggedInUser) {
+                portalUser = loggedInUser;
+                sessionStorage.clear();
+                FindArcGISGroup();
+            });
+            if (dojo.query(".esriErrorMsg")[0]) {
+                dojo.query(".esriErrorMsg")[0].innerHTML = messages.getElementsByTagName("nonAuthenticatedMember")[0].childNodes[0].nodeValue;
+                dojo.query(".esriErrorMsg")[0].style.display = "block";
             }
         }
     });

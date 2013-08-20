@@ -1,7 +1,7 @@
-<%@ WebHandler Language="C#" Class="proxy" %>
+﻿<%@ WebHandler Language="C#" Class="proxy" %>
 /*
  | Version 10.2
- | Copyright 2012 Esri
+ | Copyright 2013 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
  | you may not use this file except in compliance with the License.
@@ -15,279 +15,689 @@
  | See the License for the specific language governing permissions and
  | limitations under the License.
  */
-/*
-  This proxy page does not have any security checks. It is highly recommended
-  that a user deploying this proxy page on their web server, add appropriate
-  security checks, for example checking request path, username/password, target
-  url, etc.
-*/
 using System;
-using System.Drawing;
 using System.IO;
 using System.Web;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Serialization;
 using System.Web.Caching;
+using System.Net;                       // for WebRequest & WebResponse
+//============================================================================================================================//
 
 /// <summary>
-/// Forwards requests to an ArcGIS Server REST resource. Uses information in
-/// the proxy.config file to determine properties of the server.
+/// Handles multiple proxy behaviors:  source-site filtering, ArcGIS Online authentication, app-level Twitter authentication,
+/// and cross-domain proxying & filtering with an RSS 2 override.
 /// </summary>
 public class proxy : IHttpHandler
 {
+    const bool cShowAuthXHeaders = true;
+    const string cConfigFilename = "proxy.config";
+    const string cConfigCacheName = "proxy_config";
+    const string cAGOLAuthCacheName = "proxy_agol_authentication";
+    const string cTwitterAuthCacheName = "proxy_twitter_authentication";
+    enum IsAcceptableURL {no, onlyIfRSS, yes};
 
     public void ProcessRequest(HttpContext context)
     {
+        HttpRequest requestFromApp = context.Request;
+        HttpResponse responseToApp = context.Response;
+        HttpWebRequest requestToThirdPartyServer = null;
+        IsAcceptableURL okURL;
 
-        HttpResponse response = context.Response;
+        // Read config file
+        ProxyConfig config = ProxyConfig.GetCurrentConfig(cConfigFilename, cConfigCacheName);
+        if(null == config)
+        {
+            // Clear the caches for convenience of configurer
+            ClearCaches();
+
+            // Report the missing configuration
+            responseToApp.StatusCode = 500;
+            responseToApp.StatusDescription = "Proxy configuration not available; proxy cache usage cleared";
+            responseToApp.End();
+            return;
+        }
 
         // Get the URL requested by the client (take the entire querystring at once
-        //  to handle the case of the URL itself containing querystring parameters)
-        string uri = context.Request.Url.Query.Substring(1);
-        if (uri.Contains("https://api.twitter.com/1.1/search/tweets.json"))
+        // to handle the case of the URL itself containing querystring parameters);
+        // lop off initial question mark of query string
+        if (1 >= requestFromApp.Url.Query.Length) {
+            // Clear the caches for convenience of configurer
+            ClearCaches();
+
+            responseToApp.StatusCode = 200;
+            responseToApp.StatusDescription = "Proxy cache usage cleared";
+            responseToApp.End();
+            return;
+        }
+        string thirdPartyServerURL = requestFromApp.Url.Query.Substring(1);
+
+        // Check that the third-party URL doesn't contain extra question marks
+        int iQ = thirdPartyServerURL.IndexOf("?");
+        for (;;)
         {
-            char[] delimiters = new char[] { '?', '&' };
-            string url = uri.Split(delimiters)[0];
-            string query = uri.Split(delimiters)[1].Split(new char[] { '=' })[1];
-            getTwitterData(url, query, response);
+            if(thirdPartyServerURL.Length <= ++iQ) break;
+            iQ = thirdPartyServerURL.IndexOf("?", iQ);
+            if(0 > iQ) break;
+            thirdPartyServerURL = thirdPartyServerURL.Remove(iQ, 1).Insert(iQ, "&");
+        };
+
+        //--------------------------------------------------------------------------------------------------------------------//
+        // Are we checking the application's site's URL?
+        if (null != config.applicationSiteURL)
+        {
+            // Check that the application's server matches the config file
+            bool ok = requestFromApp.Url.ToString().ToLower().StartsWith(config.applicationSiteURL.ToLower());
+            if (!ok)
+            {
+                responseToApp.StatusCode = 500;
+                responseToApp.StatusDescription = "Unsupported application URL";
+                responseToApp.End();
+                return;
+            }
+        }
+
+        //--------------------------------------------------------------------------------------------------------------------//
+        // Are we checking for URL rewriting?
+        if (null != config.URLRewriting)
+        {
+            foreach (URLToRewrite rewriteRule in config.URLRewriting){
+
+                // Is the third-party URL a rewrite candidate?
+                if (thirdPartyServerURL.StartsWith(rewriteRule.urlPrefix)) {
+
+                    // Rewrite using AGOL authentication
+                    if (null != rewriteRule.agolCredentials) {
+
+                        if (!PrepareAgolUrl(config.applicationSiteURL, ref thirdPartyServerURL,
+                            rewriteRule.agolCredentials, ref requestToThirdPartyServer, ref responseToApp))
+                        {
+                            responseToApp.StatusCode = 500;
+                            responseToApp.StatusDescription = "ArcGIS.com authentication failed";
+                            responseToApp.End();
+                            return;
+                        }
+                        break;
+                    }
+
+                    //------------------------------------------------------------------------------------------------------------//
+
+                    // Rewrite using Twitter authentication
+                    else if (null != rewriteRule.twitterCredentials) {
+
+                        if (!PrepareTwitterUrl(config.applicationSiteURL, ref thirdPartyServerURL,
+                            rewriteRule.twitterCredentials, ref requestToThirdPartyServer, ref responseToApp))
+                        {
+                            responseToApp.StatusCode = 500;
+                            responseToApp.StatusDescription = "Twitter authentication failed";
+                            responseToApp.End();
+                            return;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        //--------------------------------------------------------------------------------------------------------------------//
+        // Are we filtering server URLs?
+        if (null != config.serverUrls)
+        {
+            okURL = config.serverUrls.exemptRSS2 ? IsAcceptableURL.onlyIfRSS : IsAcceptableURL.no;
+
+            // Find the matching server prefixes in the list of accepted servers.
+            // Carry along with the OK any restrictions.
+            string lowerThirdPartyServerURL = thirdPartyServerURL.ToLower();
+            foreach(serverUrl server in config.serverUrls)
+            {
+                if (lowerThirdPartyServerURL.StartsWith(server.url.ToLower()))
+                {
+                    okURL = IsAcceptableURL.yes;
+                }
+            }
+
+            // Report that the third-party server wasn't in the configured list; we'll defer this if exempting RSS feeds
+            if (IsAcceptableURL.no == okURL)
+            {
+                responseToApp.StatusCode = 500;
+                responseToApp.StatusDescription = "Unsupported server URL";
+                responseToApp.End();
+                return;
+            }
         }
         else
         {
-            // Get token, if applicable, and append to the request
-            string token = getTokenFromConfigFile(uri);
-            if (!String.IsNullOrEmpty(token))
-            {
-                if (uri.Contains("?"))
-                    uri += "&token=" + token;
-                else
-                    uri += "?token=" + token;
+            okURL = IsAcceptableURL.yes;
+        }
+
+        //--------------------------------------------------------------------------------------------------------------------//
+        // At this point, we've done all of the filtering, authenticating, and URL-rewriting that we need to do.
+        // Create the web request if a managed URL handler hasn't already done so
+        if (null == requestToThirdPartyServer)
+        {
+            requestToThirdPartyServer = (HttpWebRequest)WebRequest.Create(thirdPartyServerURL);
+        }
+        requestToThirdPartyServer.Method = context.Request.HttpMethod;
+        requestToThirdPartyServer.ServicePoint.Expect100Continue = false;
+
+        // Set body of request for POST requests
+        if (context.Request.InputStream.Length > 0)
+        {
+            byte[] bytes = new byte[context.Request.InputStream.Length];
+            context.Request.InputStream.Read(bytes, 0, (int)context.Request.InputStream.Length);
+            requestToThirdPartyServer.ContentLength = bytes.Length;
+
+            string ctype = context.Request.ContentType;
+            if (String.IsNullOrEmpty(ctype)) {
+                requestToThirdPartyServer.ContentType = "application/x-www-form-urlencoded";
+            }
+            else {
+                requestToThirdPartyServer.ContentType = ctype;
             }
 
-            System.Net.HttpWebRequest req = (System.Net.HttpWebRequest)System.Net.HttpWebRequest.Create(uri);
-
-            //code added to use default credentails for authenticating the request via proxy
-            req.UseDefaultCredentials = true;
-            req.Credentials = System.Net.CredentialCache.DefaultCredentials;
-
-            req.Method = context.Request.HttpMethod;
-            req.ServicePoint.Expect100Continue = false;
-
-            // Set body of request for POST requests
-            if (context.Request.InputStream.Length > 0)
+            using (Stream outputStream = requestToThirdPartyServer.GetRequestStream())
             {
-                byte[] bytes = new byte[context.Request.InputStream.Length];
-                context.Request.InputStream.Read(bytes, 0, (int)context.Request.InputStream.Length);
-                req.ContentLength = bytes.Length;
-
-                string ctype = context.Request.ContentType;
-                if (String.IsNullOrEmpty(ctype))
-                {
-                    req.ContentType = "application/x-www-form-urlencoded";
-                }
-                else
-                {
-                    req.ContentType = ctype;
-                }
-
-                using (Stream outputStream = req.GetRequestStream())
-                {
-                    outputStream.Write(bytes, 0, bytes.Length);
-                }
+                outputStream.Write(bytes, 0, bytes.Length);
             }
+        }
 
-            // Send the request to the server
-            System.Net.WebResponse serverResponse = null;
+        // Send the request to the third-party server.
+        System.Net.HttpWebResponse responseFromThirdPartyServer = null;
+        try
+        {
+            responseFromThirdPartyServer = (System.Net.HttpWebResponse)requestToThirdPartyServer.GetResponse();
+        }
+        catch (System.Net.WebException webExc)
+        {
+            responseToApp.StatusCode = 500;
+            responseToApp.StatusDescription = webExc.Status.ToString();
+            responseToApp.Write(webExc.Message);
+            responseToApp.Write("<br />");
+            responseToApp.Write(webExc.Response);
+            responseToApp.End();
+            return;
+        }
+
+        //--------------------------------------------------------------------------------------------------------------------//
+
+        // Set up the response to the client
+        if (responseFromThirdPartyServer != null)
+        {
+            responseToApp.ContentType = responseFromThirdPartyServer.ContentType;
             try
             {
-                serverResponse = req.GetResponse();
-            }
-            catch (System.Net.WebException webExc)
-            {
-                response.StatusCode = 500;
-                response.StatusDescription = webExc.Status.ToString();
-                response.Write(webExc.Response);
-                response.End();
-                return;
-            }
-
-            // Set up the response to the client
-            if (serverResponse != null)
-            {
-                response.ContentType = serverResponse.ContentType;
-                using (Stream byteStream = serverResponse.GetResponseStream())
+                using (Stream byteStream = responseFromThirdPartyServer.GetResponseStream())
                 {
-
-                    // Text response
-                    if (serverResponse.ContentType.Contains("text") ||
-                        serverResponse.ContentType.Contains("json"))
+                    if (IsAcceptableURL.onlyIfRSS == okURL)
                     {
-                        using (StreamReader sr = new StreamReader(byteStream))
+                        // Try to parse content as RSS
+                        try
                         {
-                            string strResponse = sr.ReadToEnd();
-                            response.Write(strResponse);
+                            string responseString = "";
+                            using (MemoryStream ms = new MemoryStream())
+                            {
+                                // Read the response into local memory
+                                using (StreamReader sr = new StreamReader(byteStream))
+                                {
+                                    responseString = sr.ReadToEnd();
+                                    byte[] responseBytes = Encoding.UTF8.GetBytes(responseString);
+                                    ms.Write(responseBytes, 0, responseBytes.Length);
+                                }
+
+                                // Try to parse it; throws an exception if it fails
+                                ms.Seek(0L, SeekOrigin.Begin);
+                                rss.ParseFeed(ms);
+                            }
+
+                            // Copy the third-party response to the app
+                            responseToApp.Write(responseString);
+                        }
+                        catch (Exception) {
+                            responseToApp.StatusCode = 500;
+                            responseToApp.StatusDescription = "Unsupported server URL";
+                            return;
                         }
                     }
                     else
                     {
-                        // Binary response (image, lyr file, other binary file)
-                        BinaryReader br = new BinaryReader(byteStream);
-                        byte[] outb = br.ReadBytes((int)serverResponse.ContentLength);
-                        br.Close();
+                        // Text response
+                        if (responseFromThirdPartyServer.ContentType.Contains("text") ||
+                            responseFromThirdPartyServer.ContentType.Contains("json"))
+                        {
+                            using (StreamReader sr = new StreamReader(byteStream))
+                            {
+                                string responseString = sr.ReadToEnd();
+                                responseToApp.Write(responseString);
+                            }
+                        }
+                        else
+                        {
+                            // Binary response (image, lyr file, other binary file)
+                            BinaryReader br = new BinaryReader(byteStream);
 
-                        // Tell client not to cache the image since it's dynamic
-                        response.CacheControl = "no-cache";
+                            // If the server provides the Content Length, use it, subject to a maximum
+                            // buffer size. But just because the value is zero doesn't mean that the server
+                            // didn't send us anything; cf ArcGIS.com & item thumbnails.
+                            int numBytes = Math.Min(4096, (int)responseFromThirdPartyServer.ContentLength);
+                            if (0 >= numBytes) numBytes = 4096;
 
-                        // Send the image to the client
-                        // (Note: if large images/files sent, could modify this to send in chunks)
-                        response.OutputStream.Write(outb, 0, outb.Length);
+                            // Copy to response to app until the response from third party server is empty
+                            int bytesRead = 0;
+                            do
+                            {
+                                byte[] outb = br.ReadBytes(numBytes);
+                                bytesRead = outb.Length;
+                                if (0 < bytesRead) responseToApp.OutputStream.Write(outb, 0, bytesRead);
+                            } while (0 < bytesRead);
+
+                            br.Close();
+                        }
                     }
-
-                    serverResponse.Close();
                 }
             }
-            response.End();
+            catch (Exception ex)
+            {
+                responseToApp.StatusCode = 500;
+                responseToApp.StatusDescription = ex.Message.ToString();
+                responseToApp.Write(ex.Message);
+            }
+            responseFromThirdPartyServer.Close();
         }
+        // Report that the third-party server wasn't in the configured list
+        else if (IsAcceptableURL.onlyIfRSS == okURL)
+        {
+            responseToApp.StatusCode = 500;
+            responseToApp.StatusDescription = "Unsupported server URL";
+        }
+
+        responseToApp.End();
     }
+
+    //------------------------------------------------------------------------------------------------------------------------//
 
     public bool IsReusable
     {
-        get
-        {
+        get {
             return false;
         }
     }
 
-    static void getTwitterData(string URL, string query, HttpResponse response)
+    /// <summary>
+    /// Adapts the called URL for use with AGOL.
+    /// </summary>
+    /// <param name="referer">URL of calling application's site</param>
+    /// <param name="thirdPartyServerURL">Called URL</param>
+    /// <param name="agolCredentials">AGOL authentication credentials</param>
+    /// <param name="requestToThirdPartyServer">Not used</param>
+    /// <param name="responseToApp">Response to calling application; provided so that diagnostic
+    /// information may be inserted into the response's headers</param>
+    /// <returns>True if called URL successfully adapted for calling AGOL</returns>
+    protected bool PrepareAgolUrl(string referer, ref string thirdPartyServerURL, agolCredentials agolCredentials,
+        ref HttpWebRequest requestToThirdPartyServer, ref HttpResponse responseToApp)
     {
-
-        // oauth application keys
-        var oauth_token = "986048725-MtrzgCk1Usd6DsasYELV5CMcZFWuJb7vLdcNFkJo"; //"insert here...";
-        var oauth_token_secret = "87ThaFXJDVqhyfjBHfFs5qM4BroOKKv4h3mGfNf8"; //"insert here...";
-        var oauth_consumer_key = "17pVbOgTTPCTpPMTt8ptiw";// = "insert here...";
-        var oauth_consumer_secret = "AgpnDNZ2giURm7A9J9xQSS57Vnhkarpm6d9txwLs";// = "insert here...";
-
-        // oauth implementation details
-        var oauth_version = "1.0";
-        var oauth_signature_method = "HMAC-SHA1";
-
-        // unique request details
-        var oauth_nonce = Convert.ToBase64String(
-            new ASCIIEncoding().GetBytes(DateTime.Now.Ticks.ToString()));
-        var timeSpan = DateTime.UtcNow
-            - new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-        var oauth_timestamp = Convert.ToInt64(timeSpan.TotalSeconds).ToString();
-
-        // create oauth signature
-        var baseFormat = "oauth_consumer_key={0}&oauth_nonce={1}&oauth_signature_method={2}" +
-                        "&oauth_timestamp={3}&oauth_token={4}&oauth_version={5}&q={6}";
-
-        var baseString = string.Format(baseFormat,
-                                    oauth_consumer_key,
-                                    oauth_nonce,
-                                    oauth_signature_method,
-                                    oauth_timestamp,
-                                    oauth_token,
-                                    oauth_version,
-                                    Uri.EscapeDataString(query)
-                                    );
-
-        baseString = string.Concat("GET&", Uri.EscapeDataString(URL), "&", Uri.EscapeDataString(baseString));
-
-        var compositeKey = string.Concat(Uri.EscapeDataString(oauth_consumer_secret),
-                                "&", Uri.EscapeDataString(oauth_token_secret));
-
-        string oauth_signature;
-        using (System.Security.Cryptography.HMACSHA1 hasher = new System.Security.Cryptography.HMACSHA1(ASCIIEncoding.ASCII.GetBytes(compositeKey)))
+        // Try to get the authentication spec from the cache
+        bool usedCache = true;
+        string authExpiration = "";
+        AGOLAuthenticationSpec authSpec = HttpRuntime.Cache[cAGOLAuthCacheName] as AGOLAuthenticationSpec;
+        if (authSpec == null)
         {
-            oauth_signature = Convert.ToBase64String(
-                hasher.ComputeHash(ASCIIEncoding.ASCII.GetBytes(baseString)));
-        }
+            usedCache = false;
+            // No spec available--we'll have to generate one
 
-        // create the request header
-        var headerFormat = "OAuth oauth_nonce=\"{0}\", oauth_signature_method=\"{1}\", " +
-                           "oauth_timestamp=\"{2}\", oauth_consumer_key=\"{3}\", " +
-                           "oauth_token=\"{4}\", oauth_signature=\"{5}\", " +
-                           "oauth_version=\"{6}\"";
+            // Pick a username; we can have multiple to spread out the load
+            int iUser = 0;
+            string[] usernames = agolCredentials.usernames.Split(new Char[] {','});
+            if(1 < usernames.Length)
+            {
+                iUser = (new Random()).Next(usernames.Length);
+            }
 
-        var authHeader = string.Format(headerFormat,
-                                Uri.EscapeDataString(oauth_nonce),
-                                Uri.EscapeDataString(oauth_signature_method),
-                                Uri.EscapeDataString(oauth_timestamp),
-                                Uri.EscapeDataString(oauth_consumer_key),
-                                Uri.EscapeDataString(oauth_token),
-                                Uri.EscapeDataString(oauth_signature),
-                                Uri.EscapeDataString(oauth_version)
-                        );
-        //return;
-        System.Net.ServicePointManager.Expect100Continue = false;
+            string[] passwords = agolCredentials.passwords.Split(new Char[] {','});
+            iUser = Math.Min(iUser, passwords.Length - 1);
 
-        // make the request
-        URL = URL + "?q=" + Uri.EscapeDataString(query);//
+            string username = usernames[iUser];
+            string password = passwords[iUser];
+            responseToApp.Headers["X-UserNum"] = (++iUser).ToString();
 
-        System.Net.HttpWebRequest request = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(URL);
-        request.Headers.Add("Authorization", authHeader);
-        request.Method = "GET";
-        request.ContentType = "application/x-www-form-urlencoded";
+            // Post the authentication request
+            System.Net.HttpWebRequest authenticationReq =
+                (System.Net.HttpWebRequest)System.Net.HttpWebRequest.Create(
+                agolCredentials.authenticationURL);
+            authenticationReq.Method = "POST";
+            authenticationReq.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+            authenticationReq.ServicePoint.Expect100Continue = false;
 
-        System.Net.WebResponse serverResponse = request.GetResponse();
-        var reader = new StreamReader(serverResponse.GetResponseStream());
-        var objText = reader.ReadToEnd();
-        response.Write(objText);
-        serverResponse.Close();
-        response.End();
-    }
-    
-    // Gets the token for a server URL from a configuration file
-    // TODO: ?modify so can generate a new short-lived token from username/password in the config file
-    private string getTokenFromConfigFile(string uri)
-    {
-        try
-        {
-            ProxyConfig config = ProxyConfig.GetCurrentConfig();
-            if (config != null)
-                return config.GetToken(uri);
+            string postData =
+                "referer=" + (null != referer ? referer : "") +
+                "&username=" + username +
+                "&password=" + password +
+                "&expiration=" + agolCredentials.tokenCacheDurationMinutes.ToString() +
+                "&f=pjson";
+            byte[] postBytes = UTF8Encoding.UTF8.GetBytes(postData);
+            authenticationReq.ContentLength = postBytes.Length;
+            using (Stream outputStream = authenticationReq.GetRequestStream())
+            {
+                outputStream.Write(postBytes, 0, postBytes.Length);
+            }
+
+            // Read the authentication response
+            System.Net.HttpWebResponse authenticationResponse = null;
+            try
+            {
+                authenticationResponse = (System.Net.HttpWebResponse)authenticationReq.GetResponse();
+            }
+            catch (System.Net.WebException)
+            {
+                authenticationResponse = null;
+            }
+
+            if (authenticationResponse != null)
+            {
+                try
+                {
+                    using (Stream byteStream = authenticationResponse.GetResponseStream())
+                    {
+                        System.Runtime.Serialization.Json.DataContractJsonSerializer jsonSer =
+                            new System.Runtime.Serialization.Json.DataContractJsonSerializer(
+                            typeof(AGOLAuthenticationSpec));
+                        authSpec = (AGOLAuthenticationSpec)jsonSer.ReadObject(byteStream);
+                    }
+                    if (null != authSpec.error)
+                    {
+                        authSpec = null;
+                    }
+                }
+                catch(Exception ex)
+                {
+                    authSpec = null;
+                }
+                authenticationResponse.Close();
+            }
+
+            // Cache the authentication
+            if (null != authSpec)
+            {
+                DateTime expiresDate =
+                    new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                    .AddMilliseconds(authSpec.expires);
+                HttpRuntime.Cache.Insert(
+                    cAGOLAuthCacheName, authSpec, null, expiresDate, Cache.NoSlidingExpiration);
+
+                authExpiration = expiresDate.ToShortDateString() + " " + expiresDate.ToShortTimeString() + " UTC";
+            }
             else
-                throw new ApplicationException(
-                    "Proxy.config file does not exist at application root, or is not readable.");
+            {
+                return false;
+            }
         }
-        catch (InvalidOperationException)
+        else
         {
-            // Proxy is being used for an unsupported service (proxy.config has mustMatch="true")
-            HttpResponse response = HttpContext.Current.Response;
-            response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
-            response.End();
-        }
-        catch (Exception e)
-        {
-            if (e is ApplicationException)
-                throw e;
-
-            // just return an empty string at this point
-            // -- may want to throw an exception, or add to a log file
+            DateTime expiresDate =
+                new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                .AddMilliseconds(authSpec.expires);
+            authExpiration = expiresDate.ToShortDateString() + " " + expiresDate.ToShortTimeString() + " UTC";
         }
 
-        return string.Empty;
+        responseToApp.Headers["X-FromCache"] = usedCache.ToString();
+        responseToApp.Headers["X-AuthExpiration"] = authExpiration;
+
+        // Switch to SSL if desired by authentication response
+        if (authSpec.ssl && 5 < thirdPartyServerURL.Length)
+        {
+            string protocol = thirdPartyServerURL.Substring(0, 5).ToLower();
+            if ("http:" == protocol)
+            {
+                thirdPartyServerURL = "https:" + thirdPartyServerURL.Substring(5);
+            }
+        }
+
+        // Create the proxied URL
+        thirdPartyServerURL += (thirdPartyServerURL.Contains("?") ? "&token=": "?token=") + authSpec.token;
+
+        return true;
     }
+
+    /// <summary>
+    /// Adapts the called URL for use with Twitter.
+    /// </summary>
+    /// <param name="referer">URL of calling application's site</param>
+    /// <param name="thirdPartyServerURL">Called URL</param>
+    /// <param name="twitterCredentials">Twitter authentication credentials</param>
+    /// <param name="requestToThirdPartyServer">Overwritten by proxy request to third-party server
+    /// created by this routine</param>
+    /// <param name="responseToApp">Response to calling application; provided so that diagnostic
+    /// information may be inserted into the response's headers</param>
+    /// <returns>True if called URL successfully adapted for calling Twitter</returns>
+    protected bool PrepareTwitterUrl(string referer, ref string thirdPartyServerURL, twitterCredentials twitterCredentials,
+        ref HttpWebRequest requestToThirdPartyServer, ref HttpResponse responseToApp)
+    {
+        // Try to get the authentication spec from the cache
+        bool usedCache = true;
+        string authExpiration = "";
+        TwitterAuthenticationSpec authSpec =
+            HttpRuntime.Cache[cTwitterAuthCacheName] as TwitterAuthenticationSpec;
+        if (authSpec == null)
+        {
+            usedCache = false;
+            // No spec available--we'll have to generate one
+            // https://dev.twitter.com/docs/auth/application-only-auth
+
+            // "Step 1: Encode consumer key and secret"
+            string authHeader = Encode_Base64(
+                Encode_RFC1738(twitterCredentials.consumerKey)
+                + ":" + Encode_RFC1738(twitterCredentials.consumerSecret));
+
+            // "Step 2: Obtain a bearer token"
+            System.Net.HttpWebRequest authenticationReq =
+                (System.Net.HttpWebRequest)System.Net.HttpWebRequest.Create(
+                twitterCredentials.authenticationURL);
+            authenticationReq.Method = "POST";
+            authenticationReq.Headers.Add("Authorization", "Basic " + authHeader);
+            authenticationReq.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
+            string postData = "grant_type=client_credentials";
+            byte[] postBytes = UTF8Encoding.UTF8.GetBytes(postData);
+            authenticationReq.ContentLength = postBytes.Length;
+            using (Stream outputStream = authenticationReq.GetRequestStream())
+            {
+                outputStream.Write(postBytes, 0, postBytes.Length);
+            }
+            authenticationReq.ServicePoint.Expect100Continue = false;
+
+            // Read the authentication response
+            System.Net.HttpWebResponse authenticationResponse = null;
+            try
+            {
+                authenticationResponse = (System.Net.HttpWebResponse)authenticationReq.GetResponse();
+            }
+            catch (System.Net.WebException)
+            {
+                authenticationResponse = null;
+            }
+
+            if (authenticationResponse != null)
+            {
+                try
+                {
+                    using (Stream byteStream = authenticationResponse.GetResponseStream())
+                    {
+                        System.Runtime.Serialization.Json.DataContractJsonSerializer jsonSer =
+                            new System.Runtime.Serialization.Json.DataContractJsonSerializer(
+                            typeof(TwitterAuthenticationSpec));
+                        authSpec = (TwitterAuthenticationSpec)jsonSer.ReadObject(byteStream);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    authSpec = null;
+                }
+                authenticationResponse.Close();
+            }
+
+            // Cache the authentication
+            if (null != authSpec)
+            {
+                DateTime expiresDate = DateTime.UtcNow
+                    .AddMinutes(twitterCredentials.tokenCacheDurationMinutes);
+                HttpRuntime.Cache.Insert(
+                    cTwitterAuthCacheName, authSpec, null, expiresDate, Cache.NoSlidingExpiration);
+
+                authExpiration = expiresDate.ToShortDateString() + " " + expiresDate.ToShortTimeString() + " UTC";
+                responseToApp.Headers["X-AuthExpiration"] = authExpiration;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        responseToApp.Headers["X-FromCache"] = usedCache.ToString();
+
+        // "Step 3: Authenticate API requests with the bearer token"
+        requestToThirdPartyServer = (HttpWebRequest)WebRequest.Create(thirdPartyServerURL);
+        requestToThirdPartyServer.Headers.Add("Authorization", "Bearer " + authSpec.access_token);
+
+        return true;
+    }
+
+    /// <summary>
+    /// Clears the runtime caches used by this proxy.
+    /// </summary>
+    protected void ClearCaches()
+    {
+        HttpRuntime.Cache.Remove(cConfigCacheName);
+        HttpRuntime.Cache.Remove(cAGOLAuthCacheName);
+        HttpRuntime.Cache.Remove(cTwitterAuthCacheName);
+    }
+
+    /// <summary>
+    /// Escapes a string using OAuth rules.
+    /// </summary>
+    /// <param name="rawString">Original string</param>
+    /// <returns>Escaped string</returns>
+    protected string OAuthEscape(string rawString)
+    {
+        StringBuilder escapedString = new StringBuilder();
+        for (int i = 0; i < rawString.Length; ++i)
+        {
+            char rawChar = rawString[i];
+
+            // http://tools.ietf.org/html/rfc5849#section-3.6
+            // Characters in the unreserved character set as defined by [RFC3986], Section 2.3
+            // (ALPHA, DIGIT, "-", ".", "_", "~") MUST NOT be encoded.
+            if (Char.IsLetterOrDigit(rawChar) || '-' == rawChar || '.' == rawChar || '_' == rawChar || '~' == rawChar)
+            {
+                escapedString.Append(rawChar);
+            }
+            else
+            {
+                escapedString.Append("%");
+                escapedString.Append(((int)rawChar).ToString("X2"));
+            }
+        }
+        return escapedString.ToString();
+    }
+
+    /// <summary>
+    /// Returns the current date and time in Unix format.
+    /// </summary>
+    /// <returns>Date and time string</returns>
+    protected long UnixDate()
+    {
+        DateTime cUnixStartInWindows = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        TimeSpan unixOffset = DateTimeOffset.Now - cUnixStartInWindows;
+        return Convert.ToInt64(Math.Round(unixOffset.TotalMilliseconds));
+    }
+
+    /// <summary>
+    /// Encodes a string according to the rules of RFC 2396, which supplanted RFC 1738.
+    /// </summary>
+    /// <param name="original">String to encode</param>
+    /// <returns>Encoded string</returns>
+    protected string Encode_RFC1738(string original)
+    {
+        // RFC 2396 "revises and replaces the generic definitions in RFC 1738..."
+        // http://www.ietf.org/rfc/rfc2396.txt, http://www.ietf.org/rfc/rfc1738.txt
+        // http://msdn.microsoft.com/en-us/library/system.uri.escapedatastring.aspx
+        return Uri.EscapeDataString(original);
+    }
+
+    /// <summary>
+    /// Encodes a string according to the rules of Base 64.
+    /// </summary>
+    /// <param name="original">String to encode</param>
+    /// <returns>Encoded string</returns>
+    protected string Encode_Base64(string original)
+    {
+        return Convert.ToBase64String(
+            (new ASCIIEncoding()).GetBytes(original));
+    }
+
 }
 
+//============================================================================================================================//
+
+/// <summary>
+/// Represents the contents of the config file and provides routines for accessing those contents.
+/// </summary>
 [XmlRoot("ProxyConfig")]
 public class ProxyConfig
 {
     #region Static Members
 
+    /// <summary>
+    /// Gets the current configuration from the cache if possible and falling back to a file.
+    /// </summary>
+    /// <param name="configFilename">Name of configuration file</param>
+    /// <param name="configCacheName">Name under which to cache configuration</param>
+    /// <returns>ProxyConfig object</returns>
+    public static ProxyConfig GetCurrentConfig(string configFilename, string configCacheName)
+    {
+        ProxyConfig config = HttpRuntime.Cache[configCacheName] as ProxyConfig;
+
+        if (config == null)
+        {
+            string contextualizedFilename = ContextualizeFilename(configFilename, HttpContext.Current);
+            config = LoadProxyConfig(contextualizedFilename);
+
+            if (config != null)
+            {
+                CacheDependency dep = new CacheDependency(contextualizedFilename);
+                HttpRuntime.Cache.Insert(configCacheName, config, dep);
+            }
+        }
+
+        return config;
+    }
+
+    /// <summary>
+    /// Maps the name of the configuration file to the current context.
+    /// </summary>
+    /// <param name="configFilename">Name of configuration file</param>
+    /// <param name="context">HttpContext of request</param>
+    /// <returns>Path to and name of file</returns>
+    private static string ContextualizeFilename(string configFilename, HttpContext context)
+    {
+        return context.Server.MapPath("~/" + configFilename);
+    }
+
     private static object _lockobject = new object();
 
-    public static ProxyConfig LoadProxyConfig(string fileName)
+    /// <summary>
+    /// Loads the specified configuration file and deserializes it from XML.
+    /// </summary>
+    /// <param name="filename">Path to and name of file</param>
+    /// <returns>ProxyConfig object</returns>
+    private static ProxyConfig LoadProxyConfig(string filename)
     {
         ProxyConfig config = null;
 
         lock (_lockobject)
         {
-            if (System.IO.File.Exists(fileName))
+            if (System.IO.File.Exists(filename))
             {
                 XmlSerializer reader = new XmlSerializer(typeof(ProxyConfig));
-                using (System.IO.StreamReader file = new System.IO.StreamReader(fileName))
+                using (StreamReader file = new StreamReader(filename))
                 {
                     config = (ProxyConfig)reader.Deserialize(file);
                 }
@@ -297,94 +707,242 @@ public class ProxyConfig
         return config;
     }
 
-    public static ProxyConfig GetCurrentConfig()
-    {
-        ProxyConfig config = HttpRuntime.Cache["proxyConfig"] as ProxyConfig;
-        if (config == null)
-        {
-            string fileName = GetFilename(HttpContext.Current);
-            config = LoadProxyConfig(fileName);
-
-            if (config != null)
-            {
-                CacheDependency dep = new CacheDependency(fileName);
-                HttpRuntime.Cache.Insert("proxyConfig", config, dep);
-            }
-        }
-
-        return config;
-    }
-
-    public static string GetFilename(HttpContext context)
-    {
-        return context.Server.MapPath("~/proxy.config");
-    }
     #endregion
 
-    ServerUrl[] serverUrls;
-    bool mustMatch;
+    // URL of calling program
+    [XmlElement("applicationSiteURL")]
+    public string applicationSiteURL;
 
-    [XmlArray("serverUrls")]
-    [XmlArrayItem("serverUrl")]
-    public ServerUrl[] ServerUrls
+    // URLs managed by proxy
+    [XmlArray("URLRewriting")]
+    [XmlArrayItem("URLToRewrite")]
+    public URLToRewrite[] URLRewriting;
+
+    // URLs that proxy may call on behalf of calling program
+    [XmlElement("serverUrls")]
+    public serverUrls serverUrls;
+}
+
+//============================================================================================================================//
+
+/// <summary>
+/// Represents a URL managed by the proxy, perhaps including adding authentication.
+/// </summary>
+[XmlRoot("URLToRewrite")]
+public class URLToRewrite
+{
+    // Prefix of the URL for matching
+    [XmlAttribute("urlPrefix")]
+    public string urlPrefix;
+
+    [XmlElement("agolCredentials")]
+    public agolCredentials agolCredentials;
+
+    [XmlElement("twitterCredentials")]
+    public twitterCredentials twitterCredentials;
+
+    public bool ShouldSerializeagolCredentials()
     {
-        get { return this.serverUrls; }
-        set { this.serverUrls = value; }
+        return null != agolCredentials;
     }
 
-    [XmlAttribute("mustMatch")]
-    public bool MustMatch
+    public bool ShouldSerializetwitterCredentials()
     {
-        get { return mustMatch; }
-        set { mustMatch = value; }
-    }
-
-    public string GetToken(string uri)
-    {
-        foreach (ServerUrl su in serverUrls)
-        {
-            if (su.MatchAll && uri.StartsWith(su.Url, StringComparison.InvariantCultureIgnoreCase))
-            {
-                return su.Token;
-            }
-            else
-            {
-                if (String.Compare(uri, su.Url, StringComparison.InvariantCultureIgnoreCase) == 0)
-                    return su.Token;
-            }
-        }
-
-        if (mustMatch)
-            throw new InvalidOperationException();
-
-        return string.Empty;
+        return null != twitterCredentials;
     }
 }
 
-public class ServerUrl
+//============================================================================================================================//
+
+/// <summary>
+/// Represents information needed to log into AGOL.
+/// </summary>
+[XmlRoot("agolCredentials")]
+public class agolCredentials
 {
-    string url;
-    bool matchAll;
-    string token;
+    // URL of AGOL authentication server
+    [XmlElement("authenticationURL")]
+    public string authenticationURL;
 
+    [XmlElement("usernames")]
+    public string usernames;
+
+    [XmlElement("passwords")]
+    public string passwords;
+
+    [XmlElement("tokenCacheDurationMinutes")]
+    public int tokenCacheDurationMinutes;
+}
+
+//============================================================================================================================//
+
+/// <summary>
+/// Represents information needed to log into Twitter using OAuth.
+/// </summary>
+[XmlRoot("twitterCredentials")]
+public class twitterCredentials
+{
+    // URL of Twitter authentication server
+    [XmlElement("authenticationURL")]
+    public string authenticationURL;
+
+    [XmlElement("consumerKey")]
+    public string consumerKey;
+
+    [XmlElement("consumerSecret")]
+    public string consumerSecret;
+
+    [XmlElement("accessToken")]
+    public string accessToken;
+
+    [XmlElement("accessTokenSecret")]
+    public string accessTokenSecret;
+
+    [XmlElement("tokenCacheDurationMinutes")]
+    public int tokenCacheDurationMinutes;
+}
+
+//============================================================================================================================//
+
+/// <summary>
+/// Represents a list of servers that the proxy may contact.
+/// </summary>
+[XmlRoot("serverUrls")]
+public class serverUrls
+{
+    // Switch indicating if RSS feeds are exempt from restriction; defaults to "false"
+    [XmlAttribute("exemptRSS2")]
+    public bool exemptRSS2;
+
+    // List of servers
+    private readonly List<serverUrl> items = new List<serverUrl>();
+    [XmlElement("serverUrl", typeof(serverUrl))]
+    public List<serverUrl> Items { get { return items; } }
+    public int Count { get { return items.Count; } }
+    public List<serverUrl>.Enumerator GetEnumerator() { return items.GetEnumerator(); }
+}
+
+//============================================================================================================================//
+
+/// <summary>
+/// Represents a server that the proxy may contact.
+/// </summary>
+[XmlRoot("serverUrl")]
+public class serverUrl
+{
+    // Prefix of the URL for matching
     [XmlAttribute("url")]
-    public string Url
-    {
-        get { return url; }
-        set { url = value; }
-    }
+    public string url;
+}
 
-    [XmlAttribute("matchAll")]
-    public bool MatchAll
-    {
-        get { return matchAll; }
-        set { matchAll = value; }
-    }
+//============================================================================================================================//
 
-    [XmlAttribute("token")]
-    public string Token
+/// <summary>
+/// Represents the contents of the authentication specification returned from arcgis.com.
+/// </summary>
+[System.Runtime.Serialization.DataContract]
+public class AGOLAuthenticationSpec
+{
+    [System.Runtime.Serialization.DataMember]
+    public string token;
+
+    [System.Runtime.Serialization.DataMember]
+    public long expires;
+
+    [System.Runtime.Serialization.DataMember]
+    public bool ssl;
+
+    [System.Runtime.Serialization.DataMember]
+    public object error;
+}
+
+//============================================================================================================================//
+
+/// <summary>
+/// Represents the contents of the authentication specification returned from twitter.com.
+/// </summary>
+[System.Runtime.Serialization.DataContract]
+public class TwitterAuthenticationSpec
+{
+    [System.Runtime.Serialization.DataMember]
+    public string token_type;
+
+    [System.Runtime.Serialization.DataMember]
+    public string access_token;
+}
+
+//============================================================================================================================//
+
+/// <summary>
+/// Represents a simple RSS 2 XML content.
+/// </summary>
+[XmlRoot]
+public class rss
+{
+    [XmlAttribute]
+    public string version;
+
+    [XmlElement]
+    public channel channel;
+
+    public static rss ParseFeed(Stream source)
     {
-        get { return token; }
-        set { token = value; }
+        rss feed = null;
+
+        XmlSerializer reader = new XmlSerializer(typeof(rss));
+        using (StreamReader src = new StreamReader(source))
+        {
+            feed = (rss)reader.Deserialize(src);
+        }
+
+        return feed;
     }
+}
+
+[XmlRoot]
+public class channel
+{
+    [XmlElement]
+    public string title;
+
+    [XmlElement]
+    public string description;
+
+    [XmlElement]
+    public string link;
+
+    [XmlElement("item")]
+    public item[] items;
+}
+
+[XmlRoot]
+public class item
+{
+    [XmlElement]
+    public string category;
+
+    [XmlElement]
+    public string title;
+
+    [XmlElement]
+    public string description;
+
+    [XmlElement]
+    public string link;
+
+    [XmlElement]
+    public guidItem guid;
+
+    [XmlElement]
+    public string pubDate;
+}
+
+[XmlRoot]
+public class guidItem
+{
+    [XmlAttribute]
+    public string isPermaLink;
+
+    [XmlText]
+    public string guid;
 }

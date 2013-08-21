@@ -29,18 +29,18 @@ function CreateScrollbar(container, content) {
     this.container = container;
     this.content = content;
     content.scrollTop = 0;
-    if (dojo.byId(container.id + 'scrollbar_track')) {
-        RemoveChildren(dojo.byId(container.id + 'scrollbar_track'));
-        container.removeChild(dojo.byId(container.id + 'scrollbar_track'));
+    if (dojo.dom.byId(container.id + 'scrollbar_track')) {
+        RemoveChildren(dojo.dom.byId(container.id + 'scrollbar_track'));
+        container.removeChild(dojo.dom.byId(container.id + 'scrollbar_track'));
     }
-    if (!dojo.byId(container.id + 'scrollbar_track')) {
+    if (!dojo.dom.byId(container.id + 'scrollbar_track')) {
         scrollbar_track = document.createElement('div');
         scrollbar_track.id = container.id + "scrollbar_track";
         scrollbar_track.className = "scrollbar_track";
     } else {
-        scrollbar_track = dojo.byId(container.id + 'scrollbar_track');
+        scrollbar_track = dojo.dom.byId(container.id + 'scrollbar_track');
     }
-    var containerHeight = dojo.coords(container);
+    var containerHeight = dojo['dom-geometry'].getMarginBox(container);
     scrollbar_track.style.height = (containerHeight.h - 6) + "px";
     var scrollbar_handle = document.createElement('div');
     scrollbar_handle.className = 'scrollbar_handle';
@@ -61,7 +61,6 @@ function CreateScrollbar(container, content) {
             content.addEventListener('DOMMouseScroll', ScrollDiv, false);
         }
         content.onmousewheel = function (evt) {
-            console.log(content.id);
             ScrollDiv(evt);
         }
     }
@@ -91,7 +90,7 @@ function CreateScrollbar(container, content) {
             pxTop = scrollbar_handle.offsetTop // Sliders vertical position at start of slide.
             var offsetY;
             if (!evt.offsetY) {
-                var coords = dojo.coords(evt.target);
+                var coords = dojo['dom-geometry'].getMarginBox(evt.target);
                 offsetY = evt.layerY - coords.t;
             } else offsetY = evt.offsetY;
             if (offsetY < scrollbar_handle.offsetTop) {
@@ -199,7 +198,7 @@ function CreateHorizontalScrollbar(container, content) {
     });
     if (content.id == "carouselscroll") {
         handlePoll = dojo.connect(container, "touchmove", function (evt) {
-            if ((dojo.byId('ServiceLeftArrow').style.display == "block") || (dojo.byId('ServiceRightArrow').style.display == "block")) {
+            if ((dojo.dom.byId('ServiceLeftArrow').style.display == "block") || (dojo.dom.byId('ServiceRightArrow').style.display == "block")) {
                 touchHMoveHandler(evt);
             }
         });
@@ -246,15 +245,27 @@ function CreateHorizontalScrollbar(container, content) {
 }
 
 //Get the extent based on the map point
-function GetBrowserMapExtent(mapPoint) {
+function GetBrowserMapExtent(mapPoint, mapCtrl) {
+    var width = mapCtrl.extent.getWidth();
+    var height = mapCtrl.extent.getHeight();
+    var xmin = mapPoint.x - (width / 2);
+    var ymin = mapPoint.y - (height / 1.5);
+    var xmax = xmin + width;
+    var ymax = ymin + height;
+    return new esri.geometry.Extent(xmin, ymin, xmax, ymax, map.spatialReference);
+}
+
+//Get the extent based on the map point
+function GetBrowserMapExtentforInfoWindow(mapPoint) {
     var width = map.extent.getWidth();
     var height = map.extent.getHeight();
-    var xmin = mapPoint.x - (width / 2);
-    if (dojo.byId("divServiceDetails").style.display == "block") {
-        var ymin = mapPoint.y - (height / 2.5);
+    var xmin;
+    if ((isTablet) && (window.matchMedia("(orientation: portrait)").matches)) {
+        xmin = mapPoint.x - (width / 4.5);
     } else {
-        var ymin = mapPoint.y - (height / 3);
+        xmin = mapPoint.x - (width / 2.5);
     }
+    var ymin = mapPoint.y - (height / 2);
     var xmax = xmin + width;
     var ymax = ymin + height;
     return new esri.geometry.Extent(xmin, ymin, xmax, ymax, map.spatialReference);
@@ -280,6 +291,11 @@ function CheckMailFormat(emailValue) {
 String.prototype.trimString = function (len) {
     return (this.length > len) ? this.substring(0, len) + "..." : this;
 }
+
+String.prototype.format = function () {
+    return this.toString().split(/(?=(?:\d{3})+(?:\.|$))/g).join(",");
+};
+
 //Trim string
 String.prototype.trim = function () {
     return this.replace(/^\s*/, "").replace(/\s*$/, "");
@@ -291,61 +307,98 @@ function SetLoginPageHeight() {
         if (dojo.query(".dijitDialogUnderlayWrapper")) {
             if (dojo.query(".dijitDialogUnderlayWrapper").length > 0) {
                 dojo.query(".dijitDialogUnderlayWrapper")[0].style.left = "0px";
-                if (dojo.coords("divLoginScreenContainer").w > 0) {
-                    dojo.query(".esriSignInDialog")[0].style.left = ((dojo.coords("divLoginScreenContainer").w / 2) - 165) + "px";
+                if (dojo['dom-geometry'].getMarginBox("divLoginScreenContainer").w > 0) {
+                    dojo.query(".esriSignInDialog")[0].style.left = ((dojo['dom-geometry'].getMarginBox("divLoginScreenContainer").w / 2) - 165) + "px";
                 }
                 else {
-                    dojo.query(".esriSignInDialog")[0].style.left = ((dojo.coords("divLoadingIndicator").w / 2) - 165) + "px";
+                    dojo.query(".esriSignInDialog")[0].style.left = ((dojo['dom-geometry'].getMarginBox("divLoadingIndicator").w / 2) - 165) + "px";
                 }
             }
         }
     }
-    dojo.byId("divWelcomeContent").style.height = (dojo.coords("divLoginScreenContainer").h - 400) + "px";
+    dojo.dom.byId("divWelcomeContent").style.height = (dojo['dom-geometry'].getMarginBox("divLoginScreenContainer").h - 400) + "px";
     setTimeout(function () {
-        CreateScrollbar(dojo.byId('divWelcomeContainer'), dojo.byId('divWelcomeContent'));
+        CreateScrollbar(dojo.dom.byId('divWelcomeContainer'), dojo.dom.byId('divWelcomeContent'));
     }, 100);
 }
 
 //Set the height of dashboard page
 function SetHomePageHeight() {
-    dojo.byId("divLayerContainer").style.height = (dojo.coords("divInfoContainer").h - 85) + "px";
-    dojo.byId("divLayerContent").style.height = (dojo.coords("divInfoContainer").h - 85) + "px";
-    dojo.byId("divNAEDisplayContainer").style.height = (dojo.coords("divInfoContainer").h - 205) + "px";
-    dojo.byId("divNAEDisplayContent").style.height = (dojo.coords("divInfoContainer").h - 205) + "px";
+    dojo.dom.byId("divLayerContainer").style.height = (dojo['dom-geometry'].getMarginBox("divInfoContainer").h - 85) + "px";
+    dojo.dom.byId("divLayerContent").style.height = (dojo['dom-geometry'].getMarginBox("divInfoContainer").h - 85) + "px";
+    dojo.dom.byId("divNAEDisplayContainer").style.height = (dojo['dom-geometry'].getMarginBox("divInfoContainer").h - 205) + "px";
+    dojo.dom.byId("divNAEDisplayContent").style.height = (dojo['dom-geometry'].getMarginBox("divInfoContainer").h - 205) + "px";
     setTimeout(function () {
-        CreateScrollbar(dojo.byId('divLayerContainer'), dojo.byId('divLayerContent'));
-        CreateScrollbar(dojo.byId('divNAEDisplayContainer'), dojo.byId('divNAEDisplayContent'));
+        CreateScrollbar(dojo.dom.byId('divLayerContainer'), dojo.dom.byId('divLayerContent'));
+        CreateScrollbar(dojo.dom.byId('divNAEDisplayContainer'), dojo.dom.byId('divNAEDisplayContent'));
     }, 100);
 }
 
 //Set height of settings page
 function SetSettingsHeight() {
-    dojo.byId("divRSSFeedContent").style.height = (dojo.coords("divSettingsContainer").h / 2 - 210) + "px";
-    dojo.byId("divTwitterFeedContent").style.height = (dojo.coords("divSettingsContainer").h / 2 - 210) + "px";
-    CreateScrollbar(dojo.byId('divRSSFeedContainer'), dojo.byId('divRSSFeedContent'));
-    CreateScrollbar(dojo.byId('divTwitterFeedContainer'), dojo.byId('divTwitterFeedContent'));
+    dojo.dom.byId("divRSSFeedContent").style.height = (dojo['dom-geometry'].getMarginBox("divSettingsContainer").h / 2 - 210) + "px";
+    dojo.dom.byId("divTwitterFeedContent").style.height = (dojo['dom-geometry'].getMarginBox("divSettingsContainer").h / 2 - 210) + "px";
+    CreateScrollbar(dojo.dom.byId('divRSSFeedContainer'), dojo.dom.byId('divRSSFeedContent'));
+    CreateScrollbar(dojo.dom.byId('divTwitterFeedContainer'), dojo.dom.byId('divTwitterFeedContent'));
 }
 
 //Handle orientation changes
 function orientationChanged() {
     orientationChange = true;
     setTimeout(function () {
-        if (dojo.byId("divLoginScreenContainer").style.display != "none") {
+        if (dojo.dom.byId("divLoginScreenContainer").style.display != "none") {
             SetLoginPageHeight();
         }
-        if (dojo.byId("divInfoContainer").style.display != "none") {
+        if (dojo.dom.byId("divInfoContainer").style.display != "none") {
             SetHomePageHeight();
         }
-        if (dojo.byId("divSettingsContainer").style.display != "none") {
+        if (dojo.dom.byId("divSettingsContainer").style.display != "none") {
             SetSettingsHeight();
         }
-        if (selectedPoint) {
-            if (map) {
-                map.setExtent(GetBrowserMapExtent(selectedPoint));
-            }
+        if (map) {
+            dojo.dom.byId("divTempMap").style.left = ((dojo['dom-geometry'].getMarginBox("mapContainer").w + (dojo['dom-geometry'].getMarginBox("holder").l)) - dojo['dom-geometry'].getMarginBox("divMap").w) + "px";
+            ResizeChartContainer();
+            dojo.dom.byId("tdMapControls").style.width = ((window.matchMedia("(orientation: portrait)").matches) ? "300px" : "330px");
+            dojo.dom.byId("tdMapButtons").style.width = ((window.matchMedia("(orientation: portrait)").matches) ? "300px" : "330px");
+            setTimeout(function () {
+                dojo.dom.byId("divFrozen").style.height = (map.height - 140) + "px";
+                OrientationChangesforInfoWindow();
+            }, 500);
         }
         orientationChange = false;
     }, 500);
+}
+
+function OrientationChangesforInfoWindow() {
+    if (selectedPoint) {
+        (tempMap) ? tempMap.setExtent(GetBrowserMapExtent(selectedPoint, tempMap)) : map.setExtent(GetBrowserMapExtent(selectedPoint, map));
+    }
+
+    if (selectedMapPoint) {
+        map.setExtent(GetBrowserMapExtentforInfoWindow(selectedMapPoint));
+        var point = selectedMapPoint;
+        map.infoWindow.hide();
+        setTimeout(function () {
+            map.infoWindow.show(point);
+            selectedMapPoint = point;
+            if (tempMap) {
+                if (!isBrowser) {
+                    if (dojo.query(".esriPopup .contentPane").length > 0) {
+                        dojo.query(".esriPopup .contentPane")[0].style.overflow = "hidden";
+                    }
+                }
+            }
+        }, 500);
+    }
+    if (selectedTempPoint) {
+        tempMap.setExtent(GetBrowserMapExtentforInfoWindow(selectedTempPoint));
+        var tempPoint = selectedTempPoint;
+        tempMap.infoWindow.hide();
+        setTimeout(function () {
+            tempMap.infoWindow.show(tempPoint);
+            selectedTempPoint = tempPoint;
+        }, 500);
+    }
 }
 
 //Fade-out animation
@@ -368,13 +421,13 @@ function FadeIn(node) {
 
 //Slide pods to right
 function SlideRight() {
-    var difference = dojo.byId('divServiceData').offsetWidth - dojo.byId('carouselscroll').offsetWidth;
+    var difference = dojo.dom.byId('divServiceData').offsetWidth - dojo.dom.byId('carouselscroll').offsetWidth;
     if (newLeft >= difference) {
-        dojo.byId('ServiceLeftArrow').style.display = "block";
-        var node = dojo.byId('carouselscroll');
+        dojo.dom.byId('ServiceLeftArrow').style.display = "block";
+        var node = dojo.dom.byId('carouselscroll');
         newLeft = newLeft - (220);
 
-        var node = dojo.byId('carouselscroll');
+        var node = dojo.dom.byId('carouselscroll');
         var anim1 = dojo.animateProperty({
             node: node,
             duration: 700,
@@ -385,21 +438,21 @@ function SlideRight() {
         animG = dojo.fx["chain"]([anim1]).play();
 
         if (newLeft < difference) {
-            dojo.byId('ServiceRightArrow').style.display = "none";
+            dojo.dom.byId('ServiceRightArrow').style.display = "none";
         }
-        if (dojo.byId('ServiceRightArrow').style.display == "none") {
-            dojo.byId('ServiceLeftArrow').style.display = "block";
+        if (dojo.dom.byId('ServiceRightArrow').style.display == "none") {
+            dojo.dom.byId('ServiceLeftArrow').style.display = "block";
         }
     }
     if (difference > 0) {
-        dojo.byId('ServiceRightArrow').style.display = "none";
+        dojo.dom.byId('ServiceRightArrow').style.display = "none";
     }
     RepositionMetricPods();
 }
 
 //Slide pods to left
 function SlideLeft() {
-    var difference = dojo.byId('divServiceData').offsetWidth - dojo.byId('carouselscroll').offsetWidth;
+    var difference = dojo.dom.byId('divServiceData').offsetWidth - dojo.dom.byId('carouselscroll').offsetWidth;
     if (newLeft < 0) {
         if (newLeft > -(220)) {
             newLeft = 0;
@@ -407,7 +460,7 @@ function SlideLeft() {
         else {
             newLeft = newLeft + (220);
         }
-        var node = dojo.byId('carouselscroll');
+        var node = dojo.dom.byId('carouselscroll');
         var anim1 = dojo.animateProperty({
             node: node,
             duration: 700,
@@ -417,13 +470,13 @@ function SlideLeft() {
         });
         animG = dojo.fx["chain"]([anim1]).play();
 
-        if (dojo.byId('ServiceRightArrow').style.display == "none") {
+        if (dojo.dom.byId('ServiceRightArrow').style.display == "none") {
             if (newLeft > difference) {
-                dojo.byId('ServiceRightArrow').style.display = "block";
+                dojo.dom.byId('ServiceRightArrow').style.display = "block";
             }
         }
         if (newLeft == 0) {
-            dojo.byId('ServiceLeftArrow').style.display = "none";
+            dojo.dom.byId('ServiceLeftArrow').style.display = "none";
         }
     }
     RepositionMetricPods();
@@ -431,77 +484,85 @@ function SlideLeft() {
 
 //Reset pod positions
 function ResetSlideControls() {
-    dojo.byId("divServiceDetails").style.left = (dojo.coords("holder").l) + "px";
-
-    if (dojo.byId("carouselscroll").offsetWidth > (dojo.coords("divGroupHolder").w - 104)) {
-        dojo.byId("divServiceData").style.width = (dojo.coords("divGroupHolder").w - 104) + "px";
+    dojo.dom.byId("divServiceDetails").style.left = (dojo['dom-geometry'].getMarginBox("holder").l) + "px";
+    if (tempMap) {
+        dojo.dom.byId("divServiceData").style.width = (dojo['dom-geometry'].getMarginBox("divGroupHolder").w / 2.5) + "px";
     }
     else {
-        dojo.byId("divServiceData").style.width = dojo.byId("carouselscroll").offsetWidth + "px";
+        if (dojo.dom.byId("carouselscroll").offsetWidth > (dojo['dom-geometry'].getMarginBox("divGroupHolder").w - 104)) {
+            dojo.dom.byId("divServiceData").style.width = (dojo['dom-geometry'].getMarginBox("divGroupHolder").w - 104) + "px";
+        }
+        else {
+            dojo.dom.byId("divServiceData").style.width = dojo.dom.byId("carouselscroll").offsetWidth + "px";
+        }
     }
-    dojo.byId('carouselscroll').style.paddingLeft = "0px";
+    dojo.dom.byId('carouselscroll').style.paddingLeft = "0px";
 
 
-    if (newLeft > (dojo.byId("divServiceData").offsetWidth - dojo.byId("carouselscroll").offsetWidth)) {
-        dojo.byId('tdServiceRightArrow').style.width = "45px";
-        dojo.byId('tdServiceLeftArrow').style.width = "45px";
+    if (newLeft > (dojo.dom.byId("divServiceData").offsetWidth - dojo.dom.byId("carouselscroll").offsetWidth)) {
+        if (!tempMap) {
+            dojo.dom.byId('tdServiceRightArrow').style.width = "45px";
+            dojo.dom.byId('tdServiceLeftArrow').style.width = "45px";
 
-        dojo.byId('ServiceRightArrow').style.display = "block";
-        dojo.byId('ServiceRightArrow').style.cursor = "pointer";
+            dojo.dom.byId('ServiceRightArrow').style.display = "block";
+            dojo.dom.byId('ServiceRightArrow').style.cursor = "pointer";
+        }
     }
     else {
-        if ((dojo.byId("ServiceLeftArrow").style.display == "none") && (dojo.byId("ServiceRightArrow").style.display == "none")) {
-            dojo.byId('tdServiceRightArrow').style.width = "1px";
-            dojo.byId('tdServiceLeftArrow').style.width = "1px";
+        if ((dojo.dom.byId("ServiceLeftArrow").style.display == "none") && (dojo.dom.byId("ServiceRightArrow").style.display == "none")) {
+            dojo.dom.byId('tdServiceRightArrow').style.width = "1px";
+            dojo.dom.byId('tdServiceLeftArrow').style.width = "1px";
         }
 
-        dojo.byId('ServiceRightArrow').style.display = "none";
-        dojo.byId('ServiceRightArrow').style.cursor = "default";
+        dojo.dom.byId('ServiceRightArrow').style.display = "none";
+        dojo.dom.byId('ServiceRightArrow').style.cursor = "default";
     }
 
     if (newLeft == 0) {
-        dojo.byId('ServiceLeftArrow').style.display = "none";
-        dojo.byId('ServiceLeftArrow').style.cursor = "default";
+        dojo.dom.byId('ServiceLeftArrow').style.display = "none";
+        dojo.dom.byId('ServiceLeftArrow').style.cursor = "default";
     }
     else {
-        dojo.byId('ServiceLeftArrow').style.display = "block";
-        dojo.byId('ServiceLeftArrow').style.cursor = "pointer";
+        dojo.dom.byId('ServiceLeftArrow').style.display = "block";
+        dojo.dom.byId('ServiceLeftArrow').style.cursor = "pointer";
     }
     RepositionMetricPods();
     setTimeout(function () {
-        if (dojo.byId("tblMetricPods")) {
-            dojo.byId("tblMetricPods").style.visibility = "visible";
+        if (dojo.dom.byId("tblMetricPods")) {
+            dojo.dom.byId("tblMetricPods").style.visibility = "visible";
         }
     }, 500);
 }
 
 //Reposition the pods based on number of metric pods available for a subject group
 function RepositionMetricPods() {
-    if (dojo.byId("divServiceData").offsetWidth - dojo.byId("carouselscroll").offsetWidth ==0) {
-        if (dojo.byId('ServiceLeftArrow').style.display == "none" && dojo.byId('ServiceRightArrow').style.display == "none") {
-            var cal = dojo.coords("divGroupHolder").w - dojo.byId("carouselscroll").offsetWidth;
-            dojo.byId('divServiceDetails').style.marginLeft = (cal / 2) + "px";
+    if (dojo.dom.byId("divServiceData").offsetWidth - dojo.dom.byId("carouselscroll").offsetWidth == 0) {
+        if (dojo.dom.byId('ServiceLeftArrow').style.display == "none" && dojo.dom.byId('ServiceRightArrow').style.display == "none") {
+            var cal = dojo['dom-geometry'].getMarginBox("divGroupHolder").w - dojo.dom.byId("carouselscroll").offsetWidth;
+            if (!tempMap) {
+                dojo.dom.byId('divServiceDetails').style.marginLeft = (cal / 2) + "px";
+            }
         }
     }
     else {
-        dojo.byId('divServiceDetails').style.marginLeft = "0px";
+        dojo.dom.byId('divServiceDetails').style.marginLeft = "0px";
     }
 }
 
 
 //Toggle containers
 function ToggleContainers() {
-    if (dojo.coords('divBookmarkContent').h > 0) {
-        dojo.byId('divBookmarkContent').style.right = (dojo.coords("holder").l + 15) + "px";
+    if (dojo['dom-geometry'].getMarginBox('divBookmarkContent').h > 0) {
+        dojo.dom.byId('divBookmarkContent').style.right = (dojo['dom-geometry'].getMarginBox("holder").l + 15) + "px";
     }
-    if (dojo.coords('divAddressContent').h > 0) {
-        dojo.byId('divAddressContent').style.right = (dojo.coords("holder").l + 15) + "px";
+    if (dojo['dom-geometry'].getMarginBox('divAddressContent').h > 0) {
+        dojo.dom.byId('divAddressContent').style.right = (dojo['dom-geometry'].getMarginBox("holder").l + 15) + "px";
     }
-    if (dojo.coords('divMoreContent').h > 0) {
-        dojo.byId('divMoreContent').style.right = (dojo.coords("holder").l + 15) + "px";
+    if (dojo['dom-geometry'].getMarginBox('divMoreContent').h > 0) {
+        dojo.dom.byId('divMoreContent').style.right = (dojo['dom-geometry'].getMarginBox("holder").l + 15) + "px";
     }
-    if (dojo.coords('divGraphComponent').h > 0) {
-        dojo.byId('divGraphComponent').style.right = (dojo.coords("holder").l + 15) + "px";
+    if (dojo['dom-geometry'].getMarginBox('divGraphComponent').h > 0) {
+        dojo.dom.byId('divGraphComponent').style.right = (dojo['dom-geometry'].getMarginBox("holder").l + 15) + "px";
     }
 }
 
@@ -550,14 +611,14 @@ function ReplaceDefaultText(e) {
 
 //Set target value for address
 function ResetTargetValue(target, title, color) {
-   if (target.value == '' && target.getAttribute(title)) {
+    if (target.value == '' && target.getAttribute(title)) {
         target.value = target.title;
         if (target.title == "") {
             target.value = target.getAttribute(title);
         }
     }
     target.style.color = color;
-    lastSearchString = dojo.byId("txtAddress").value.trim();
+    lastSearchString = dojo.dom.byId("txtAddress").value.trim();
 }
 
 //Converting string to Boolean

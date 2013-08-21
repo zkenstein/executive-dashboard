@@ -112,12 +112,27 @@ dojo.declare("js.config", null, {
 
     //Set locator settings
     LocatorSettings: {
+<<<<<<< HEAD
+        DefaultLocatorSymbol: "images/RedPushpin.png",
+=======
         DisplayText: "Search by Address or County",
         DefaultLocatorSymbol: "images/redPushpin.png",
+>>>>>>> state_adaptation
         MarkupSymbolSize: {
             width: 35,
             height: 35
         },
+<<<<<<< HEAD
+        DefaultValue: "139 W Porter Ave Naperville IL 60540",
+        LocatorParamaters: ["SingleLine"],
+        LocatorURL: "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
+        CandidateFields: "Loc_name, Score, Match_addr",
+        DisplayField: "${Match_addr}",
+        ZoomLevel: 14,
+        AddressMatchScore: 80,
+        LocatorFieldName: 'Loc_name',
+        LocatorFieldValues: ["USA.StreetName", "USA.PointAddress", "USA.StreetAddress"]
+=======
         DefaultValue: "1848 N Mill St Naperville IL 60563",
         LocatorParamaters: {
             SearchField: "text",
@@ -144,6 +159,7 @@ dojo.declare("js.config", null, {
             FieldValue: 'county'
         },
         MaxResults: 100
+>>>>>>> state_adaptation
     },
 
     //Fields for RSS Feed.
@@ -165,10 +181,17 @@ dojo.declare("js.config", null, {
 
     //Default values to set the RSS Feed and Twitter trend.
     DefaultNewsFields: [{
+<<<<<<< HEAD
+        RSSFeedName: "Chicago Tribune",
+        RSSFeedURL: "http://feeds.chicagotribune.com/chicagotribune/news/"
+    }, {
+        TwitterTrendName: "NapervilleIL"
+=======
         RSSFeedName: "Florida Local News",
         RSSFeedURL: "http://www.floridapsc.com/home/news/newsrss.ashx"
     }, {
         TwitterTrendName: "Florida"
+>>>>>>> state_adaptation
     }],
 
     //Set headers and Images for the welcome screen.
@@ -185,6 +208,36 @@ dojo.declare("js.config", null, {
 
     //Layer Images for the subject groups.
     LayerImages: [{
+<<<<<<< HEAD
+        Tag: "Public Safety",
+        Images: ["images/safety.png", "images/safety_hover.png"],
+        isPodVisible: true
+    }, {
+        Tag: "City Services",
+        Images: ["images/city.png", "images/city_hover.png"],
+        isPodVisible: true
+    }, {
+        Tag: "Health",
+        Images: ["images/transport.png", "images/transport_hover.png"],
+        isPodVisible: true
+    }, {
+        Tag: "Violations",
+        Images: ["images/capital.png", "images/capital_hover.png"],
+        isPodVisible: true
+    }, {
+        Tag: "Utilities",
+        Images: ["images/water.png", "images/water_hover.png"],
+        isPodVisible: true
+    }, {
+        Tag: "Construction Activity",
+        Images: ["images/capital.png", "images/capital_hover.png"]
+    }, {
+        Tag: "Public Notices",
+        Images: ["images/safety.png", "images/safety_hover.png"]
+    }, {
+        Tag: "Special Events",
+        Images: ["images/special_events.png", "images/special_events_hover.png"]
+=======
         Tag: "Employment",
         Images: ["images/employment.png", "images/employment-hover.png"],
         isPodVisible: true
@@ -208,17 +261,26 @@ dojo.declare("js.config", null, {
         Tag: "ARRA",
         Images: ["images/reinvestment.png", "images/reinvestment-hover.png"],
         isPodVisible: true
+>>>>>>> state_adaptation
     }],
 
     //Specify fields for the Metric pods.
     InfoPodStatics: [{
         CurrentObservation: "${OBSERVCURR}",
         LatestObservation: "${OBSERV1}",
+<<<<<<< HEAD
+        PreviousObservations: ["${OBSERV2}", "${OBSERV3}", "${OBSERV4}"],
+        StaticsPosition: "${INCREASEPOS}"
+    }, {
+        DateObservations: ["${DATECURR}", "${DATE1}", "${DATE2}", "${DATE3}", "${DATE4}"],
+        DatePattern: "MMM-dd"
+=======
         StatisticsPosition: "${INCREASEPOS}"
     }, {
         DateObservations: ["${DATE1}", "${DATE2}", "${DATE3}", "${DATECURR}"],
         CountObservations: ["${OBSERV1}", "${OBSERV2}", "${OBSERV3}", "${OBSERVCURR}"],
         DatePattern: "MMM dd, yyyy"
+>>>>>>> state_adaptation
     }],
 
     //Update information for info pods.

@@ -80,7 +80,7 @@ body,html
 {
     color: #ffffff;
     position: absolute;
-    z-index: 1005;
+    z-index: 2600 !important;
     overflow: hidden;
     -webkit-transition: top 0.5s ease-in;
     -moz-transition: top 0.5s ease-in;
@@ -161,7 +161,7 @@ body,html
    position: absolute;
    height: 60px;
    width: 100%;
-   z-index: 1005;
+   z-index: 1006;
    overflow: hidden;
 }
 .lblAppName
@@ -210,6 +210,15 @@ body,html
 {
     width:100%;
     height:100%;
+}
+.divFrozen
+{
+    position:absolute;
+    left:0px;
+    top:60px;
+    background: rgba(0,0,0,0.10);
+    width: 100%;
+    z-index: 2500;
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -343,6 +352,14 @@ body,html
     -webkit-box-shadow: 0 0 25px #AAAAAA;
     -moz-box-shadow: 0 0 25px #AAAAAA;
     box-shadow: 0 0 25px #AAAAAA;
+}
+
+.spnMetricNumber
+{
+    font-family:Arial;
+    font-size:36px;
+    font-weight:bolder;
+    word-break:break-all;
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -498,7 +515,7 @@ body,html
 
 .divBookmarkContent,.divAddressContent
 {
-    z-index: 1100;
+    z-index: 2600;
     position:absolute;
     top: 65px;
     width: 300px;
@@ -553,7 +570,7 @@ body,html
 {
     bottom: 80px;
     position: absolute;
-    z-index: 1005;
+    z-index: 1004;
     text-align: middle;
 }
 
@@ -607,6 +624,7 @@ body,html
     left:0px;
     width:100%;
     height:80px;
+    z-index:1006;
 }
 
 .tdBreak
@@ -626,7 +644,7 @@ body,html
 
 .esriSignInDialog
 {
-    z-index:2100 !important;
+    z-index:2900 !important;
 }
 
 .claro .dijitDialog
@@ -685,11 +703,6 @@ body,html
 .claro .dijitTooltip
 {
     z-index:2200 !important;
-}
-
-.esriPopup
-{
-    z-index:2100 !important;
 }
 
 .esriPopup .titleButton
@@ -855,11 +868,10 @@ body,html
 
 .divGraphComponent
 {
-    width: 380px;
     height: 300px;
-    z-index: 1100 !important;
+    z-index: 2600 !important;
     top: 59px;
-    background-color: #000000;
+    background: rgba(0,0,0,0.60);
     position:absolute;
     right:15px;
     -moz-border-radius: 0px 0px 0px 10px;
@@ -899,7 +911,7 @@ body,html
     top: 90px !important;
 }
 
-.esriLogo
+.esriControlsBR
 {
     bottom:80px !important;
     z-index:999 !important;
@@ -914,7 +926,7 @@ body,html
     width: 100%;
     display: none;
     font-family: Verdana;
-    z-index: 2000;
+    z-index: 2700;
     position: absolute;
     bottom: 0px;
     filter: alpha(opacity = 55);
@@ -931,4 +943,14 @@ body,html
     vertical-align: middle;
     display: none;
     cursor: default;
+}
+
+/*---------------------------------------------------------------------------------------------------------*/
+/*Styles for Home icon in esri slider*/
+.esriSimpleSliderHomeButton
+{
+    border-bottom: 2px solid #666666;
+    background-image: url('../images/home.png');
+    background-repeat: no-repeat;
+    background-position: center;
 }

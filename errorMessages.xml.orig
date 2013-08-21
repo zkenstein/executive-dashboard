@@ -20,7 +20,11 @@
     <nonAuthenticatedMember>The username and password are valid, but you don't have access to this resource.</nonAuthenticatedMember>
     <noResults>No results found for</noResults>
     <noSearchResults>No search results found.</noSearchResults>
+<<<<<<< HEAD
+    <locatorService>Locator service is not working, Please try again after some time.</locatorService>
+=======
     <locatorService>Locator service is not working; please try again after some time.</locatorService>
+>>>>>>> state_adaptation
     <bookmarkName>Please enter bookmark name.</bookmarkName>
     <selectLocation>Please select a location to compare.</selectLocation>
     <existingBookmark>Bookmark with this name already exists; please enter different name.</existingBookmark>

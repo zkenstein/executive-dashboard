@@ -23,6 +23,7 @@ using System.Text;
 using System.Xml.Serialization;
 using System.Web.Caching;
 using System.Net;                       // for WebRequest & WebResponse
+using System.Security.Cryptography;     // for MD5CryptoServiceProvider
 //============================================================================================================================//
 
 /// <summary>
@@ -34,8 +35,7 @@ public class proxy : IHttpHandler
     const bool cShowAuthXHeaders = true;
     const string cConfigFilename = "proxy.config";
     const string cConfigCacheName = "proxy_config";
-    const string cAGOLAuthCacheName = "proxy_agol_authentication";
-    const string cTwitterAuthCacheName = "proxy_twitter_authentication";
+    const string cCredentialsTagListCacheName = "proxy_credentialTags";
     enum IsAcceptableURL {no, onlyIfRSS, yes};
 
     public void ProcessRequest(HttpContext context)
@@ -110,7 +110,10 @@ public class proxy : IHttpHandler
                     // Rewrite using AGOL authentication
                     if (null != rewriteRule.agolCredentials) {
 
-                        if (!PrepareAgolUrl(config.applicationSiteUrl, ref thirdPartyServerURL,
+                        string cacheTag = MD5.HashString(rewriteRule.urlPrefix);
+                        AddToCredentialsTagListCache(cacheTag);
+                        if (!PrepareAgolUrl(
+                            cacheTag, config.applicationSiteUrl, ref thirdPartyServerURL,
                             rewriteRule.agolCredentials, ref requestToThirdPartyServer, ref responseToApp))
                         {
                             responseToApp.StatusCode = 500;
@@ -126,7 +129,10 @@ public class proxy : IHttpHandler
                     // Rewrite using Twitter authentication
                     else if (null != rewriteRule.twitterCredentials) {
 
-                        if (!PrepareTwitterUrl(config.applicationSiteUrl, ref thirdPartyServerURL,
+                        string cacheTag = MD5.HashString(rewriteRule.urlPrefix);
+                        AddToCredentialsTagListCache(cacheTag);
+                        if (!PrepareTwitterUrl(
+                            cacheTag, config.applicationSiteUrl, ref thirdPartyServerURL,
                             rewriteRule.twitterCredentials, ref requestToThirdPartyServer, ref responseToApp))
                         {
                             responseToApp.StatusCode = 500;
@@ -326,6 +332,7 @@ public class proxy : IHttpHandler
     /// <summary>
     /// Adapts the called URL for use with AGOL.
     /// </summary>
+    /// <param name="cacheTag">Tag for token cache</param>
     /// <param name="referer">URL of calling application's site</param>
     /// <param name="thirdPartyServerURL">Called URL</param>
     /// <param name="agolCredentials">AGOL authentication credentials</param>
@@ -333,13 +340,14 @@ public class proxy : IHttpHandler
     /// <param name="responseToApp">Response to calling application; provided so that diagnostic
     /// information may be inserted into the response's headers</param>
     /// <returns>True if called URL successfully adapted for calling AGOL</returns>
-    protected bool PrepareAgolUrl(string referer, ref string thirdPartyServerURL, agolCredentials agolCredentials,
+    protected bool PrepareAgolUrl(string cacheTag,
+        string referer, ref string thirdPartyServerURL, agolCredentials agolCredentials,
         ref HttpWebRequest requestToThirdPartyServer, ref HttpResponse responseToApp)
     {
         // Try to get the authentication spec from the cache
         bool usedCache = true;
         string authExpiration = "";
-        AGOLAuthenticationSpec authSpec = HttpRuntime.Cache[cAGOLAuthCacheName] as AGOLAuthenticationSpec;
+        AGOLAuthenticationSpec authSpec = HttpRuntime.Cache[cacheTag] as AGOLAuthenticationSpec;
         if (authSpec == null)
         {
             usedCache = false;
@@ -422,7 +430,7 @@ public class proxy : IHttpHandler
                     new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                     .AddMilliseconds(authSpec.expires);
                 HttpRuntime.Cache.Insert(
-                    cAGOLAuthCacheName, authSpec, null, expiresDate, Cache.NoSlidingExpiration);
+                    cacheTag, authSpec, null, expiresDate, Cache.NoSlidingExpiration);
 
                 authExpiration = expiresDate.ToShortDateString() + " " + expiresDate.ToShortTimeString() + " UTC";
             }
@@ -461,6 +469,7 @@ public class proxy : IHttpHandler
     /// <summary>
     /// Adapts the called URL for use with Twitter.
     /// </summary>
+    /// <param name="cacheTag">Tag for token cache</param>
     /// <param name="referer">URL of calling application's site</param>
     /// <param name="thirdPartyServerURL">Called URL</param>
     /// <param name="twitterCredentials">Twitter authentication credentials</param>
@@ -469,14 +478,15 @@ public class proxy : IHttpHandler
     /// <param name="responseToApp">Response to calling application; provided so that diagnostic
     /// information may be inserted into the response's headers</param>
     /// <returns>True if called URL successfully adapted for calling Twitter</returns>
-    protected bool PrepareTwitterUrl(string referer, ref string thirdPartyServerURL, twitterCredentials twitterCredentials,
+    protected bool PrepareTwitterUrl(string cacheTag,
+        string referer, ref string thirdPartyServerURL, twitterCredentials twitterCredentials,
         ref HttpWebRequest requestToThirdPartyServer, ref HttpResponse responseToApp)
     {
         // Try to get the authentication spec from the cache
         bool usedCache = true;
         string authExpiration = "";
         TwitterAuthenticationSpec authSpec =
-            HttpRuntime.Cache[cTwitterAuthCacheName] as TwitterAuthenticationSpec;
+            HttpRuntime.Cache[cacheTag] as TwitterAuthenticationSpec;
         if (authSpec == null)
         {
             usedCache = false;
@@ -540,7 +550,7 @@ public class proxy : IHttpHandler
                 DateTime expiresDate = DateTime.UtcNow
                     .AddMinutes(twitterCredentials.tokenCacheDurationMinutes);
                 HttpRuntime.Cache.Insert(
-                    cTwitterAuthCacheName, authSpec, null, expiresDate, Cache.NoSlidingExpiration);
+                    cacheTag, authSpec, null, expiresDate, Cache.NoSlidingExpiration);
 
                 authExpiration = expiresDate.ToShortDateString() + " " + expiresDate.ToShortTimeString() + " UTC";
                 responseToApp.Headers["X-AuthExpiration"] = authExpiration;
@@ -561,13 +571,46 @@ public class proxy : IHttpHandler
     }
 
     /// <summary>
+    /// Cache a credential used by this proxy.
+    /// </summary>
+    protected void AddToCredentialsTagListCache(string cacheTag)
+    {
+        string tags = HttpRuntime.Cache[cCredentialsTagListCacheName] as string;
+
+        // No cache tag names stored yet
+        if (null == tags)
+        {
+            HttpRuntime.Cache[cCredentialsTagListCacheName] = cacheTag;
+        }
+
+        // Add cache tag name if it isn't there already
+        else if (!tags.Contains(cacheTag))
+        {
+            tags += "|" + cacheTag;
+            HttpRuntime.Cache[cCredentialsTagListCacheName] = tags;
+        }
+    }
+
+    /// <summary>
     /// Clears the runtime caches used by this proxy.
     /// </summary>
     protected void ClearCaches()
     {
-        HttpRuntime.Cache.Remove(cConfigCacheName);
-        HttpRuntime.Cache.Remove(cAGOLAuthCacheName);
-        HttpRuntime.Cache.Remove(cTwitterAuthCacheName);
+        string tags = HttpRuntime.Cache[cCredentialsTagListCacheName] as string;
+        if (null == tags)
+        {
+            return;
+        }
+
+        // Run thru the list of cache tag names clearing each one
+        string[] tagList = tags.Split(new char[]{'|'});
+        foreach (string tag in tagList)
+        {
+            HttpRuntime.Cache.Remove(tag);
+        }
+
+        // Then clear list of tag names
+        HttpRuntime.Cache.Remove(cCredentialsTagListCacheName);
     }
 
     /// <summary>
@@ -633,6 +676,34 @@ public class proxy : IHttpHandler
             (new ASCIIEncoding()).GetBytes(original));
     }
 
+}
+
+//============================================================================================================================//
+
+public class MD5
+{
+    // How to compute and compare hash values by using Visual C#
+    // http://support.microsoft.com/kb/307020
+    // We don't cache the created provider because the site above says
+    // "Note that to compute another hash value, you will need to create
+    // another instance of the class."
+
+    public static string HashString(string sourceString)
+    {
+        return MD5.ByteArrayToString(new MD5CryptoServiceProvider()
+            .ComputeHash(ASCIIEncoding.ASCII.GetBytes(sourceString)));
+    }
+
+    public static string ByteArrayToString(byte[] arrInput)
+    {
+        int i;
+        StringBuilder sOutput = new StringBuilder(arrInput.Length);
+        for (i = 0; i < arrInput.Length; i++)
+        {
+            sOutput.Append(arrInput[i].ToString("x2"));
+        }
+        return sOutput.ToString();
+    }
 }
 
 //============================================================================================================================//

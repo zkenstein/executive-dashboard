@@ -2,7 +2,9 @@
 
 The Executive Dashboard is a configuration of ArcGIS Online and a HTML 5 / JavaScript application used by government leaders to proactively view critical metrics, identify trends, raise questions, and devise new management strategies.  It supports community-wide efforts to increase accountability and transparency within government and with the citizens they serve.   The Dashboard is a single application that can be deployed by  governments and used by decision-makers on a tablet device and desktop PC.
 
-[Try the Executive Dashboard application](http://localgovtemplates2.esri.com/ExecutiveDashboardTryItLive/)
+[Try the Executive Dashboard for State Government application](http://tryitlive.arcgis.com/StateDashboard/)
+
+[Try the Executive Dashboard for Local Government application](http://tryitlive.arcgis.com/ExecutiveDashboardTryItLive/)
 
 [![Image of Local Government Executive Dashboard application](https://raw.github.com/Esri/executive-dashboard/master/executive-dashboard.png "Executive Dashboard application")](http://localgovtemplates2.esri.com/ExecutiveDashboardTryItLive/)
 

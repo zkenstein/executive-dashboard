@@ -804,10 +804,17 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
                 dojo.dom.byId("imgResize").setAttribute("webmapID", id);
                 dojo.dom.byId("imgResize").setAttribute("webmapKey", webmapInfo.key);
                 mapDeferred.addCallback(function (response) {
+                    if (map) {
+                        map.destroy();
+                    }
                     map = response.map;
                     map.disableKeyboardNavigation();
+                    if (dojo.dom.byId("esriHomeButton")) {
+                        dojo.destroy(dojo.dom.byId("esriHomeButton"));
+                    }
                     dojo.create("div", {
                         className: "esriSimpleSliderHomeButton",
+                        id: "esriHomeButton",
                         onclick: function () {
                             if (defExtent) {
                                 var defaultExtent = new esri.geometry.Extent(Number(defExtent.split(",")[0]), Number(defExtent.split(",")[1]), Number(defExtent.split(",")[2]), Number(defExtent.split(",")[3]), map.spatialReference);
@@ -904,11 +911,18 @@ function ShowCompare(click) {
                                         }
                                     }
                                     HideProgressIndicator();
+                                    if (tempMap) {
+                                        tempMap.destroy();
+                                    }
                                     tempMap = response.map;
                                     tempMap.disableKeyboardNavigation();
 
+                                    if (dojo.dom.byId("esriCompareHomeButton")) {
+                                        dojo.destroy(dojo.dom.byId("esriCompareHomeButton"));
+                                    }
                                     dojo.create("div", {
                                         className: "esriSimpleSliderHomeButton",
+                                        id: "esriCompareHomeButton",
                                         onclick: function () {
                                             if (defExtent) {
                                                 var defaultTempMapExtent = new esri.geometry.Extent(Number(defExtent.split(",")[0]), Number(defExtent.split(",")[1]), Number(defExtent.split(",")[2]), Number(defExtent.split(",")[3]), map.spatialReference);
@@ -1709,6 +1723,3 @@ function CreateGraphicLayer(mapCtrl, webmapInfo) {
         }
     });
 }
-
-
-

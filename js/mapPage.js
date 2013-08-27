@@ -1118,7 +1118,9 @@ function PopulateInfoPodDetails(store, value, graph) {
         if (!graph) {
             dojo.dom.byId("divSummary" + store + "Pod").style.display = "none";
         }
-        dojo.dom.byId("divContainer" + store + "Pod").style.display = "block";
+        if (dojo.dom.byId("divContainer" + store + "Pod")) {
+            dojo.dom.byId("divContainer" + store + "Pod").style.display = "block";
+        }
     }
     else {
         if (graph) {
@@ -1327,12 +1329,12 @@ function PopulateChart(chartData, data, xAxisData) {
 
     chart.addAxis("x", {
         stroke: "white", min: 1, max: (xAxisData.length + 1), fontColor: "white", minorTicks: false, minorLabels: false, microTicks: false, font: "normal normal normal 9pt verdana",
-        hMajorLines: false, hMinorLines: false, fixLower: "major", fixUpper: "major", includeZero: false, title: "Reporting Period", titleGap: 10, titleFontColor: "#FFF", titleOrientation: "away",
+        hMajorLines: false, hMinorLines: false, fixLower: "major", fixUpper: "major", includeZero: false, title: "Reporting Period", titleGap: 10, titleFontColor: "#FFF", titleFont: "normal normal normal 11pt verdana", titleOrientation: "away",
         labels: label
     });
 
     chart.addAxis("y", { stroke: "white", min: minVal, max: maxVal, vertical: true, hMajorLines: false, fontColor: "white", font: "normal normal normal 9pt verdana",
-        hMinorLines: false, fixLower: "major", fixUpper: "major", title: "Historical Observations", titleGap: 10, titleFontColor: "#FFF"
+        hMinorLines: false, fixLower: "major", fixUpper: "major", title: "Historical Observations", titleGap: 10, titleFont: "normal normal normal 11pt verdana", titleFontColor: "#FFF"
     });
     chart.addSeries("dashboard", data);
     chart.render();

@@ -428,14 +428,14 @@ function SlideRight() {
         newLeft = newLeft - (220);
 
         var node = dojo.dom.byId('carouselscroll');
-        var anim1 = dojo.animateProperty({
+        var animate = dojo.animateProperty({
             node: node,
             duration: 700,
             properties: {
                 left: { end: newLeft, unit: "px" }
             }
         });
-        animG = dojo.fx["chain"]([anim1]).play();
+        animG = dojo.fx["chain"]([animate]).play();
 
         if (newLeft < difference) {
             dojo.dom.byId('ServiceRightArrow').style.display = "none";
@@ -461,14 +461,14 @@ function SlideLeft() {
             newLeft = newLeft + (220);
         }
         var node = dojo.dom.byId('carouselscroll');
-        var anim1 = dojo.animateProperty({
+        var animate = dojo.animateProperty({
             node: node,
             duration: 700,
             properties: {
                 left: { end: newLeft, unit: "px" }
             }
         });
-        animG = dojo.fx["chain"]([anim1]).play();
+        animG = dojo.fx["chain"]([animate]).play();
 
         if (dojo.dom.byId('ServiceRightArrow').style.display == "none") {
             if (newLeft > difference) {
@@ -625,5 +625,3 @@ function ResetTargetValue(target, title, color) {
 String.prototype.bool = function () {
     return (/^true$/i).test(this);
 };
-
-

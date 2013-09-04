@@ -119,31 +119,27 @@ dojo.declare("js.config", null, {
             height: 35
         },
         DefaultValue: "1848 N Mill St Naperville IL 60563",
-        LocatorParamaters: {
-            SearchField: "text",
-            SearchResultField: "outFields",
-            SearchCountField: "maxLocations",
-            SearchBoundaryField: "bbox",
-            SpatialReferenceField: "outSR"
+        LocatorParameters: {
+            SearchField: "SingleLine",
+            SearchBoundaryField: "searchExtent"
         },
-        LocatorURL: "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find",
-        CandidateFields: "Addr_type,Type,Score, Match_addr",
-        DisplayField: "${Match_addr}",
+        LocatorURL: "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
+        LocatorOutFields: ["Addr_Type", "Type", "Score", "Match_Addr","xmin","xmax","ymin","ymax"],
+        DisplayField: "${Match_Addr}",
         ZoomLevel: 14,
         AddressMatchScore: {
             Field: "Score",
             Value: 80
         },
         AddressSearch: {
-	    FieldName: 'Addr_type',
-            FieldValue: ["StreetAddress", "StreetName", "PointAddress"]
+            FilterFieldName: 'Addr_Type',
+            FilterFieldValues: ["StreetAddress", "StreetName", "PointAddress"]
         },
-        LocationSearch: {
-            LocatorFieldValue: 'POI',
-            FieldName: 'Type',
-            FieldValue: 'county'
-        },
-        MaxResults: 100
+        PlaceNameSearch: {
+            LocatorFieldValue: "POI",
+            FilterFieldName: "Type",
+            FilterFieldValues: ["county"]
+        }
     },
 
     //Fields for RSS Feed.

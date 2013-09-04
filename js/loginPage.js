@@ -22,6 +22,7 @@ dojo.require("dojox.charting.themes.RoyalPurples");
 dojo.require("esri.map");
 dojo.require("esri.layers.FeatureLayer");
 dojo.require("esri.tasks.geometry");
+dojo.require("esri.tasks.locator");
 dojo.require("esri.arcgis.utils");
 dojo.require("esri.arcgis.Portal");
 dojo.require("dojo.number");

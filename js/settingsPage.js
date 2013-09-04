@@ -84,14 +84,14 @@ function DisplaySettings() {
 function PopulateFeedList() {
     dojo.dom.byId("RSSErrorMessage").innerHTML = "";
     RemoveChildren(dojo.dom.byId("divRSSFeedContent"));
-    var table = document.createElement("table");
-    table.style.width = "100%";
-    table.cellSpacing = 0;
-    table.cellPadding = 0;
-    dojo.dom.byId("divRSSFeedContent").appendChild(table);
-    var tBody = document.createElement("tbody");
-    table.appendChild(tBody);
-    CreateSettingsListTemplate(rss, tBody, true);
+    var tblRSSFeedContent = document.createElement("table");
+    tblRSSFeedContent.style.width = "100%";
+    tblRSSFeedContent.cellSpacing = 0;
+    tblRSSFeedContent.cellPadding = 0;
+    dojo.dom.byId("divRSSFeedContent").appendChild(tblRSSFeedContent);
+    var tBodyRSSFeedContent = document.createElement("tbody");
+    tblRSSFeedContent.appendChild(tBodyRSSFeedContent);
+    CreateSettingsListTemplate(rss, tBodyRSSFeedContent, true);
     dojo.dom.byId("txtRSSFeedName").value = "";
     dojo.dom.byId("txtRSSFeedURL").value = "";
     CreateScrollbar(dojo.dom.byId('divRSSFeedContainer'), dojo.dom.byId('divRSSFeedContent'));
@@ -101,14 +101,14 @@ function PopulateFeedList() {
 function PopulateTrendList() {
     dojo.dom.byId("twitterErrorMessage").innerHTML = "";
     RemoveChildren(dojo.dom.byId("divTwitterFeedContent"));
-    var table = document.createElement("table");
-    table.style.width = "100%";
-    table.cellSpacing = 0;
-    table.cellPadding = 0;
-    dojo.dom.byId("divTwitterFeedContent").appendChild(table);
-    var tBody = document.createElement("tbody");
-    table.appendChild(tBody);
-    CreateSettingsListTemplate(trends, tBody, false);
+    var tblTwitterFeedContent = document.createElement("table");
+    tblTwitterFeedContent.style.width = "100%";
+    tblTwitterFeedContent.cellSpacing = 0;
+    tblTwitterFeedContent.cellPadding = 0;
+    dojo.dom.byId("divTwitterFeedContent").appendChild(tblTwitterFeedContent);
+    var tBodyTwitterFeedContent = document.createElement("tbody");
+    tblTwitterFeedContent.appendChild(tBodyTwitterFeedContent);
+    CreateSettingsListTemplate(trends, tBodyTwitterFeedContent, false);
     dojo.dom.byId("txtTwitterTrendName").value = "";
     CreateScrollbar(dojo.dom.byId('divTwitterFeedContainer'), dojo.dom.byId('divTwitterFeedContent'));
 }
@@ -187,36 +187,36 @@ function RemoveElement(Rname, Rarray) {
 }
 
 //Create the settings list for Rss feed or Twitter trend
-function CreateSettingsListTemplate(arrayList, tBody, feed) {
+function CreateSettingsListTemplate(arrayList, tBodyTemplate, feed) {
     if (arrayList) {
         for (var r = 0; r < arrayList.length; r++) {
-            var tr = document.createElement("tr")
+            var trTemplate = document.createElement("tr")
             if (r % 2 != 0) {
-                tr.className = "listDarkColor";
+                trTemplate.className = "listDarkColor";
             } else {
-                tr.className = "listLightColor";
+                trTemplate.className = "listLightColor";
             }
-            tBody.appendChild(tr);
-            var td = document.createElement("td");
-            td.style.width = "75%";
-            td.style.paddingLeft = "3px";
-            td.style.paddingTop = "10px";
-            td.style.paddingBottom = "10px";
-            td.style.borderBottom = "1px #000 solid";
+            tBodyTemplate.appendChild(trTemplate);
+            var tdTemplate = document.createElement("td");
+            tdTemplate.style.width = "75%";
+            tdTemplate.style.paddingLeft = "3px";
+            tdTemplate.style.paddingTop = "10px";
+            tdTemplate.style.paddingBottom = "10px";
+            tdTemplate.style.borderBottom = "1px #000 solid";
             if (arrayList[r].name.length > ((isBrowser) ? 100 : 70)) {
-                td.innerHTML = arrayList[r].name.trimString(((isBrowser) ? 100 : 70));
-                td.title = arrayList[r].name;
+                tdTemplate.innerHTML = arrayList[r].name.trimString(((isBrowser) ? 100 : 70));
+                tdTemplate.title = arrayList[r].name;
             }
             else {
-                td.innerHTML = arrayList[r].name;
+                tdTemplate.innerHTML = arrayList[r].name;
             }
-            tr.appendChild(td);
+            trTemplate.appendChild(tdTemplate);
 
             var tdUp = document.createElement("td");
             tdUp.style.borderBottom = "1px #000 solid";
             tdUp.align = "center";
             tdUp.className = 'imgOptions';
-            tr.appendChild(tdUp);
+            trTemplate.appendChild(tdUp);
             var imgUP = document.createElement("img");
             imgUP.id = "imgUP" + arrayList[r].name;
             imgUP.setAttribute("ComName", arrayList[r].name);
@@ -244,7 +244,7 @@ function CreateSettingsListTemplate(arrayList, tBody, feed) {
             tdDown.style.borderBottom = "1px #000 solid";
             tdDown.className = 'imgOptions';
             tdDown.align = "center";
-            tr.appendChild(tdDown);
+            trTemplate.appendChild(tdDown);
             var imgDown = document.createElement("img");
             imgDown.id = "imgDown" + arrayList[r].name;
             imgDown.src = "images/down-arrow.png";
@@ -272,7 +272,7 @@ function CreateSettingsListTemplate(arrayList, tBody, feed) {
             tdClose.style.borderBottom = "1px #000 solid";
             tdClose.align = "center";
             tdClose.className = 'imgOptions';
-            tr.appendChild(tdClose);
+            trTemplate.appendChild(tdClose);
             if (!arrayList[r].type) {
                 var imgClose = document.createElement("img");
                 imgClose.id = "imgClose" + arrayList[r].name;
@@ -330,7 +330,7 @@ function CreateSettingsListTemplate(arrayList, tBody, feed) {
                 }
                 check.id = 'chkBox' + arrayList[r].name;
                 tdCheck.appendChild(check);
-                tr.appendChild(tdCheck);
+                trTemplate.appendChild(tdCheck);
             }
         }
     }

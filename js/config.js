@@ -124,7 +124,7 @@ dojo.declare("js.config", null, {
     //ZoomLevel: Set zoom level for address search.
     //AddressMatchScore: Required parameters to specify the accuracy of address match.
     //                Field: Set the outfield of geocode service that contains the Address Match Score.
-    //                Score: Set the minimum score value for filtering the candidate results. The value should a number between 0-100.
+    //                Value: Set the minimum score value for filtering the candidate results. The value should a number between 0-100.
     //AddressSearch: Candidates based on which the address search will be performed.
     //                FilterFieldName: Set the outfield that contains the match level for geocode request. e.g. For World GeoCode, the field that contains the match level is 'Addr_type'.
     //                FilterFieldValues: Specify the desired match levels to filter address search results. e.g. 'StreetAddress', 'StreetName' etc.

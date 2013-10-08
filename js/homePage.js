@@ -68,10 +68,12 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
         divPod.setAttribute("WebTag", webTag);
         divPod.setAttribute("webTitle", webTitle);
         for (var lay in layerImages) {
-            if (arrSubjectGroups[p][0].tags[0] == layerImages[lay].Tag) {
-                if (layerImages[lay].isPodVisible) {
-                    divPod.setAttribute("podVisible", true);
-                    break;
+            for (var t in arrSubjectGroups[p][0].tags) {
+                if (arrSubjectGroups[p][0].tags[t].toLowerCase() == layerImages[lay].Tag.toLowerCase()) {
+                    if (layerImages[lay].isPodVisible) {
+                        divPod.setAttribute("podVisible", true);
+                        break;
+                    }
                 }
             }
         }
@@ -255,7 +257,7 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
 
                         var visibility = "";
                         for (var lay in layerImages) {
-                            if (subjectGroup == layerImages[lay].Tag) {
+                            if (subjectGroup.toLowerCase() == layerImages[lay].Tag.toLowerCase()) {
                                 if (layerImages[lay].isPodVisible) {
                                     visibility = true;
                                     break;

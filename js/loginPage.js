@@ -365,8 +365,8 @@ function FindArcGISGroup() {
                     for (var t = 0; t < groupdata.items.length; t++) {
                         for (var u = 0; u < groupdata.items[t].tags.length; u++) {
                             if (groupdata.items[t].type == "Web Map") {
-                                if (groupdata.items[t].tags[u] != baseMapLayer[0].MapValue) {
-                                    if (groupdata.items[t].tags[u] != "Key Indicator") {
+                                if (groupdata.items[t].tags[u].toLowerCase() != baseMapLayer[0].MapValue.toLowerCase()) {
+                                    if (groupdata.items[t].tags[u].toLowerCase() != "key indicator") {
                                         if (arrSubjectGroups[groupdata.items[t].tags[u]]) {
                                             arrSubjectGroups[groupdata.items[t].tags[u]].push({ "webMapId": groupdata.items[t].id, "title": groupdata.items[t].title, "tags": groupdata.items[t].tags });
                                         }
@@ -377,7 +377,7 @@ function FindArcGISGroup() {
                                     }
                                 }
                                 else {
-                                    if (groupdata.items[t].tags[u] == "Compare") {
+                                    if (groupdata.items[t].tags[u].toLowerCase() == "compare") {
                                         compareWebmaps.push(groupdata.items[t].id);
                                     }
                                 }
@@ -389,7 +389,7 @@ function FindArcGISGroup() {
                     var orderedLayer = [];
                     for (var u in layerImages) {
                         for (var v in arrSubjectGroups) {
-                            if (layerImages[u].Tag == v) {
+                            if (layerImages[u].Tag.toLowerCase() == v.toLowerCase()) {
                                 orderedLayer[v] = [];
                                 orderedLayer[v] = arrSubjectGroups[v];
                             }
@@ -405,7 +405,7 @@ function FindArcGISGroup() {
                     for (var p in orderedLayer) {
                         for (var g in orderedLayer[p]) {
                             for (var h in orderedLayer[p][g].tags) {
-                                if (orderedLayer[p][g].tags[h] == "Key Indicator") {
+                                if (orderedLayer[p][g].tags[h].toLowerCase() == "key indicator") {
                                     keyCounter++;
                                     var mapDeferred = esri.arcgis.utils.createMap(orderedLayer[p][g].webMapId, "map", {
                                         mapOptions: {
@@ -432,7 +432,7 @@ function FindArcGISGroup() {
                                         alert(dojo.toJson(error));
                                     });
                                 }
-                                else if (orderedLayer[p][g].tags[h] == "Compare") {
+                                else if (orderedLayer[p][g].tags[h].toLowerCase() == "compare") {
                                     compareWebmaps.push(orderedLayer[p][g].webMapId);
                                 }
                             }
@@ -511,7 +511,7 @@ function FindArcGISGroup() {
 function CreateBasemap(orderedLayer, groupdata, data) {
     for (var q = 0; q < groupdata.items.length; q++) {
         for (i = 0; i < groupdata.items[q].tags.length; i++) {
-            if (groupdata.items[q].tags[i] == baseMapLayer[0].MapValue) {
+            if (groupdata.items[q].tags[i].toLowerCase() == baseMapLayer[0].MapValue.toLowerCase()) {
                 var webmapDetails = esri.arcgis.utils.createMap(groupdata.items[q].id, "map", {
                     mapOptions: {
                         slider: false
@@ -559,7 +559,7 @@ function CheckBasemap(orderedLayer, groupdata, data) {
     var baseLayer = false;
     for (var q = 0; q < groupdata.items.length; q++) {
         for (i = 0; i < groupdata.items[q].tags.length; i++) {
-            if (groupdata.items[q].tags[i] == baseMapLayer[0].MapValue) {
+            if (groupdata.items[q].tags[i].toLowerCase() == baseMapLayer[0].MapValue.toLowerCase()) {
                 baseLayer = true;
             }
         }

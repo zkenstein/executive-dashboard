@@ -62,12 +62,12 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
         tdBottomHeader.appendChild(imgHeader);
         for (var l = 0; l < layerImages.length; l++) {
             for (var k = 0; k < arrSubjectGroups[col].length; k++) {
-                if (col == layerImages[l].Tag) {
+                if (col.toLowerCase() == layerImages[l].Tag.toLowerCase()) {
                     imgHeader.src = layerImages[l].Images[0];
                     imgHeader.style.cursor = "pointer";
                     imgHeader.setAttribute("orgImage", layerImages[l].Images[0]);
                     imgHeader.setAttribute("selImage", layerImages[l].Images[1]);
-                    if (layerImages[l].Tag == selectedLayer) {
+                    if (layerImages[l].Tag.toLowerCase() == selectedLayer.toLowerCase()) {
                         imgHeader.src = layerImages[l].Images[1];
                         imgHeader.style.cursor = "default";
                     }

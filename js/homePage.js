@@ -351,7 +351,10 @@ function createDataforPods(group, tag, webMapId, webMapTitle, visibility, token,
                                         var str = webInfo[z].operationalLayers[y].url;
                                         var ss = str.substring(((str.lastIndexOf("/")) + 1), (str.length))
                                         if (!isNaN(ss)) {
-                                            webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url, statsTitle: webInfo[z].operationalLayers[y].title });
+                                            webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url, statsTitle: webInfo[z].operationalLayers[y].title, definitionExpression: null });
+                                            if(webInfo[z].operationalLayers[y].layerDefinition && webInfo[z].operationalLayers[y].layerDefinition.definitionExpression){
+                                                webStats[webStats.length - 1].definitionExpression = webInfo[z].operationalLayers[y].layerDefinition.definitionExpression;
+                                            }
                                         }
                                     }
                                 }
@@ -379,7 +382,11 @@ function FetchStatData(webStats, inc, statsData, webInfo, groupdata, token) {
                 var queryTask = new esri.tasks.QueryTask(webStats[inc].url);
                 var queryDate = (new Date()).getTime();
                 var queryCounty = new esri.tasks.Query();
-                queryCounty.where = "1=1 AND " + queryDate + "=" + queryDate;
+                if (webStats[inc].definitionExpression) {
+                    queryCounty.where = webStats[inc].definitionExpression + " AND " + queryDate + "=" + queryDate;
+                 } else {
+                    queryCounty.where = "1=1 AND " + queryDate + "=" + queryDate;
+                }
                 queryCounty.returnGeometry = false;
                 queryCounty.outFields = ["*"];
                 queryCounty.outSpatialReference = map.spatialReference;

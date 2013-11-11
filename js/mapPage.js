@@ -183,7 +183,10 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
                                                     var str = webInfo[z].operationalLayers[y].url;
                                                     var ss = str.substring(((str.lastIndexOf("/")) + 1), (str.length))
                                                     if (!isNaN(ss)) {
-                                                        webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url, statsTitle: webInfo[z].operationalLayers[y].title });
+                                                        webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url, statsTitle: webInfo[z].operationalLayers[y].title, definitionExpression: null });
+                                                        if (webInfo[z].operationalLayers[y].layerDefinition && webInfo[z].operationalLayers[y].layerDefinition.definitionExpression) {
+                                                            webStats[webStats.length - 1].definitionExpression = webInfo[z].operationalLayers[y].layerDefinition.definitionExpression;
+                                                        }
                                                     }
                                                 }
                                             }

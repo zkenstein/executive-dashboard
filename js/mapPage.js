@@ -1176,7 +1176,6 @@ function CreateSummaryData(statsData, layer, title) {
         var spanSummary = document.createElement("span");
     }
 
-    var date = new js.date();
     for (var y = 0; y < statsData.length; y++) {
         if (statsData[y].title == title) {
             for (var i in statsData[y].fields) {
@@ -1221,16 +1220,12 @@ function CreateLineChart(statsData, title) {
                                 chartData.push(showNullValueAs);
                             }
                         }
-                        var date = new js.date();
                         var xAxisData = [];
                         for (var a = 0; a < infoPodStatics[1].DateObservations.length; a++) {
                             try {
                                 if (Number(dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data)) == dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data)) {
                                     var utcMilliseconds = Number(dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data));
-                                    xAxisData.push(dojo.date.locale.format(date.utcTimestampFromMs(utcMilliseconds), { datePattern: infoPodStatics[1].DatePattern, selector: "date" }));
-                                }
-                                else {
-                                    xAxisData.push(dojo.date.locale.format(new Date(dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data)), { datePattern: infoPodStatics[1].DatePattern, selector: "date" }));
+                                    xAxisData.push(dojo.date.locale.format(new Date(utcMilliseconds), { datePattern: infoPodStatics[1].DatePattern, selector: "date" }));
                                 }
                             } catch (err) {
                                 xAxisData.push(showNullValueAs);

@@ -624,7 +624,11 @@ function PopulateIndicatorData(keyIndicators, val, indicatorState, orderedLayer,
                 var queryDate = (new Date()).getTime();
                 var queryTask = new esri.tasks.QueryTask(keyIndicators[val].operationalLayers[b].url);
                 var queryCounty = new esri.tasks.Query();
-                queryCounty.where = "1=1 AND " + queryDate + "=" + queryDate;
+                if (keyIndicators[val].operationalLayers[b].layerDefinition && keyIndicators[val].operationalLayers[b].layerDefinition.definitionExpression) {
+                    queryCounty.where = keyIndicators[val].operationalLayers[b].layerDefinition.definitionExpression + " AND " + queryDate + "=" + queryDate;
+                } else {
+                    queryCounty.where = "1=1 AND " + queryDate + "=" + queryDate;
+                }
                 queryCounty.returnGeometry = false;
                 queryCounty.outFields = ["*"];
                 queryCounty.outSpatialReference = map.spatialReference;

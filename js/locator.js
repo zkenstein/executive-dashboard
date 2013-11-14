@@ -31,27 +31,26 @@ function LocateAddress() {
         return;
     }
 
-    var params = {};
-    params["f"] = "json";
-    params[locatorSettings.LocatorParamaters.SearchField] = dojo.dom.byId('txtAddress').value;
-    params[locatorSettings.LocatorParamaters.SpatialReferenceField] = ((map.spatialReference.wkid) ? ("{wkid:" + map.spatialReference.wkid + "}") : ("{wkt:" + map.spatialReference.wkt + "}"));
-    params[locatorSettings.LocatorParamaters.SearchResultField] = locatorSettings.CandidateFields;
-    params[locatorSettings.LocatorParamaters.SearchCountField] = locatorSettings.MaxResults;
-    params[locatorSettings.LocatorParamaters.SearchBoundaryField] = dojo.toJson(baseMapExtent);
-    esri.request({
-        url: locatorSettings.LocatorURL,
-        content: params,
-        callbackParamName: "callback",
-        load: function (candidates) {
-            // Discard searches made obsolete by new typing from user
-            if (thisSearchTime < lastSearchTime) {
-                return;
-            }
-            ShowLocatedAddress(candidates.locations);
-        }, error: function (err) {
-            dojo.dom.byId("imgSearchLoader").style.display = "none";
-            LoctorErrBack("locatorService");
+    var locator = new esri.tasks.Locator(locatorSettings.LocatorURL);
+    var searchFieldName = locatorSettings.LocatorParameters.SearchField;
+    var addressField = {};
+    addressField[searchFieldName] = dojo.dom.byId('txtAddress').value;
+
+    var options = {};
+    options["address"] = addressField;
+    options["outFields"] = locatorSettings.LocatorOutFields;
+    options[locatorSettings.LocatorParameters.SearchBoundaryField] = baseMapExtent;
+    locator.outSpatialReference = map.spatialReference;
+    locator.addressToLocations(options);
+    locator.on("address-to-locations-complete", function (candidates) {
+        // Discard searches made obsolete by new typing from user
+        if (thisSearchTime < lastSearchTime) {
+            return;
         }
+        ShowLocatedAddress(candidates.addresses);
+    }, function () {
+        dojo.dom.byId("imgSearchLoader").style.display = "none";
+        LoctorErrBack("locatorService");
     });
 }
 
@@ -61,32 +60,38 @@ function ShowLocatedAddress(candidates) {
     CreateScrollbar(dojo.dom.byId("divAddressScrollContainer"), dojo.dom.byId("divAddressScrollContent"));
 
     if (candidates.length > 0) {
-        var table = dojo.dom.byId("tblAddressResults");
-        var tBody = document.createElement("tbody");
-        table.appendChild(tBody);
-        table.cellSpacing = 0;
-        table.cellPadding = 0;
+        var tblAddressResults = dojo.dom.byId("tblAddressResults");
+        var tBodyAddressResults = document.createElement("tbody");
+        tblAddressResults.appendChild(tBodyAddressResults);
+        tblAddressResults.cellSpacing = 0;
+        tblAddressResults.cellPadding = 0;
 
         //Filter and display valid address results according to locator settings in configuration file
         var counter = 0;
         var validResult = true;
         var searchFields = [];
-        for (var s in locatorSettings.AddressSearch.FieldValue) {
-            searchFields.push(locatorSettings.AddressSearch.FieldValue[s]);
+        var addressFieldName = locatorSettings.AddressSearch.FilterFieldName;
+        var addressFieldValues = locatorSettings.AddressSearch.FilterFieldValues;
+        var placeFieldName = locatorSettings.PlaceNameSearch.FilterFieldName;
+        var placeFieldValues = locatorSettings.PlaceNameSearch.FilterFieldValues;
+        for (var s in addressFieldValues) {
+            searchFields.push(addressFieldValues[s]);
         }
-
-        searchFields.push(locatorSettings.LocationSearch.LocatorFieldValue);
+        searchFields.push(locatorSettings.PlaceNameSearch.LocatorFieldValue);
         for (var i in candidates) {
-            if (candidates[i].feature.attributes[locatorSettings.AddressMatchScore.Field] > locatorSettings.AddressMatchScore.Value) {
-                var locatePoint = new esri.geometry.Point(Number(candidates[i].feature.geometry.x), Number(candidates[i].feature.geometry.y), map.spatialReference);
+            if (candidates[i].attributes[locatorSettings.AddressMatchScore.Field] > locatorSettings.AddressMatchScore.Value) {
+                var locatePoint = new esri.geometry.Point(Number(candidates[i].location.x), Number(candidates[i].location.y), map.spatialReference);
                 for (var j in searchFields) {
-                    if (candidates[i].feature.attributes[locatorSettings.AddressSearch.FieldName] == searchFields[j]) {
-                        if (candidates[i].feature.attributes[locatorSettings.AddressSearch.FieldName] == locatorSettings.LocationSearch.LocatorFieldValue) {
-                            if (candidates[i].feature.attributes[locatorSettings.LocationSearch.FieldName] != locatorSettings.LocationSearch.FieldValue) {
-                                validResult = false;
-                            }
-                            else {
-                                validResult = true;
+                    if (candidates[i].attributes[addressFieldName] == searchFields[j]) {
+                        if (candidates[i].attributes[addressFieldName] == locatorSettings.PlaceNameSearch.LocatorFieldValue) {
+                            for (var placeField in placeFieldValues) {
+                                if (candidates[i].attributes[placeFieldName] != placeFieldValues[placeField]) {
+                                    validResult = false;
+                                }
+                                else {
+                                    validResult = true;
+                                    break;
+                                }
                             }
                         }
                         else {
@@ -95,29 +100,38 @@ function ShowLocatedAddress(candidates) {
                         if (validResult) {
                             counter++;
                             var candidate = candidates[i];
-                            var tr = document.createElement("tr");
-                            tBody.appendChild(tr);
-                            var td1 = document.createElement("td");
-                            td1.innerHTML = dojo.string.substitute(locatorSettings.DisplayField, candidate.feature.attributes);
-                            td1.align = "left";
-                            td1.style.borderBottom = "black 1px solid";
+                            var trData = document.createElement("tr");
+                            tBodyAddressResults.appendChild(trData);
+                            var tdData = document.createElement("td");
+                            tdData.innerHTML = dojo.string.substitute(locatorSettings.DisplayField, candidate.attributes);
+                            tdData.align = "left";
+                            tdData.style.borderBottom = "black 1px solid";
 
                             if (counter % 2 != 0) {
-                                td1.className = "bottomborder listLightColor";
+                                tdData.className = "bottomborder listLightColor";
                             } else {
-                                td1.className = "bottomborder listDarkColor";
+                                tdData.className = "bottomborder listDarkColor";
                             }
-                            td1.style.cursor = "pointer";
-                            td1.setAttribute("x", candidate.feature.geometry.x);
-                            td1.setAttribute("y", candidate.feature.geometry.y);
-                            td1.setAttribute("address", dojo.string.substitute(locatorSettings.DisplayField, candidate.feature.attributes));
-                            if (candidate.feature.attributes[locatorSettings.LocationSearch.FieldName] == locatorSettings.LocationSearch.FieldValue) {
-                                td1.setAttribute("county", dojo.toJson(candidate.extent));
+                            tdData.style.cursor = "pointer";
+                            tdData.setAttribute("x", candidate.location.x);
+                            tdData.setAttribute("y", candidate.location.y);
+                            tdData.setAttribute("address", dojo.string.substitute(locatorSettings.DisplayField, candidate.attributes));
+                            if (candidate.attributes[addressFieldName] == locatorSettings.PlaceNameSearch.LocatorFieldValue) {
+                                for (var field in locatorSettings.PlaceNameSearch.FilterFieldValues) {
+                                    if (candidate.attributes[placeFieldName] == placeFieldValues[field]) {
+                                        var ext = { xmin: candidate.attributes.xmin, ymin: candidate.attributes.ymin, xmax: candidate.attributes.xmax, ymax: candidate.attributes.ymax };
+                                        tdData.setAttribute("county", dojo.toJson(ext));
+                                        break;
+                                    }
+                                    else {
+                                        tdData.setAttribute("county", "");
+                                    }
+                                }
                             }
                             else {
-                                td1.setAttribute("county", "");
+                                tdData.setAttribute("county", "");
                             }
-                            td1.onclick = function () {
+                            tdData.onclick = function () {
                                 dojo.dom.byId("txtAddress").value = this.innerHTML;
                                 lastSearchString = dojo.dom.byId("txtAddress").value.trim();
                                 dojo.dom.byId('txtAddress').setAttribute("defaultAddress", this.innerHTML);
@@ -126,7 +140,7 @@ function ShowLocatedAddress(candidates) {
                                 LocateGraphicOnMap(this);
                                 dojo.dom.byId("imgGeolocation").src = "images/imgGeolocation.png";
                             }
-                            tr.appendChild(td1);
+                            trData.appendChild(tdData);
                         }
                     }
                 }
@@ -134,11 +148,11 @@ function ShowLocatedAddress(candidates) {
         }
         //Display error message if there are no valid candidate addresses
         if (counter == 0) {
-            var tr = document.createElement("tr");
-            tBody.appendChild(tr);
-            var td1 = document.createElement("td");
-            td1.innerHTML = messages.getElementsByTagName("noSearchResults")[0].childNodes[0].nodeValue;
-            tr.appendChild(td1);
+            var trData = document.createElement("tr");
+            tBodyAddressResults.appendChild(trData);
+            var tdData = document.createElement("td");
+            tdData.innerHTML = messages.getElementsByTagName("noSearchResults")[0].childNodes[0].nodeValue;
+            trData.appendChild(tdData);
             dojo.dom.byId("imgSearchLoader").style.display = "none";
             return;
         }
@@ -150,66 +164,97 @@ function ShowLocatedAddress(candidates) {
     }
 }
 
+function CreateExtentForCounty(ext) {
+    var projExtent;
+    projExtent = new esri.geometry.Extent({
+        "xmin": parseFloat(ext.xmin),
+        "ymin": parseFloat(ext.ymin),
+        "xmax": parseFloat(ext.xmax),
+        "ymax": parseFloat(ext.ymax),
+        "spatialReference": {
+            "wkid": 4326
+        }
+    });
+    return projExtent;
+}
+
 //This function is called when locator service fails or does not return any data
 function LoctorErrBack(val) {
-    var table = dojo.dom.byId("tblAddressResults");
-    var tBody = document.createElement("tbody");
-    table.appendChild(tBody);
-    table.cellSpacing = 0;
-    table.cellPadding = 0;
+    var tblAddressResults = dojo.dom.byId("tblAddressResults");
+    var tBodyAddressResults = document.createElement("tbody");
+    tblAddressResults.appendChild(tBodyAddressResults);
+    tblAddressResults.cellSpacing = 0;
+    tblAddressResults.cellPadding = 0;
 
-    var tr = document.createElement("tr");
-    tBody.appendChild(tr);
-    var td1 = document.createElement("td");
-    td1.innerHTML = messages.getElementsByTagName(val)[0].childNodes[0].nodeValue;
-    tr.appendChild(td1);
+    var trData = document.createElement("tr");
+    tBodyAddressResults.appendChild(trData);
+    var tdData = document.createElement("td");
+    tdData.innerHTML = messages.getElementsByTagName(val)[0].childNodes[0].nodeValue;
+    trData.appendChild(tdData);
 }
 
 //Locate searched address on map with pushpin graphic
 function LocateGraphicOnMap(evt) {
     HideContainer("locate");
-    setTimeout(function () {
-        if (evt) {
-            if (evt.getAttribute("county")) {
-                var countyExtent = dojo.fromJson(evt.getAttribute("county"));
-                var extent = new esri.geometry.Extent(parseFloat(countyExtent.xmin), parseFloat(countyExtent.ymin), parseFloat(countyExtent.xmax), parseFloat(countyExtent.ymax), map.spatialReference);
-            }
+    HideContainer("bookmark");
+    if (evt) {
+        if (evt.getAttribute("county")) {
+            var countyExtent = CreateExtentForCounty(dojo.fromJson(evt.getAttribute("county")));
+            geometryService.project([countyExtent], map.spatialReference, function (results) {
+                if (results.length) {
+                    var extent = new esri.geometry.Extent(parseFloat(results[0].xmin), parseFloat(results[0].ymin), parseFloat(results[0].xmax), parseFloat(results[0].ymax), map.spatialReference);
+                    CreateGraphicforLocation(extent);
+                }
+            });
+        } else {
+            setTimeout(function () {
+                CreateGraphicforLocation(null);
+            }, 1000);
         }
-        if (!tempMap) {
-            map.infoWindow.hide();
-            if (!countyExtent) {
-                map.centerAndZoom(mapPoint, locatorSettings.ZoomLevel);
-            }
-            else {
-                map.setExtent(extent.expand(1.75));
-            }
-            if (map.getLayer(tempGraphicsLayerId)) {
-                map.getLayer(tempGraphicsLayerId).clear();
-            }
+    }
+    else {
+        setTimeout(function () {
+            CreateGraphicforLocation(null);
+        }, 1000);
+    }
+
+}
+
+function CreateGraphicforLocation(extent) {
+    if (!tempMap) {
+        map.infoWindow.hide();
+        if (!extent) {
+            map.centerAndZoom(mapPoint, locatorSettings.ZoomLevel);
         }
         else {
-            tempMap.infoWindow.hide();
-            if (!countyExtent) {
-                tempMap.centerAndZoom(mapPoint, locatorSettings.ZoomLevel);
-            }
-            else {
-                tempMap.setExtent(extent.expand(1.75));
-            }
-            if (tempMap.getLayer(temporaryGraphicsLayerId)) {
-                tempMap.getLayer(temporaryGraphicsLayerId).clear();
-            }
+            map.setExtent(extent.expand(1.75));
         }
+        if (map.getLayer(tempGraphicsLayerId)) {
+            map.getLayer(tempGraphicsLayerId).clear();
+        }
+    }
+    else {
+        tempMap.infoWindow.hide();
+        if (!extent) {
+            tempMap.centerAndZoom(mapPoint, locatorSettings.ZoomLevel);
+        }
+        else {
+            tempMap.setExtent(extent.expand(1.75));
+        }
+        if (tempMap.getLayer(temporaryGraphicsLayerId)) {
+            tempMap.getLayer(temporaryGraphicsLayerId).clear();
+        }
+    }
 
-        var symbol = new esri.symbol.PictureMarkerSymbol(locatorSettings.DefaultLocatorSymbol, locatorSettings.MarkupSymbolSize.width, locatorSettings.MarkupSymbolSize.height);
-        var graphic = new esri.Graphic(mapPoint, symbol, null, null);
-        var features = [];
-        features.push(graphic);
-        var featureSet = new esri.tasks.FeatureSet();
-        featureSet.features = features;
-        var layer = (!tempMap) ? map.getLayer(tempGraphicsLayerId) : tempMap.getLayer(temporaryGraphicsLayerId);
-        layer.add(featureSet.features[0]);
-        HideProgressIndicator();
-    }, 1000);
+    var symbol = new esri.symbol.PictureMarkerSymbol(locatorSettings.DefaultLocatorSymbol, locatorSettings.MarkupSymbolSize.width, locatorSettings.MarkupSymbolSize.height);
+    var graphic = new esri.Graphic(mapPoint, symbol, null, null);
+    var features = [];
+    features.push(graphic);
+    var featureSet = new esri.tasks.FeatureSet();
+    featureSet.features = features;
+    var layer = (!tempMap) ? map.getLayer(tempGraphicsLayerId) : tempMap.getLayer(temporaryGraphicsLayerId);
+    layer.add(featureSet.features[0]);
+    HideProgressIndicator();
 }
 
 //Display the current location of the user

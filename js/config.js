@@ -111,6 +111,28 @@ dojo.declare("js.config", null, {
     ShowNullValueAs: "N/A",
 
     //Set locator settings
+    //DisplayText: Set the title for type of search e.g. 'Address', 'Name', 'Activity'
+    //DefaultLocatorSymbol:Set the image path for locator symbol. e.g. pushpin.
+    //MarkupSymbolSize:Set the image dimensions in pixels for locator symbol.
+    //DefaultValue: Set the default address to search.
+    //LocatorParameters: Required parameters to search the address candidates.
+    //                SearchField: The name of geocode service input field that accepts the search address. e.g. 'SingleLine' or 'Address'.
+    //                SearchBoundaryField: The name of geocode service input field that accepts an extent to search an input address within. e.g."searchExtent"
+    //LocatorURL: Specify URL for geocode service.
+    //LocatorOutFields: The list of outfields to be included in the result set provided by geocode service.
+    //DisplayField: Specify the outfield of geocode service. The value in this field will be displayed for search results in the application.
+    //ZoomLevel: Set zoom level for address search.
+    //AddressMatchScore: Required parameters to specify the accuracy of address match.
+    //                Field: Set the outfield of geocode service that contains the Address Match Score.
+    //                Value: Set the minimum score value for filtering the candidate results. The value should a number between 0-100.
+    //AddressSearch: Candidates based on which the address search will be performed.
+    //                FilterFieldName: Set the outfield that contains the match level for geocode request. e.g. For World GeoCode, the field that contains the match level is 'Addr_type'.
+    //                FilterFieldValues: Specify the desired match levels to filter address search results. e.g. 'StreetAddress', 'StreetName' etc.
+    //PlaceNameSearch: Attributes based on which the layers will be queried when a location search is performed.
+    //                LocatorFieldValue: Set the match level for county/place search. e.g. 'POI' will contain all administrative boundary
+    //                FilterFieldName: Set the feature type for results returned by the geocode request. e.g. For World GeoCode, the field that contains the feature type is 'Type'.
+    //                FilterFieldValues: Specify the feature types to filter search results. e.g. 'county', 'city' etc.
+
     LocatorSettings: {
         DisplayText: "Search by Address or County",
         DefaultLocatorSymbol: "images/redPushpin.png",
@@ -119,31 +141,27 @@ dojo.declare("js.config", null, {
             height: 35
         },
         DefaultValue: "1848 N Mill St Naperville IL 60563",
-        LocatorParamaters: {
-            SearchField: "text",
-            SearchResultField: "outFields",
-            SearchCountField: "maxLocations",
-            SearchBoundaryField: "bbox",
-            SpatialReferenceField: "outSR"
+        LocatorParameters: {
+            SearchField: "SingleLine",
+            SearchBoundaryField: "searchExtent"
         },
-        LocatorURL: "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find",
-        CandidateFields: "Addr_type,Type,Score, Match_addr",
-        DisplayField: "${Match_addr}",
+        LocatorURL: "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
+        LocatorOutFields: ["Addr_Type", "Type", "Score", "Match_Addr", "xmin", "xmax", "ymin", "ymax"],
+        DisplayField: "${Match_Addr}",
         ZoomLevel: 14,
         AddressMatchScore: {
             Field: "Score",
             Value: 80
         },
         AddressSearch: {
-	    FieldName: 'Addr_type',
-            FieldValue: ["StreetAddress", "StreetName", "PointAddress"]
+            FilterFieldName: 'Addr_Type',
+            FilterFieldValues: ["StreetAddress", "StreetName", "PointAddress"]
         },
-        LocationSearch: {
-            LocatorFieldValue: 'POI',
-            FieldName: 'Type',
-            FieldValue: 'county'
-        },
-        MaxResults: 100
+        PlaceNameSearch: {
+            LocatorFieldValue: "POI",
+            FilterFieldName: "Type",
+            FilterFieldValues: ["county"]
+        }
     },
 
     //Fields for RSS Feed.

@@ -36,19 +36,19 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
     RemoveChildren(dojo.dom.byId("divLayerContent"));
     RemoveChildren(dojo.dom.byId("divNAEDisplayContent"));
 
-    var table = document.createElement("table");
-    table.cellSpacing = 0;
-    table.cellPadding = 0;
-    dojo.dom.byId("divLayerContent").appendChild(table);
-    var tBody = document.createElement("tbody");
-    table.appendChild(tBody);
+    var tblMetricPod = document.createElement("table");
+    tblMetricPod.cellSpacing = 0;
+    tblMetricPod.cellPadding = 0;
+    dojo.dom.byId("divLayerContent").appendChild(tblMetricPod);
+    var tBodyMetricPod = document.createElement("tbody");
+    tblMetricPod.appendChild(tBodyMetricPod);
     var count = 0;
     for (var p in arrSubjectGroups) {
         if (count == 0) {
-            var tr = document.createElement("tr");
-            tBody.appendChild(tr);
-            var td = document.createElement("td");
-            tr.appendChild(td);
+            var trMetricPod = document.createElement("tr");
+            tBodyMetricPod.appendChild(trMetricPod);
+            var tdMetricPod = document.createElement("td");
+            trMetricPod.appendChild(tdMetricPod);
         }
 
         var divPod = document.createElement("div");
@@ -68,10 +68,12 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
         divPod.setAttribute("WebTag", webTag);
         divPod.setAttribute("webTitle", webTitle);
         for (var lay in layerImages) {
-            if (arrSubjectGroups[p][0].tags[0] == layerImages[lay].Tag) {
-                if (layerImages[lay].isPodVisible) {
-                    divPod.setAttribute("podVisible", true);
-                    break;
+            for (var t in arrSubjectGroups[p][0].tags) {
+                if (arrSubjectGroups[p][0].tags[t].toLowerCase() == layerImages[lay].Tag.toLowerCase()) {
+                    if (layerImages[lay].isPodVisible) {
+                        divPod.setAttribute("podVisible", true);
+                        break;
+                    }
                 }
             }
         }
@@ -92,7 +94,7 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
             var visibility = this.getAttribute("podVisible");
             createDataforPods(null, tag, webMapId, webMapTitle, visibility, token, arrSubjectGroups, groupdata, indicatorState);
         }
-        td.appendChild(divPod);
+        tdMetricPod.appendChild(divPod);
         var divPodInner = document.createElement("div");
         divPodInner.className = "divPodInner";
         divPod.appendChild(divPodInner);
@@ -105,29 +107,29 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
         var tBodyPod = document.createElement("tbody");
         tablePod.appendChild(tBodyPod);
 
-        var tr2 = document.createElement("tr");
-        tBodyPod.appendChild(tr2);
-        var td2 = document.createElement("td");
-        td2.align = "left";
-        td2.style.paddingLeft = "10px";
-        td2.style.paddingTop = "23px";
-        tr2.appendChild(td2);
+        var trIndicator = document.createElement("tr");
+        tBodyPod.appendChild(trIndicator);
+        var tdIndicator = document.createElement("td");
+        tdIndicator.align = "left";
+        tdIndicator.style.paddingLeft = "10px";
+        tdIndicator.style.paddingTop = "23px";
+        trIndicator.appendChild(tdIndicator);
         var spanText = document.createElement("span");
         spanText.style.color = "white";
         spanText.style.fontSize = "16px";
         spanText.style.lineHeight = "22px";
         spanText.style.fontWeight = "bolder";
         spanText.innerHTML = p;
-        td2.appendChild(spanText);
+        tdIndicator.appendChild(spanText);
 
         // Create pods for each subject group
         for (var g in arrSubjectGroups[p]) {
             for (var j in indicatorState) {
                 if (arrSubjectGroups[p][g].title == indicatorState[j].key) {
                     tablePod.style.height = "100%";
-                    td2.style.paddingTop = "0px";
-                    td2.height = "";
-                    td2.colSpan = 2;
+                    tdIndicator.style.paddingTop = "0px";
+                    tdIndicator.height = "";
+                    tdIndicator.colSpan = 2;
 
                     var trInd = document.createElement("tr");
                     tBodyPod.appendChild(trInd);
@@ -147,10 +149,10 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
                     imgArr.style.display = "block";
                     spanImg.appendChild(imgArr);
 
-                    var td1 = document.createElement("td");
-                    td1.align = "right";
-                    td1.style.paddingRight = "10px";
-                    trInd.appendChild(td1);
+                    var tdArrowInd = document.createElement("td");
+                    tdArrowInd.align = "right";
+                    tdArrowInd.style.paddingRight = "10px";
+                    trInd.appendChild(tdArrowInd);
 
                     var spanText = document.createElement("span");
                     spanText.align = "right";
@@ -158,7 +160,7 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
                     spanText.style.lineHeight = "22px";
                     spanText.style.fontWeight = "bolder";
                     spanText.innerHTML = arrSubjectGroups[p][g].title;
-                    td1.appendChild(spanText);
+                    tdArrowInd.appendChild(spanText);
 
                     try {
                         //Decide color of pod using Increase or decrease indicator, Current and Past observation
@@ -255,7 +257,7 @@ function CreateLayerPods(arrSubjectGroups, token, groupdata, indicatorState) {
 
                         var visibility = "";
                         for (var lay in layerImages) {
-                            if (subjectGroup == layerImages[lay].Tag) {
+                            if (subjectGroup.toLowerCase() == layerImages[lay].Tag.toLowerCase()) {
                                 if (layerImages[lay].isPodVisible) {
                                     visibility = true;
                                     break;
@@ -349,7 +351,10 @@ function createDataforPods(group, tag, webMapId, webMapTitle, visibility, token,
                                         var str = webInfo[z].operationalLayers[y].url;
                                         var ss = str.substring(((str.lastIndexOf("/")) + 1), (str.length))
                                         if (!isNaN(ss)) {
-                                            webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url, statsTitle: webInfo[z].operationalLayers[y].title });
+                                            webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url, statsTitle: webInfo[z].operationalLayers[y].title, definitionExpression: null });
+                                            if(webInfo[z].operationalLayers[y].layerDefinition && webInfo[z].operationalLayers[y].layerDefinition.definitionExpression){
+                                                webStats[webStats.length - 1].definitionExpression = webInfo[z].operationalLayers[y].layerDefinition.definitionExpression;
+                                            }
                                         }
                                     }
                                 }
@@ -377,7 +382,11 @@ function FetchStatData(webStats, inc, statsData, webInfo, groupdata, token) {
                 var queryTask = new esri.tasks.QueryTask(webStats[inc].url);
                 var queryDate = (new Date()).getTime();
                 var queryCounty = new esri.tasks.Query();
-                queryCounty.where = "1=1 AND " + queryDate + "=" + queryDate;
+                if (webStats[inc].definitionExpression) {
+                    queryCounty.where = webStats[inc].definitionExpression + " AND " + queryDate + "=" + queryDate;
+                 } else {
+                    queryCounty.where = "1=1 AND " + queryDate + "=" + queryDate;
+                }
                 queryCounty.returnGeometry = false;
                 queryCounty.outFields = ["*"];
                 queryCounty.outSpatialReference = map.spatialReference;
@@ -607,68 +616,68 @@ function OnNewsFeedsUpdateEnd(chkfeedCount) {
 
 
 //Function to display list of RSS feeds and Twitter trends
-function CreateNewsDataTemplate(Header, Link, Content, tBody, feed, lastVal) {
-    var tr = document.createElement("tr");
-    tBody.appendChild(tr);
-    var td1 = document.createElement("td");
-    td1.style.paddingTop = "5px";
-    td1.style.paddingLeft = "5px";
-    td1.style.paddingRight = "10px";
+function CreateNewsDataTemplate(Header, Link, Content, tBodyFeedTemplate, feed, lastVal) {
+    var trFeedTemplate = document.createElement("tr");
+    tBodyFeedTemplate.appendChild(trFeedTemplate);
+    var tdFeedTemplate = document.createElement("td");
+    tdFeedTemplate.style.paddingTop = "5px";
+    tdFeedTemplate.style.paddingLeft = "5px";
+    tdFeedTemplate.style.paddingRight = "10px";
     if (feed) {
         if (Header.length) {
-            td1.innerHTML = "<u>" + Header[0].nodeValue + "</u>";
+            tdFeedTemplate.innerHTML = "<u>" + Header[0].nodeValue + "</u>";
         }
         if (Link.length) {
-            td1.setAttribute("link", Link[0].nodeValue);
+            tdFeedTemplate.setAttribute("link", Link[0].nodeValue);
         }
     }
     else {
-        td1.innerHTML = "<u>" + Header + "</u>";
-        td1.setAttribute("link", Link);
+        tdFeedTemplate.innerHTML = "<u>" + Header + "</u>";
+        tdFeedTemplate.setAttribute("link", Link);
     }
 
     if (lastVal % 2 != 0) {
-        td1.className = "listDarkColor";
+        tdFeedTemplate.className = "listDarkColor";
     } else {
-        td1.className = "listLightColor";
+        tdFeedTemplate.className = "listLightColor";
     }
 
-    td1.onclick = function () {
+    tdFeedTemplate.onclick = function () {
         window.open(this.getAttribute("link"));
     }
-    td1.style.fontWeight = "bolder";
-    td1.align = "left";
-    td1.style.cursor = "pointer";
-    td1.height = 20;
-    tr.appendChild(td1);
-    var tr1 = document.createElement("tr");
-    tBody.appendChild(tr1);
-    var td2 = document.createElement("td");
-    td2.style.paddingBottom = "5px";
-    td2.style.paddingLeft = "5px";
-    td2.style.paddingRight = "10px";
+    tdFeedTemplate.style.fontWeight = "bolder";
+    tdFeedTemplate.align = "left";
+    tdFeedTemplate.style.cursor = "pointer";
+    tdFeedTemplate.height = 20;
+    trFeedTemplate.appendChild(tdFeedTemplate);
+    var trFeedContent = document.createElement("tr");
+    tBodyFeedTemplate.appendChild(trFeedContent);
+    var tdFeedContent = document.createElement("td");
+    tdFeedContent.style.paddingBottom = "5px";
+    tdFeedContent.style.paddingLeft = "5px";
+    tdFeedContent.style.paddingRight = "10px";
     if (feed) {
         if (Content.length) {
-            td2.innerHTML = Content[0].nodeValue;
+            tdFeedContent.innerHTML = Content[0].nodeValue;
         }
     } else {
-        td2.innerHTML = Content;
+        tdFeedContent.innerHTML = Content;
     }
-    td2.title = td2.textContent;
-    td2.innerHTML = td2.textContent.trimString(50);
+    tdFeedContent.title = tdFeedContent.textContent;
+    tdFeedContent.innerHTML = tdFeedContent.textContent.trimString(50);
 
     if (lastVal % 2 != 0) {
-        td2.className = "listDarkColor";
+        tdFeedContent.className = "listDarkColor";
     } else {
-        td2.className = "listLightColor";
+        tdFeedContent.className = "listLightColor";
     }
 
-    td2.align = "left";
-    td2.style.borderBottom = "#000000 1px solid";
-    if (td2.innerHTML) {
-        td2.height = 20;
+    tdFeedContent.align = "left";
+    tdFeedContent.style.borderBottom = "#000000 1px solid";
+    if (tdFeedContent.innerHTML) {
+        tdFeedContent.height = 20;
     }
-    tr1.appendChild(td2);
+    trFeedContent.appendChild(tdFeedContent);
 }
 
 //This function is used to resize chart container
@@ -786,7 +795,7 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
                 var defExtent = res.map.extent.xmin + "," + res.map.extent.ymin + "," + res.map.extent.xmax + "," + res.map.extent.ymax;
                 res.map.destroy();
 
-                if (startExtent && (!loadInitialExtentForWebmap)) {
+                if ((startExtent && (share != "")) || (startExtent && (!loadInitialExtentForWebmap))) {
                     mapDeferred = esri.arcgis.utils.createMap(id, "map", {
                         mapOptions: {
                             slider: true,
@@ -795,11 +804,7 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
                     });
                 }
                 else {
-                    mapDeferred = esri.arcgis.utils.createMap(id, "map", {
-                        mapOptions: {
-                            slider: true
-                        }
-                    });
+                    mapDeferred = CreateWebmap(id);
                 }
                 dojo.dom.byId("imgResize").setAttribute("webmapID", id);
                 dojo.dom.byId("imgResize").setAttribute("webmapKey", webmapInfo.key);
@@ -843,6 +848,15 @@ function PopulateEventDetails(id, arrSubjectGroups, header, webmapInfo, groupdat
             });
         }, (state) ? 500 : 0);
     }
+}
+
+function CreateWebmap(id) {
+    var mapObj = esri.arcgis.utils.createMap(id, "map", {
+        mapOptions: {
+            slider: true
+        }
+    });
+    return mapObj;
 }
 
 function ShowCompare(click) {
@@ -1636,9 +1650,9 @@ var selectedMapPoint;
 var selectedTempPoint;
 
 function CreateGraphicLayer(mapCtrl, webmapInfo) {
-    var gLayer1 = new esri.layers.GraphicsLayer();
-    gLayer1.id = (!tempMap) ? "tempNotesLayerId" : "tempNotesGraphicLayerId";
-    dojo.connect(gLayer1, "onClick", function (evt) {
+    var gLayerNotes = new esri.layers.GraphicsLayer();
+    gLayerNotes.id = (!tempMap) ? "tempNotesLayerId" : "tempNotesGraphicLayerId";
+    dojo.connect(gLayerNotes, "onClick", function (evt) {
         evt.stopPropagation();
         evt.preventDefault();
         evt.cancelBubble = true;
@@ -1663,7 +1677,7 @@ function CreateGraphicLayer(mapCtrl, webmapInfo) {
 
         ShowNotesInfo(evt.graphic.attributes[0], evt.graphic.geometry, ((!tempMap) ? webmapInfo.key : "temp" + webmapInfo), evt.graphic, Number(evt.graphic.attributes[0].count));
     });
-    mapCtrl.addLayer(gLayer1);
+    mapCtrl.addLayer(gLayerNotes);
 
     dojo.connect(mapCtrl, "onClick", function (evt) {
         if (dojo.dom.byId("imgNotes").getAttribute("state") != "unSelected") {

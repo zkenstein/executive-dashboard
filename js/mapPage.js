@@ -35,11 +35,11 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
     var lay = 0;
     for (var col in arrSubjectGroups) {
         lay++;
-        var td = document.createElement("td");
-        td.style.width = "100px";
-        td.style.paddingRight = "2px";
-        td.style.paddingTop = ((isBrowser) ? 10 : 5) + "px";
-        td.id = "tdBottomHeader" + lay;
+        var tdBottomHeader = document.createElement("td");
+        tdBottomHeader.style.width = "100px";
+        tdBottomHeader.style.paddingRight = "2px";
+        tdBottomHeader.style.paddingTop = ((isBrowser) ? 10 : 5) + "px";
+        tdBottomHeader.id = "tdBottomHeader" + lay;
 
         var webId = "";
         var webTag = "";
@@ -49,7 +49,7 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
             webTag += col + ",";
             webTitle += arrSubjectGroups[col][t].title + ",";
         }
-        td.align = "center";
+        tdBottomHeader.align = "center";
 
         var imgHeader = document.createElement("img");
         imgHeader.className = "imgOptions";
@@ -59,15 +59,15 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
         imgHeader.id = "imgBottomHeader" + col;
         imgHeader.setAttribute("con", "bottom");
         imgHeader.setAttribute("parentOrder", lay);
-        td.appendChild(imgHeader);
+        tdBottomHeader.appendChild(imgHeader);
         for (var l = 0; l < layerImages.length; l++) {
             for (var k = 0; k < arrSubjectGroups[col].length; k++) {
-                if (col == layerImages[l].Tag) {
+                if (col.toLowerCase() == layerImages[l].Tag.toLowerCase()) {
                     imgHeader.src = layerImages[l].Images[0];
                     imgHeader.style.cursor = "pointer";
                     imgHeader.setAttribute("orgImage", layerImages[l].Images[0]);
                     imgHeader.setAttribute("selImage", layerImages[l].Images[1]);
-                    if (layerImages[l].Tag == selectedLayer) {
+                    if (layerImages[l].Tag.toLowerCase() == selectedLayer.toLowerCase()) {
                         imgHeader.src = layerImages[l].Images[1];
                         imgHeader.style.cursor = "default";
                     }
@@ -183,7 +183,10 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
                                                     var str = webInfo[z].operationalLayers[y].url;
                                                     var ss = str.substring(((str.lastIndexOf("/")) + 1), (str.length))
                                                     if (!isNaN(ss)) {
-                                                        webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url, statsTitle: webInfo[z].operationalLayers[y].title });
+                                                        webStats.push({ title: webInfo[z].key, url: webInfo[z].operationalLayers[y].url, statsTitle: webInfo[z].operationalLayers[y].title, definitionExpression: null });
+                                                        if (webInfo[z].operationalLayers[y].layerDefinition && webInfo[z].operationalLayers[y].layerDefinition.definitionExpression) {
+                                                            webStats[webStats.length - 1].definitionExpression = webInfo[z].operationalLayers[y].layerDefinition.definitionExpression;
+                                                        }
                                                     }
                                                 }
                                             }
@@ -209,7 +212,7 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
         }
         //Display more button if the number of subject groups can not be accommodated in the bottom panel
         if ((((bottomOffset) ? bottomOffset : dojo.dom.byId("divGroupHolder").offsetWidth) - ((lay == ord) ? 0 : 100)) > (lay * 100)) {
-            dojo.dom.byId("trBottomHeaders").appendChild(td);
+            dojo.dom.byId("trBottomHeaders").appendChild(tdBottomHeader);
         } else {
             var trMoreResults = document.createElement("tr");
             trMoreResults.id = "trMore" + lay;
@@ -224,27 +227,27 @@ function CreateBottomHeaders(arrSubjectGroups, groupdata, token, selectedLayer, 
                 trMoreResults.className = "listLightColor";
             }
             dojo.dom.byId("tblMoreResults").appendChild(trMoreResults);
-            trMoreResults.appendChild(td);
+            trMoreResults.appendChild(tdBottomHeader);
             imgHeader.setAttribute("con", "more");
         }
 
-        var td1 = document.createElement("td");
-        td1.style.width = "100px";
-        td1.style.paddingRight = "2px";
-        td1.innerHTML = col;
-        td1.style.fontSize = "9px";
-        td1.id = "tdMetricText" + lay;
-        td1.style.color = "white";
-        td1.align = "center";
-        td1.style.fontWeight = "bold";
-        td1.style.verticalAlign = "top";
+        var tdMetricText = document.createElement("td");
+        tdMetricText.style.width = "100px";
+        tdMetricText.style.paddingRight = "2px";
+        tdMetricText.innerHTML = col;
+        tdMetricText.style.fontSize = "9px";
+        tdMetricText.id = "tdMetricText" + lay;
+        tdMetricText.style.color = "white";
+        tdMetricText.align = "center";
+        tdMetricText.style.fontWeight = "bold";
+        tdMetricText.style.verticalAlign = "top";
         if ((((bottomOffset) ? bottomOffset : dojo.dom.byId("divGroupHolder").offsetWidth) - ((lay == ord) ? 0 : 100)) > (lay * 100)) {
-            dojo.dom.byId("trBottomTags").appendChild(td1);
+            dojo.dom.byId("trBottomTags").appendChild(tdMetricText);
         }
         else {
-            td1.style.verticalAlign = "middle";
-            td1.align = "left";
-            trMoreResults.appendChild(td1);
+            tdMetricText.style.verticalAlign = "middle";
+            tdMetricText.align = "left";
+            trMoreResults.appendChild(tdMetricText);
         }
     }
     if (bottomOffset == null) {
@@ -388,6 +391,7 @@ function RemoveHiglightGraphic() {
 
 //Show bookmark container with wipe-in animation
 function ShowBookmarkContainer() {
+    dojo.dom.byId("txtBookmark").value = "";
     ToggleHeaderPanels();
     if (dojo['dom-geometry'].getMarginBox("divBookmarkContent").h <= 0) {
         dojo.dom.byId("showHide").style.display = "none";
@@ -427,54 +431,54 @@ function ShowBookmarkContainer() {
 function PopulateBookmarkList() {
     dojo.dom.byId("bookmarkErrorMessage").innerHTML = "";
     RemoveChildren(dojo.dom.byId("divBookMarksResultsContent"));
-    var table = document.createElement("table");
-    table.style.width = "96%";
-    table.cellSpacing = 0;
-    table.cellPadding = 0;
-    table.align = "left";
-    dojo.dom.byId("divBookMarksResultsContent").appendChild(table);
-    var tBody = document.createElement("tbody");
-    table.appendChild(tBody);
+    var tblBookMarksResults = document.createElement("table");
+    tblBookMarksResults.style.width = "96%";
+    tblBookMarksResults.cellSpacing = 0;
+    tblBookMarksResults.cellPadding = 0;
+    tblBookMarksResults.align = "left";
+    dojo.dom.byId("divBookMarksResultsContent").appendChild(tblBookMarksResults);
+    var tBodyBookMarksResults = document.createElement("tbody");
+    tblBookMarksResults.appendChild(tBodyBookMarksResults);
     var arrayBookmarks = dojo.fromJson(localStorage.getItem("BookmarkCollection"));
     if (arrayBookmarks) {
         for (var r = 0; r < arrayBookmarks.length; r++) {
-            var tr = document.createElement("tr");
+            var trBookMarksResults = document.createElement("tr");
             if (r % 2 != 0) {
-                tr.className = "listDarkColor";
+                trBookMarksResults.className = "listDarkColor";
             } else {
-                tr.className = "listLightColor";
+                trBookMarksResults.className = "listLightColor";
             }
-            tBody.appendChild(tr);
-            var td = document.createElement("td");
+            tBodyBookMarksResults.appendChild(trBookMarksResults);
+            var tdBookMarksResults = document.createElement("td");
             if (isBrowser) {
-                td.style.width = "185px";
-                td.style.height = "32px";
+                tdBookMarksResults.style.width = "185px";
+                tdBookMarksResults.style.height = "32px";
             } else {
-                td.style.height = "100%";
+                tdBookMarksResults.style.height = "100%";
             }
 
-            td.style.paddingLeft = "3px";
-            td.align = "left";
-            td.style.cursor = "pointer";
-            td.style.borderBottom = "1px #000 solid";
-            td.setAttribute("bookmarkName", arrayBookmarks[r].name);
+            tdBookMarksResults.style.paddingLeft = "3px";
+            tdBookMarksResults.align = "left";
+            tdBookMarksResults.style.cursor = "pointer";
+            tdBookMarksResults.style.borderBottom = "1px #000 solid";
+            tdBookMarksResults.setAttribute("bookmarkName", arrayBookmarks[r].name);
 
             var x = arrayBookmarks[r].name.split(" ");
             for (var i in x) {
                 w = x[i].getWidth(((isTablet) ? 14 : 11));
                 var boxWidth = ((isTablet) ? 155 : 200);
                 if (boxWidth < w) {
-                    td.className = "tdBreakWord";
+                    tdBookMarksResults.className = "tdBreakWord";
                     continue;
                 }
             }
 
-            td.innerHTML = arrayBookmarks[r].name.trimString(40);
+            tdBookMarksResults.innerHTML = arrayBookmarks[r].name.trimString(40);
             if (arrayBookmarks[r].name.length > 40) {
-                td.title = arrayBookmarks[r].name;
+                tdBookMarksResults.title = arrayBookmarks[r].name;
             }
 
-            td.onclick = function (evt) {
+            tdBookMarksResults.onclick = function (evt) {
                 //Upon clicking/tapping on this cell map will pan to the respective stored extent of this bookmark
                 for (var b = 0; b < arrayBookmarks.length; b++) {
                     if (this.getAttribute("bookmarkName") == arrayBookmarks[b].name) {
@@ -490,12 +494,12 @@ function PopulateBookmarkList() {
                     }
                 }
             }
-            tr.appendChild(td);
+            trBookMarksResults.appendChild(tdBookMarksResults);
             var tdUp = document.createElement("td");
             tdUp.style.borderBottom = "1px #000 solid";
             tdUp.align = "center";
             tdUp.className = 'imgOptions';
-            tr.appendChild(tdUp);
+            trBookMarksResults.appendChild(tdUp);
             var imgUP = document.createElement("img");
             imgUP.id = "imgUP" + arrayBookmarks[r].name;
             imgUP.setAttribute("bookmarkName", arrayBookmarks[r].name);
@@ -518,7 +522,7 @@ function PopulateBookmarkList() {
             tdDown.style.borderBottom = "1px #000 solid";
             tdDown.className = 'imgOptions';
             tdDown.align = "center";
-            tr.appendChild(tdDown);
+            trBookMarksResults.appendChild(tdDown);
             var imgDown = document.createElement("img");
             imgDown.id = "imgDown" + arrayBookmarks[r].name;
             imgDown.src = "images/down-arrow.png";
@@ -541,7 +545,7 @@ function PopulateBookmarkList() {
             tdClose.style.borderBottom = "1px #000 solid";
             tdClose.align = "center";
             tdClose.className = 'imgOptions';
-            tr.appendChild(tdClose);
+            trBookMarksResults.appendChild(tdClose);
             var imgClose = document.createElement("img");
             imgClose.id = "imgClose" + arrayBookmarks[r].name;
             imgClose.setAttribute("bookmarkName", arrayBookmarks[r].name);
@@ -571,7 +575,7 @@ function ShowLocateContainer() {
         dojo.dom.byId('divAddressContent').style.right = (dojo['dom-geometry'].getMarginBox("holder").l + 15) + "px";
         dojo['dom-class'].replace("divAddressContent", "showContainerHeight", "hideContainerHeight");
         dojo.dom.byId("txtAddress").value = dojo.dom.byId("txtAddress").getAttribute("defaultAddress");
-
+        lastSearchString = dojo.dom.byId("txtAddress").value.trim();
         dojo.dom.byId("txtAddress").blur();
         if (dojo.dom.byId("txtAddress").getAttribute("defaultAddress") == dojo.dom.byId("txtAddress").getAttribute("defaultAddressTitle")) {
             dojo.dom.byId("txtAddress").style.color = "gray";
@@ -685,21 +689,21 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
     newLeft = 0;
 
     RemoveChildren(dojo.dom.byId("divServiceContainer"));
-    var table = document.createElement("table");
-    table.id = "tblMetricPods";
-    table.style.visibility = "hidden";
-    table.cellSpacing = 0;
-    table.cellPadding = 0;
-    dojo.dom.byId("divServiceContainer").appendChild(table);
-    var tBody = document.createElement("tbody");
-    table.appendChild(tBody);
-    var tr = document.createElement("tr");
-    tBody.appendChild(tr);
+    var tblMetricPods = document.createElement("table");
+    tblMetricPods.id = "tblMetricPods";
+    tblMetricPods.style.visibility = "hidden";
+    tblMetricPods.cellSpacing = 0;
+    tblMetricPods.cellPadding = 0;
+    dojo.dom.byId("divServiceContainer").appendChild(tblMetricPods);
+    var tBodyMetricPods = document.createElement("tbody");
+    tblMetricPods.appendChild(tBodyMetricPods);
+    var trMetricPods = document.createElement("tr");
+    tBodyMetricPods.appendChild(trMetricPods);
     var count = 0;
     var infoClicked = false;
     for (var p in webInfo) {
-        var td = document.createElement("td");
-        tr.appendChild(td);
+        var tdMetricPods = document.createElement("td");
+        trMetricPods.appendChild(tdMetricPods);
 
         var outerdiv = document.createElement("div");
         outerdiv.style.backgroundColor = "#000000";
@@ -711,7 +715,7 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         outerdiv.style.width = "200px";
         outerdiv.style.height = "150px";
         outerdiv.className = "rounded";
-        td.appendChild(outerdiv);
+        tdMetricPods.appendChild(outerdiv);
 
         var divPod = document.createElement("div");
         divPod.style.width = "200px";
@@ -825,14 +829,14 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         var tBodyPod = document.createElement("tbody");
         tablePod.appendChild(tBodyPod);
 
-        var tr2 = document.createElement("tr");
-        tBodyPod.appendChild(tr2);
+        var trPod = document.createElement("tr");
+        tBodyPod.appendChild(trPod);
 
         var tdInner = document.createElement("td");
         tdInner.style.verticalAlign = "top";
         tdInner.style.height = "50%";
         tdInner.style.padingTop = "5px";
-        tr2.appendChild(tdInner);
+        trPod.appendChild(tdInner);
 
         var tableInner = document.createElement("table");
         tableInner.cellPadding = 0;
@@ -846,19 +850,19 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         var trInner = document.createElement("tr");
         tbodyInner.appendChild(trInner);
 
-        var td2 = document.createElement("td");
-        td2.align = "left";
-        td2.style.paddingLeft = "10px";
-        td2.style.paddingTop = "20px";
-        td2.style.verticalAlign = "top";
-        trInner.appendChild(td2);
+        var tdKeyInd = document.createElement("td");
+        tdKeyInd.align = "left";
+        tdKeyInd.style.paddingLeft = "10px";
+        tdKeyInd.style.paddingTop = "20px";
+        tdKeyInd.style.verticalAlign = "top";
+        trInner.appendChild(tdKeyInd);
         var spanText = document.createElement("span");
         spanText.style.color = "white";
         spanText.style.fontSize = "16px";
         spanText.style.lineHeight = "22px";
         spanText.style.fontWeight = "bolder";
         spanText.innerHTML = webInfo[p].key;
-        td2.appendChild(spanText);
+        tdKeyInd.appendChild(spanText);
 
         var tdImg = document.createElement("td");
         tdImg.align = "right";
@@ -881,27 +885,27 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
 
         var trImg = document.createElement("tr");
         tBodyPod.appendChild(trImg);
-        var tdInner1 = document.createElement("td");
-        tdInner1.style.height = "50%";
-        trImg.appendChild(tdInner1);
-        var tableInner1 = document.createElement("table");
-        tableInner1.cellPadding = 0;
-        tableInner1.cellSpacing = 0;
-        tableInner1.style.width = "100%";
-        tableInner1.style.height = "100%";
-        tdInner1.appendChild(tableInner1);
-        var tbodyInner1 = document.createElement("tbody");
-        tableInner1.appendChild(tbodyInner1);
-        var trInner1 = document.createElement("tr");
-        tbodyInner1.appendChild(trInner1);
+        var tdMetricStatus = document.createElement("td");
+        tdMetricStatus.style.height = "50%";
+        trImg.appendChild(tdMetricStatus);
+        var tableMetricStatus = document.createElement("table");
+        tableMetricStatus.cellPadding = 0;
+        tableMetricStatus.cellSpacing = 0;
+        tableMetricStatus.style.width = "100%";
+        tableMetricStatus.style.height = "100%";
+        tdMetricStatus.appendChild(tableMetricStatus);
+        var tbodyMetricStatus = document.createElement("tbody");
+        tableMetricStatus.appendChild(tbodyMetricStatus);
+        var trMetricStatus = document.createElement("tr");
+        tbodyMetricStatus.appendChild(trMetricStatus);
 
-        var td1 = document.createElement("td");
-        td1.align = "left";
-        td1.style.paddingLeft = "10px";
-        trInner1.appendChild(td1);
+        var tdStatusInd = document.createElement("td");
+        tdStatusInd.align = "left";
+        tdStatusInd.style.paddingLeft = "10px";
+        trMetricStatus.appendChild(tdStatusInd);
 
         var spanImg = document.createElement("span");
-        td1.appendChild(spanImg);
+        tdStatusInd.appendChild(spanImg);
         var imgArr = document.createElement("img");
         imgArr.style.width = "40px";
         imgArr.style.height = "25px";
@@ -911,7 +915,7 @@ function CreateGroupPods(webInfo, groupdata, token, statsData) {
         var tdText = document.createElement("td");
         tdText.align = "right";
         tdText.style.paddingRight = "10px";
-        trInner1.appendChild(tdText);
+        trMetricStatus.appendChild(tdText);
 
         var spanText = document.createElement("span");
         spanText.className = "spnMetricNumber";
@@ -1147,24 +1151,24 @@ function CreateSummaryData(statsData, layer, title) {
         divSummary.style.margin = "10px";
         dojo.dom.byId("divPodInner" + layer + "Pod").appendChild(divSummary);
 
-        var table = document.createElement("table");
-        table.cellSpacing = 0;
-        table.cellPadding = 0;
-        table.style.width = "100%";
-        table.style.height = "100%";
-        divSummary.appendChild(table);
-        var tbody = document.createElement('tbody');
-        table.appendChild(tbody);
-        var tr = document.createElement("tr");
-        tbody.appendChild(tr);
-        var td = document.createElement("td");
-        td.style.verticalAlign = "middle";
-        td.align = "center";
-        tr.appendChild(td);
+        var tblSummary = document.createElement("table");
+        tblSummary.cellSpacing = 0;
+        tblSummary.cellPadding = 0;
+        tblSummary.style.width = "100%";
+        tblSummary.style.height = "100%";
+        divSummary.appendChild(tblSummary);
+        var tbodySummary = document.createElement('tbody');
+        tblSummary.appendChild(tbodySummary);
+        var trSummary = document.createElement("tr");
+        tbodySummary.appendChild(trSummary);
+        var tdSummary = document.createElement("td");
+        tdSummary.style.verticalAlign = "middle";
+        tdSummary.align = "center";
+        trSummary.appendChild(tdSummary);
 
         var spanSummary = document.createElement("span");
         spanSummary.style.fontWeight = "bolder";
-        td.appendChild(spanSummary);
+        tdSummary.appendChild(spanSummary);
     }
     if (!layer) {
         title = dojo.dom.byId("imgSocialMedia").getAttribute("key");
@@ -1172,7 +1176,6 @@ function CreateSummaryData(statsData, layer, title) {
         var spanSummary = document.createElement("span");
     }
 
-    var date = new js.date();
     for (var y = 0; y < statsData.length; y++) {
         if (statsData[y].title == title) {
             for (var i in statsData[y].fields) {
@@ -1217,16 +1220,12 @@ function CreateLineChart(statsData, title) {
                                 chartData.push(showNullValueAs);
                             }
                         }
-                        var date = new js.date();
                         var xAxisData = [];
                         for (var a = 0; a < infoPodStatics[1].DateObservations.length; a++) {
                             try {
                                 if (Number(dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data)) == dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data)) {
                                     var utcMilliseconds = Number(dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data));
-                                    xAxisData.push(dojo.date.locale.format(date.utcTimestampFromMs(utcMilliseconds), { datePattern: infoPodStatics[1].DatePattern, selector: "date" }));
-                                }
-                                else {
-                                    xAxisData.push(dojo.date.locale.format(new Date(dojo.string.substitute(infoPodStatics[1].DateObservations[a], statsData[y].data)), { datePattern: infoPodStatics[1].DatePattern, selector: "date" }));
+                                    xAxisData.push(dojo.date.locale.format(new Date(utcMilliseconds), { datePattern: infoPodStatics[1].DatePattern, selector: "date" }));
                                 }
                             } catch (err) {
                                 xAxisData.push(showNullValueAs);

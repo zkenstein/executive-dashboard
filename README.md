@@ -49,11 +49,11 @@ decide.
 
 ## Resources
 
-Learn more about Esri's [ArcGIS for Local Government maps and apps](http://resources.arcgis.com/en/communities/local-government/).
+Learn more about Esri's [ArcGIS for Local Government maps and apps](http://solutions.arcgis.com/local-government/).
 
 Show me a list of other [Local Government GitHub repositories](http://esri.github.io/#Local-Government).
 
-Learn more about Esri's [ArcGIS for State Government maps and apps](http://resources.arcgis.com/en/communities/state-government/).
+Learn more about Esri's [ArcGIS for State Government maps and apps](http://solutions.arcgis.com/state-government/).
 
 Additional [information and sample data](http://www.arcgis.com/home/item.html?id=9c31136ff6f54dfb90edbc74f08573ed)
 are available for the application.

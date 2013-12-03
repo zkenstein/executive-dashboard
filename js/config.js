@@ -1,6 +1,6 @@
-﻿/*global dojo */
+/*global dojo */
 /** @license
- | Version 10.2
+ | Version 10.2.0.1
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -90,7 +90,7 @@ dojo.declare("js.config", null, {
     AuthenticatedLinks: "http://www.arcgis.com/sharing/rest/content/groups/${0}?f=json&token=${0}",
 
     //Authenticated group id for dashboard group.
-    AuthenticatedGroup: "4cd8df6c536347399d67314a89117f4f",
+    AuthenticatedGroup: "f8f0da7f951e4566b7adf7c75a25f0c6",
 
     //Flag for retaining the webmap initial extent when changing from one webmap to another.
     LoadInitialExtentForWebmap: true,
@@ -140,7 +140,7 @@ dojo.declare("js.config", null, {
             width: 35,
             height: 35
         },
-        DefaultValue: "1848 N Mill St Naperville IL 60563",
+        DefaultValue: "Yamhill Oregon",
         LocatorParameters: {
             SearchField: "SingleLine",
             SearchBoundaryField: "searchExtent"
@@ -183,10 +183,10 @@ dojo.declare("js.config", null, {
 
     //Default values to set the RSS Feed and Twitter trend.
     DefaultNewsFields: [{
-        RSSFeedName: "Florida Local News",
-        RSSFeedURL: "http://www.floridapsc.com/home/news/newsrss.ashx"
+        RSSFeedName: "CNN Local News",
+        RSSFeedURL: "http://rss.cnn.com/rss/cnn_us.rss"
     }, {
-        TwitterTrendName: "Florida"
+        TwitterTrendName: "Oregon"
     }],
 
     //Set headers and Images for the welcome screen.
@@ -215,10 +215,6 @@ dojo.declare("js.config", null, {
         Images: ["images/health.png", "images/health_hover.png"],
         isPodVisible: true
     }, {
-        Tag: "Indicator",
-        Images: ["images/indicators.png", "images/indicators-hover.png"],
-        isPodVisible: true
-    }, {
         Tag: "Education",
         Images: ["images/education.png", "images/education-hover.png"],
         isPodVisible: true
@@ -231,19 +227,19 @@ dojo.declare("js.config", null, {
     //Specify fields for the Metric pods.
     InfoPodStatics: [{
         CurrentObservation: "${OBSERVCURR}",
-        LatestObservation: "${OBSERV1}",
+        LatestObservation: "${OBSERV4}",
         StatisticsPosition: "${INCREASEPOS}"
     }, {
-        DateObservations: ["${DATE1}", "${DATE2}", "${DATE3}", "${DATECURR}"],
-        CountObservations: ["${OBSERV1}", "${OBSERV2}", "${OBSERV3}", "${OBSERVCURR}"],
+        DateObservations: ["${DATE1}", "${DATE2}", "${DATE3}", "${DATE4}", "${DATECURR}"],
+        CountObservations: ["${OBSERV1}", "${OBSERV2}", "${OBSERV3}", "${OBSERV4}","${OBSERVCURR}"],
         DatePattern: "MMM dd, yyyy"
     }],
 
     //Update information for info pods.
-    PodInformation: "This report was updated on ${LASTUPDATE} and includes data from ${STARTDATE} to ${ENDDATE}.",
+    PodInformation: "This report was updated on ${LASTUPDATE} and includes data from ${STARTDATE} to ${DATECURR}.",
 
     //Keyword to detect the statistics layer.
-    StatisticsKeyword: "@ Stats",
+    StatisticsKeyword: "@ stats",
 
     // ------------------------------------------------------------------------------------------------------------------------
     // SETTINGS FOR MAP SHARING

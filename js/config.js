@@ -56,8 +56,11 @@ dojo.declare("js.config", null, {
     //
     // 20. Set keyword to detect statistics layer        - [ Tag(s) to look for: StatisticsKeyword ]
     //
-    // 21. Specify URLs for map sharing                  - [ Tag(s) to look for:  ShareByMailLink ]
-    // 22.In case of changing the TinyURL service
+    // 21. Set geometry service URL                      - [ Tag(s) to look for: GeometryService ]
+    //
+    // 22. Specify URLs for map sharing                  - [ Tag(s) to look for:  ShareByMailLink ]
+    //
+    // 23. In case of changing the TinyURL service
     //     Specify URL for the new service               - [ Tag(s) to look for: MapSharingOptions (set TinyURLServiceURL, TinyURLResponseAttribute) ]
     //
     //
@@ -240,6 +243,12 @@ dojo.declare("js.config", null, {
 
     //Keyword to detect the statistics layer.
     StatisticsKeyword: "@ stats",
+
+    // ------------------------------------------------------------------------------------------------------------------------
+    // GEOMETRY SERVICE SETTINGS
+    // ------------------------------------------------------------------------------------------------------------------------
+    // Set geometry service URL
+    GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 
     // ------------------------------------------------------------------------------------------------------------------------
     // SETTINGS FOR MAP SHARING

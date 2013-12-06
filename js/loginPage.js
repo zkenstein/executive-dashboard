@@ -187,7 +187,7 @@ function Init() {
             podInformation = responseObject.PodInformation;
             layerImages = responseObject.LayerImages;
             loadInitialExtentForWebmap = responseObject.LoadInitialExtentForWebmap;
-            geometryService = new esri.tasks.GeometryService("http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
+            geometryService = new esri.tasks.GeometryService(responseObject.GeometryService);
             rssFields = responseObject.RSSFields;
             statisticsKeyword = responseObject.StatisticsKeyword;
             dojo.dom.byId("tdGraphTab").innerHTML = responseObject.GraphTabName.trimString(10);

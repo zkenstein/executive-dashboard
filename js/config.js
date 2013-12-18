@@ -163,7 +163,7 @@ dojo.declare("js.config", null, {
         PlaceNameSearch: {
             LocatorFieldValue: "POI",
             FilterFieldName: "Type",
-            FilterFieldValues: ["county"]
+            FilterFieldValues: ["County"]
         }
     },
 

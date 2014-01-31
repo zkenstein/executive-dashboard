@@ -6,9 +6,9 @@ The Executive Dashboard is a configuration of ArcGIS Online and a HTML 5 / JavaS
 
 [Try the Executive Dashboard for Local Government application](http://tryitlive.arcgis.com/ExecutiveDashboardTryItLive/)
 
-[![Image of Local Government Executive Dashboard application](https://raw.github.com/Esri/executive-dashboard/master/executive-dashboard.png "Executive Dashboard application")](http://localgovtemplates2.esri.com/ExecutiveDashboardTryItLive/)
+[![Image of Local Government Executive Dashboard application](executive-dashboard.png "Executive Dashboard application")](http://localgovtemplates2.esri.com/ExecutiveDashboardTryItLive/)
 
-[![Image of State Government Executive Dashboard application](https://raw.github.com/Esri/executive-dashboard/state_adaptation/stategovernment-execdashboard.png "Executive Dashboard application")](http://localgovtemplates2.esri.com/ExecutiveDashboardTryItLive/)
+[![Image of State Government Executive Dashboard application](stategovernment-execdashboard.png "Executive Dashboard application")](http://localgovtemplates2.esri.com/ExecutiveDashboardTryItLive/)
 
 ## Features
 
@@ -88,7 +88,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 A copy of the license is available in the repository's
-[LICENSE.txt](https://raw.github.com/Esri/executive-dashboard/master/LICENSE.txt) file.
+[LICENSE.txt](LICENSE.txt) file.
 
 [](Esri Tags: Local-Government State-Government Local State Government Executive Dashboard)
 [](Esri Language: JavaScript)

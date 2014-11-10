@@ -1,4 +1,4 @@
-﻿/*global */
+/*global */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2012 Esri
@@ -1277,7 +1277,7 @@ function CreateLineChart(statsData, title) {
 
 //Populate chart for the metric pod
 function PopulateChart(chartData, data, xAxisData) {
-    for (var c = 0; c < data.length; c++) {
+    for (c = data.length - 1; c > 0; c--) {
         if ((chartData[c] == showNullValueAs) && (xAxisData[c] == showNullValueAs)) {
             chartData.splice(c, 1);
             xAxisData.splice(c, 1);

@@ -15,6 +15,10 @@
  | See the License for the specific language governing permissions and
  | limitations under the License.
  */
+dojo.require("js.commonShare");
+
+var commonShare = null;
+var getTinyUrl = null;
 var newLeft = 0;    //Variable to store the new left value for carousel of polling place
 var operationalLayers; //variable for storing the operational layer details
 var orientationChange = false; //variable for setting the flag on orientation

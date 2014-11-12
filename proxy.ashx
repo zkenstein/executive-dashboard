@@ -142,6 +142,23 @@ public class proxy : IHttpHandler
                         }
                         break;
                     }
+
+                    //------------------------------------------------------------------------------------------------------------//
+
+                    // Rewrite using Bitly authentication
+                    else if (null != rewriteRule.bitlyCredentials) {
+
+                        if (!PrepareBitlyUrl(
+                            null, config.applicationSiteUrl, ref thirdPartyServerURL,
+                            rewriteRule.bitlyCredentials, ref requestToThirdPartyServer, ref responseToApp))
+                        {
+                            responseToApp.StatusCode = 500;
+                            responseToApp.StatusDescription = "Bitly authentication failed";
+                            responseToApp.End();
+                            return;
+                        }
+                        break;
+                    }
                 }
             }
         }
@@ -571,6 +588,46 @@ public class proxy : IHttpHandler
     }
 
     /// <summary>
+    /// Adapts the called URL for use with Bitly.
+    /// </summary>
+    /// <param name="cacheTag">Tag for token cache</param>
+    /// <param name="referer">URL of calling application's site</param>
+    /// <param name="thirdPartyServerURL">Called URL</param>
+    /// <param name="bitlyCredentials">Twitter authentication credentials</param>
+    /// <param name="requestToThirdPartyServer">Overwritten by proxy request to third-party server
+    /// created by this routine</param>
+    /// <param name="responseToApp">Response to calling application; provided so that diagnostic
+    /// information may be inserted into the response's headers</param>
+    /// <returns>True if called URL successfully adapted for calling Twitter</returns>
+    protected bool PrepareBitlyUrl(string cacheTag,
+        string referer, ref string thirdPartyServerURL, bitlyCredentials bitlyCredentials,
+        ref HttpWebRequest requestToThirdPartyServer, ref HttpResponse responseToApp)
+    {
+        if (null != bitlyCredentials.tokenParamName && null != bitlyCredentials.accessToken)
+        {
+            string url = AddParamToUri(thirdPartyServerURL,
+                bitlyCredentials.tokenParamName, bitlyCredentials.accessToken);
+            requestToThirdPartyServer = (HttpWebRequest)WebRequest.Create(url);
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Adds a parameter to a URI.
+    /// </summary>
+    /// <param name="uri">URI to receive parameter</param>
+    /// <param name="paramName">Name/tag for parameter</param>
+    /// <param name="param">Parameter value</param>
+    /// <returns></returns>
+    protected string AddParamToUri(string uri, string paramName, string param) {
+        if (!String.IsNullOrEmpty(param))
+            uri += uri.Contains("?") ?
+                "&" + paramName + "=" + param : "?" + paramName + "=" + param;
+        return uri;
+    }
+
+    /// <summary>
     /// Cache a credential used by this proxy.
     /// </summary>
     protected void AddToCredentialsTagListCache(string cacheTag)
@@ -812,6 +869,9 @@ public class UrlToRewrite
     [XmlElement("twitterCredentials")]
     public twitterCredentials twitterCredentials;
 
+    [XmlElement("bitlyCredentials")]
+    public bitlyCredentials bitlyCredentials;
+
     public bool ShouldSerializeagolCredentials()
     {
         return null != agolCredentials;
@@ -871,6 +931,21 @@ public class twitterCredentials
 
     [XmlElement("tokenCacheDurationMinutes")]
     public int tokenCacheDurationMinutes;
+}
+
+//============================================================================================================================//
+
+/// <summary>
+/// Represents information needed to use Bitly.
+/// </summary>
+[XmlRoot("bitlyCredentials")]
+public class bitlyCredentials
+{
+    [XmlElement("accessToken")]
+    public string accessToken;
+
+    [XmlElement("tokenParamName")]
+    public string tokenParamName;
 }
 
 //============================================================================================================================//

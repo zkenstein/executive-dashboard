@@ -90,5 +90,5 @@ limitations under the License.
 A copy of the license is available in the repository's
 [LICENSE.txt](LICENSE.txt) file.
 
-[](Esri Tags: Local-Government State-Government Local State Government Executive Dashboard)
+[](Esri Tags: ArcGISSolutions Local-Government State-Government Local State Government Executive Dashboard)
 [](Esri Language: JavaScript)

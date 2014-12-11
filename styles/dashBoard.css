@@ -725,6 +725,7 @@ body,html
 
 .esriPopup .titleButton.close
 {
+    background-position: 0 -171px !important;
     right:8px !important;
 }
 
@@ -748,6 +749,7 @@ body,html
 }
 .esriPopup .titleButton.next
 {
+    background-position: 0 -342px !important;
     right: 76px !important;
 }
 

@@ -1,4 +1,4 @@
-﻿/*global */
+/*global */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2012 Esri
@@ -606,6 +606,9 @@ function GetMapExtent() {
 //Open Email client with shared link
 function ShareLink(ext) {
     if (!tempMap) {
+        if (!esri.isDefined(commonShare)) {
+            commonShare = new js.CommonShare();
+        }
         dojo.dom.byId("imgSocialMedia").src = "images/imgSocialMedia_hover.png";
         tinyUrl = null;
         mapExtent = GetMapExtent();
@@ -623,38 +626,12 @@ function ShareLink(ext) {
         else {
             urlStr = encodeURI(url.path) + "?extent=" + mapExtent + "$t=" + dojo.dom.byId("imgSocialMedia").getAttribute("mapName").replace("&", "@");
         }
-        url = dojo.string.substitute(mapSharingOptions.TinyURLServiceURL, [urlStr]);
-        setTimeout(function () {
-            dojo.dom.byId("imgSocialMedia").src = "images/imgSocialMedia.png";
-        }, 500);
-        dojo.io.script.get({
-            url: url,
-            callbackParamName: "callback",
-            load: function (data) {
-                tinyResponse = data;
-                tinyUrl = data;
-                var attr = mapSharingOptions.TinyURLResponseAttribute.split(".");
-                for (var x = 0; x < attr.length; x++) {
-                    tinyUrl = tinyUrl[attr[x]];
-                }
-                if (tinyUrl) {
-                    parent.location = dojo.string.substitute(mapSharingOptions.ShareByMailLink, [dojo.dom.byId("imgSocialMedia").getAttribute("mapName").replace("&", "and") + " - " + tinyUrl]);
 
-                } else {
-                    alert(messages.getElementsByTagName("tinyURLEngine")[0].childNodes[0].nodeValue);
-                    return;
-                }
-            },
-            error: function (error) {
-                alert(tinyResponse.error);
-            }
-        });
-        setTimeout(function () {
-            if (!tinyResponse) {
-                alert(messages.getElementsByTagName("tinyURLEngine")[0].childNodes[0].nodeValue);
-                return;
-            }
-        }, 6000);
+        // Attempt the shrinking of the URL
+        getTinyUrl = commonShare.getTinyLink(urlStr, mapSharingOptions.TinyURLServiceURL);
+
+        // Do the share
+        commonShare.share(getTinyUrl, mapSharingOptions, "email");
     }
 }
 
@@ -1277,7 +1254,7 @@ function CreateLineChart(statsData, title) {
 
 //Populate chart for the metric pod
 function PopulateChart(chartData, data, xAxisData) {
-    for (var c = 0; c < data.length; c++) {
+    for (c = data.length - 1; c > 0; c--) {
         if ((chartData[c] == showNullValueAs) && (xAxisData[c] == showNullValueAs)) {
             chartData.splice(c, 1);
             xAxisData.splice(c, 1);

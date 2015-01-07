@@ -26,7 +26,7 @@ You'll need to convert to an application in IIS and use the ASP .NET 4.0. applic
 
 **Start now using your own services**
 
-For more information on requirements and publication steps, see [State Executive Dashboard](http://links.esri.com/stategovernment/help/10.2/ExecutiveDashboard)or[Executive Dashboard](http://links.esri.com/localgovernment/help/10.2/ExecutiveDashboard) help.
+For more information on requirements and publication steps, see [State Executive Dashboard](http://links.esri.com/stategovernment/help/10.2/ExecutiveDashboard) or [Executive Dashboard](http://links.esri.com/localgovernment/help/10.2/ExecutiveDashboard) help.
 
 ### Developer Notes
 

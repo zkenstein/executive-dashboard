@@ -1,276 +1,356 @@
-# -*- coding: utf-8 -*-
-"""----------------------------------------------------------------------------
-Name:               executive_dashboard.py
-Purpose:            TODO: add purpose.
-Author:             Local Government Team
-Created:            June 22, 2012
-Updated:            May 8, 2013
-ArcGIS Version:     10.1
-Python Version:     2.7
-----------------------------------------------------------------------------"""
-from os.path import dirname, join
+#-------------------------------------------------------------------------------
+# Name:         executive_dashboard.py
+# Purpose:
+#
+# Author:       Local Government
+#
+# Created:      13/08/2015
+# Version:      Python 2.7
+#-------------------------------------------------------------------------------
+
+import json, urllib, arcrest
+from arcrest.security import AGOLTokenSecurityHandler
+from arcresthelper import securityhandlerhelper
+from arcresthelper import common
+from arcrest.agol import FeatureLayer
+from datetime import datetime as dt
+from datetime import timedelta as td
 import getpass
-import datetime
-import arcpy
-import serviceutils
 import indicator_constants as ic
+from os.path import dirname, join
 
-# Field names
-date1       = u"DATE1"
-date2       = u"DATE2"
-date3       = u"DATE3"
-date4       = u"DATE4"
-datecurr    = u"DATECURR"
-observ4     = u"OBSERV4"
-observ3     = u"OBSERV3"
-observ2     = u"OBSERV2"
-observ1     = u"OBSERV1"
-observcurr  = u"OBSERVCURR"
-performind  = u"PERFORMIND"
-last_update = u"LASTUPDATE"
-last_editor = u"LASTEDITOR"
-start_date  = u"STARTDATE"
-end_date    = u"ENDDATE"
+# Messages
+m1 = "Can not not create token to access map. Please check username, password, and organization URL."
+m2 = "Can not access web map JSON. Please check map ID."
+m3 = "Map does not contain the specified data layer"
+m4 = "Map does not contain the specified stats layer"
+m5 = "Apply a filter to the stats layer so that exactly one record is available in the map."
+m6 = "Layer does not contain a filter that uses the provided date field."
+m7 = "Stats layer capabilities must include 'Update'."
 
-# Error messages.
-e1 = u"Spatial Analyst extension is not available."
-e2 = u"No constants found for {}."
-e3 = u"Please add a domain to the PerformanceIndicators named {}."
-e4 = u"No performance indicator matching {}.\n Add a feature to {} matching {}."
-e5 = u"The end date is empty."
-e6 = u"No incidents found matching {}."
-e7 = u"Invalid server URL or login credentials."
-gp_error = u"GP ERROR:"
-py_error = u"ERROR:"
+def get_layer_properties(title, layers):
+    """Parse the JSON of a web map and retrieve the URL of a specific layer,
+    and any filters that have been applied to that layer."""
+    for layer in layers:
+        if layer['title'] == title:
+            url = layer['url']
+            if 'layerDefinition' in layer:
+                query = layer['layerDefinition']['definitionExpression']
+            else:
+                query = "1=1"
+            return url, query
+    return "", "", ""
 
-# Informative messages
-m1 = u"{}: Updating the {} service...\n"
-m2 = u"{}: Successfully updated {}.\n\n"
+def connect_to_layer(url, sh, proxy_port=None, proxy_url=None, initialize=True):
+    """Establish a connection to an ArcGIS Online feature layer"""
+    fl = FeatureLayer(
+            url=url,
+            securityHandler=sh,
+            proxy_port=proxy_port,
+            proxy_url=proxy_url,
+            initialize=initialize)
+    return fl
 
-def update_observ_fields(perform_ind_features):
-    """Updates the OBSERV and date fields."""
-    fields = [observ4, observ3, observ2, observ1,
-            observcurr, date4, date3, date2, date1, datecurr]
+def count_features(layer, query="1=1"):
+    """Count feature in a feature layer, optionally respecting a where clause"""
+    cnt = layer.query(where=query, returnGeometry=False, returnCountOnly=True)
+    return cnt['count']
 
-    with arcpy.da.UpdateCursor(perform_ind_features, fields) as rows:
-        for row in rows:
-            row[0] = row[1] # OBSERV3 moves to OBSERV4
-            row[5] = row[6] # DATE3 moves to DATE4
-            row[1] = row[2] # OBSERV2 moves to OBSERV3
-            row[6] = row[7] # DATE2 moves to DATE3
-            row[2] = row[3] # OBSERV1 moves to OBSERV2
-            row[7] = row[8] # DATE1 moves to DATE2
-            row[3] = row[4] # OBSERVCURR moves to OBSERV1
-            row[8] = row[9] # DATECURR moves to DATE1
-            rows.updateRow(row)
-# End update_observ_fields function
+def featureset_to_dict(fs):
+    """Returns JSON of a feature set in dictionary format"""
+    fs_str = fs.toJSON
+    fs_dict =json.loads(fs_str)
+    return fs_dict
 
-def find_key(dic, val):
-    """Return the dictionary key given the value.
-       Used to get the domain value for the indicator value.
+def get_attributes(layer, query="1=1", fields="*"):
+    """Get all attributes for a record in a table"""
+    vals = layer.query(where=query, out_fields=fields, returnGeometry=False)
+    valsdict = featureset_to_dict(vals)
+    return valsdict['features'][0]['attributes']
+
+def update_values(layer, field_info, query="1=1"):
+    """Update feature values """
+    out_fields = ['objectid']
+    for fld in field_info:
+        out_fields.append(fld['FieldName'])
+
+    resFeats = layer.query(where=query,
+                        out_fields=",".join(out_fields))
+    for feat in resFeats:
+
+        for fld in field_info:
+            feat.set_value(fld["FieldName"],fld['ValueToSet'])
+
+def trace():
     """
-    for k, v in dic.iteritems():
-        if v.lower() == val:
-            return k
-# End find_key function
-
-def main(indicator_value, *args):
-
+        trace finds the line, the filename
+        and error message and returns it
+        to the user
     """
-    Main function to record the number of incidents for a selected performance indicator value since
-    the data/time the previous count of this value was performed, or within a specified number of days.
-    It will also maintain a record of the previous 4 count records. Density of these new incidents
-    will be mapped using the Kernel Density tool.
+    import traceback, inspect,sys
+    tb = sys.exc_info()[2]
+    tbinfo = traceback.format_tb(tb)[0]
+    filename = inspect.getfile(inspect.currentframe())
+    # script name + line number
+    line = tbinfo.split(", ")[1]
+    # Get Python syntax error
+    #
+    synerror = traceback.format_exc().splitlines()[-1]
+    return line, filename, synerror
 
-    Required arguments:
-            indicator_value -- Performance Indicator value (i.e. Violent Crime)
+def create_security_handler(security_type='Portal', username="", password="",
+                            org_url="", proxy_url=None, proxy_port=None,
+                            referer_url=None, token_url=None, certificatefile=None,
+                            keyfile=None, client_id=None, secret_id=None):
+    """Creates a security handler helper using the specified properties."""
+    securityinfo = {}
+    securityinfo['security_type'] = security_type#LDAP, NTLM, OAuth, Portal, PKI, ArcGIS
+    securityinfo['username'] = username
+    securityinfo['password'] = password
+    securityinfo['org_url'] = org_url
+    securityinfo['proxy_url'] = proxy_url
+    securityinfo['proxy_port'] = proxy_port
+    securityinfo['referer_url'] = referer_url
+    securityinfo['token_url'] = token_url
+    securityinfo['certificatefile'] = certificatefile
+    securityinfo['keyfile'] = keyfile
+    securityinfo['client_id'] = client_id
+    securityinfo['secret_id'] = secret_id
 
-    """
+    return securityhandlerhelper.securityhandlerhelper(securityinfo=securityinfo)
 
-    # Open log file for reporting.
-    with open(join(dirname(__file__), 'ed_log.log'), 'a') as log_file:
+def main():
+    with open(join(dirname(__file__), 'DashboardLog.log'), 'a') as log_file:
+
+        # Get current time for report datetime range
+        start_time = dt.utcnow()
+        today_agol = dt.isoformat(start_time)
+
         try:
-            # Check out the Spatial analyst extension.
-            if arcpy.CheckExtension('Spatial') == 'Available':
-                arcpy.CheckOutExtension('Spatial')
-            else:
-                raise Exception(e1)
 
-            # Set overwrite output option to True.
-            arcpy.env.overwriteOutput = True
+            # Get security handler for organization content
+            org_shh = create_security_handler(security_type='Portal',
+                                              username=ic.org_username,
+                                              password=ic.org_password,
+                                              org_url=ic.org_url)
+            if org_shh.valid == False:
+                raise Exception(org_shh.message)
 
-            # Set performance indicators (tuples) based on the indicator value.
-            try:
-                indicator_values = ic.indicators[indicator_value]
-            except KeyError:
-                raise KeyError(e2.format(indicator_value))
+            # Get security handler for services
+            if 'Server' in [ic.data_service_type, ic.stats_service_type]:
+                service_shh = create_security_handler(security_type='Portal',
+                                                  username=ic.server_username,
+                                                  password=ic.server_password,
+                                                  org_url=ic.server_url)
 
-            # Select perform_ind_features where PERFORMIND == indicator_value.
-            dsc = arcpy.Describe(ic.perform_ind_features)
-            cp = dirname(dsc.catalogPath)
-            if cp.endswith('.gdb'):
-                domains = arcpy.da.ListDomains(cp)
-            else:
-                domains = arcpy.da.ListDomains(dirname(cp))
-            for domain in domains:
-                if domain.name == 'PerformanceIndicators':
-                    c = find_key(domain.codedValues, indicator_value.lower())
-                    if not c:
-                        raise Exception(e3.format(indicator_value))
-                    else:
-                        break
-            # Create a copy in memory instead using Select
-            perform_ind_lyr = arcpy.management.MakeFeatureLayer(ic.perform_ind_features,
-                                                                "perform_ind_lyr",
-                                                                """{0} = {1}""".format(performind, c))
+                if server_shh.valid == False:
+                    raise Exception(org_shh.message)
 
-            # Update historical count and date fields.
-            row_cnt = arcpy.management.GetCount(perform_ind_lyr)
-            if int(row_cnt[0]) > 0:
-                update_observ_fields(perform_ind_lyr)
-            else:
-                raise Exception(e4.format(indicator_value, ic.perform_ind_features, indicator_value))
+                if ic.data_service_type == 'Server':
+                    data_sh = server_shh
 
-            # Select all incident features where:
+                if ic.stats_service_type == 'Server':
+                    stats_sh = server_shh
 
-            # 1. If number of days parameter is None, do this.
-            # Else, grab last # of days from now.
-            inc_time_field = indicator_values["inc_time_field"]
+            if ic.data_service_type == 'AGOL':
+                data_sh = org_shh.securityhandler
 
-            if indicator_values["number_of_days"] == '':
-                # a. calltime is more recent than ENDDATE value from PerformanceIndicator where PERFORMIND == domain value
-                with arcpy.da.SearchCursor(perform_ind_lyr, end_date, sql_clause=(None, "ORDER BY {0} DESC".format(end_date))) as dates:
-                    last_update_value = dates.next()[0]
-                    d = last_update_value
-                if not last_update_value is None:
-                    arcpy.management.MakeFeatureLayer(indicator_values["inc_features"], "inc_lyr")
-                    incident_lyr = arcpy.management.SelectLayerByAttribute("inc_lyr", "NEW_SELECTION",
-                        """{0} > date '{1}'""".format(inc_time_field, str(last_update_value.replace(microsecond=0))))
+            if ic.stats_service_type == 'AGOL':
+                stats_sh = org_shh.securityhandler
+
+            # Access map JSON
+            admin = arcrest.manageorg.Administration(securityHandler=org_shh.securityhandler)
+            item = admin.content.getItem(ic.mapid)
+            mapjson = item.itemData()
+
+            if 'error' in mapjson:
+                raise Exception(m2)
+
+            print "Getting stats layer info..."
+
+            # Get attributes of a single row in stats layer
+            statsurl, statsquery = get_layer_properties(ic.statslayername,
+                                                      mapjson['operationalLayers'])
+            if not statsurl:
+                raise Exception(m4)
+
+            statslayer = connect_to_layer(statsurl, stats_sh)
+            if not "Update" in statslayer.capabilities:
+                raise Exception(m7)
+
+            if not count_features(statslayer, query=statsquery) == 1:
+                raise Exception(m5)
+
+            stats = get_attributes(statslayer, query=statsquery)
+
+            # If requested, update layer query using today as max date
+            if ic.auto_update_date_query:
+
+                print "Updating date filter on layer..."
+
+                if ic.report_frequency:
+                    # get diff value to min date
+                    if ic.report_time_unit == 'minutes':
+                        delta = td(minute=ic.report_frequency)
+                    elif ic.report_time_unit == 'hours':
+                        delta = td(hours=ic.report_frequency)
+                    elif ic.report_time_unit == 'days':
+                        delta = td(days=ic.report_frequency)
+                    elif ic.report_time_unit == 'weeks':
+                        delta = td(weeks=ic.report_frequency)
+
+                    min_date = start_time - delta
                 else:
-                    raise Exception(e5)
-            else:
-                # b. Value of inc_time_field is >= the current date minus the number of days specified in number_of_days.
-                d = datetime.datetime.now() - datetime.timedelta(days=int(indicator_values["number_of_days"]))
-                arcpy.management.MakeFeatureLayer(indicator_values["inc_features"], "inc_lyr")
-                incident_lyr = arcpy.management.SelectLayerByAttribute("inc_lyr", "NEW_SELECTION",
-                                        """{0} >= date '{1}'""".format(inc_time_field, str(d.replace(microsecond=0))))
+                    # Use end date of previous report
+                    min_date = stats[ic.end_date]
 
-            # 2. value of inc_type_field is in the list of performance_indicators
-            inc_lyr_count = arcpy.management.GetCount(incident_lyr)
+                # update filter on layer
+                for layer in mapjson['operationalLayers']:
+                    if layer['title'] == ic.datalayername:
+                        try:
+                            original_query = layer['layerDefinition']['definitionExpression']
+                            query_words = original_query.split(" ")
 
-            inc_type_field = indicator_values["inc_type_field"]
-            if not inc_type_field.upper() == "NONE":
-                perform_indicators = indicator_values["perform_indicators"]
-                if type(perform_indicators) == tuple:
-                    arcpy.management.SelectLayerByAttribute(incident_lyr, "SUBSET_SELECTION",
-                                    """{0} IN {1}""".format(inc_type_field, perform_indicators))
-                else:
-                    arcpy.management.SelectLayerByAttribute(incident_lyr, "SUBSET_SELECTION",
-                                    """{0} = '{1}'""".format(inc_type_field, perform_indicators))
+                            # Get starting points of all date queries
+                            date_locations = [d for d,x in enumerate(query_words) if ic.datefield in x]
 
-            # Calculate OBSERVCURR with a count of selected incident features.
-            inc_lyr_count = arcpy.management.GetCount(incident_lyr)
-            arcpy.management.CalculateField(perform_ind_lyr,
-                                            observcurr,
-                                            int(inc_lyr_count[0]),
-                                            "PYTHON")
+                            # Find the date range query
+                            for dloc in date_locations:
+                                if query_words[dloc + 1] == "BETWEEN":
+                                    query_start = dloc
 
-            # Populate DATECURR with current date.
-            arcpy.management.CalculateField(perform_ind_lyr,
-                                            datecurr,
-                                            """datetime.datetime.now()""",
-                                            "PYTHON")
+                                    date_length_found = False
+                                    date_length = 0
 
-            # Update LASTUPDATE, LASTEDITOR with the current date & username.
-            arcpy.management.CalculateField(perform_ind_lyr,
-                                            last_editor,
-                                            "'{0}'".format(getpass.getuser()),
-                                        "PYTHON")
+                                    # Dates can span multiple list elements
+                                    # Find the # elements needed for each date
+                                    while not date_length_found:
+                                        if query_words[dloc + 2 + date_length] == 'AND':
+                                            date_length_found = True
+                                            break
+                                        date_length += 1
+                                    break
 
-            arcpy.management.CalculateField(perform_ind_lyr,
-                                            last_update,
-                                            """datetime.datetime.now()""",
-                                            "PYTHON")
+                            # replace max date
+                            # preserve final ) if present
+                            if ')' in query_words[dloc + 2 + (2*date_length)]:
+                                suffix = ')'
+                            else:
+                                suffix = ""
 
-            # Update STARTDATE, ENDDATE with the date range of the data used.
-            arcpy.management.CalculateField(perform_ind_lyr,
-                                            start_date,
-                                            repr(d),
-                                            "PYTHON")
+                            # Delete current max date elements and insert new max date
+                            del(query_words[dloc + 3 + date_length: dloc + 3 + (2*date_length)])
+                            query_words.insert(dloc + 3 + date_length, "'{}'{}".format(start_time, suffix))
 
-            arcpy.management.CalculateField(perform_ind_lyr,
-                                            end_date,
-                                            repr(datetime.datetime.now()),
-                                            "PYTHON")
 
-            # Get the average distance to the specified Nth nearest neighbor
-            # for the selected incident features.
-            if not int(inc_lyr_count[0]) > 0:
-                raise Exception(e6.format(indicator_value))
+                            # replace min date
+                            del(query_words[dloc + 2: dloc + 2 + date_length])
+                            query_words.insert(dloc + 2, "'{}'".format(min_date))
 
-            distances = arcpy.stats.CalculateDistanceBand(incident_lyr,
-                                            indicator_values["neighbors_value"],
-                                            "EUCLIDEAN_DISTANCE")
+                            # ReBuild query string
+                            query = query_words[0]
+                            for i in query_words[1:]:
+                                query += " {}".format(i)
 
-            # Calculates the density of incident features in a neighborhood using the avg distance (from above).
-            output_density = indicator_values["output_density"]
-            arcpy.gp.KernelDensity_sa(incident_lyr,
-                                    "NONE",
-                                    output_density,
-                                    "",
-                                    float(distances[1]),
-                                    "SQUARE_MILES")
+                            # Update JSON with new query
+                            layer['layerDefinition']['definitionExpression'] = query
 
-            # Retrieve the mean & standard dev. of the raster pixel values.
-            mean = arcpy.management.GetRasterProperties(output_density, "MEAN")
-            std = arcpy.management.GetRasterProperties(output_density, "STD")
+                        except ValueError, KeyError:
+                            raise Exception(m6)
 
-            # Exclude from rendering all values from 0 => (mean + (stdev) x (excluded_raster_values))
-            exclusion_value = indicator_values["exclusion_value"]
-            if not exclusion_value == str(0):
-                mean = float(mean[0])
-                std = float(std[0])
-                exclude_values = "0 - {0}".format(str(mean + (std) * (int(exclusion_value))))
-            else:
-                exclude_values = "0"
+                # Commit update to AGOL item
+                useritem = item.userItem
+                params = arcrest.manageorg.ItemParameter()
+                useritem.updateItem(itemParameters = params,
+                                    text=json.dumps(mapjson))
 
-            mxd = arcpy.mapping.MapDocument(indicator_values["map_document"])
-            raster_layer = arcpy.mapping.ListLayers(mxd)[0]
-            raster_layer.symbology.excludedValues = exclude_values
-            mxd.save()
+            # Retrieve the url and queries associated with the data and stats layers
+            print "Getting layer info..."
 
-            # Publish the services.
-            dt = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S")
-            log_file.write(m1.format(dt, indicator_values["service_name"]))
-            print (m1.format(dt, indicator_values["service_name"]))
-            serviceutils.publish_service(indicator_values["service_name"], mxd, "Map")
+            dataurl, dataquery = get_layer_properties(ic.datalayername,
+                                                      mapjson['operationalLayers'])
+            if not dataurl:
+                raise Exception(m3)
 
-            dt = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S")
-            log_file.write(m1.format(dt, ic.stats_service_name))
-            print (m1.format(dt, ic.stats_service_name))
-            serviceutils.publish_service(ic.stats_service_name, ic.stats_mxd, "Feature")
+            # Connect to the services
+            print "Connecting to data layer..."
 
-            # Log the results.
-            dt = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S")
-            log_file.write(m2.format(dt, indicator_value))
+            datalayer = connect_to_layer(dataurl, data_sh)
 
-        except arcpy.ExecuteError:
-            print("{}\n{}\n".format(gp_error, arcpy.GetMessages(2)))
-            dt = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S")
-            log_file.write("{} ({}):\n".format(gp_error, dt))
-            log_file.write("{}\n".format(arcpy.GetMessages(2)))
+            # Count the data features that meet the map query
+            print "Counting features"
+            feature_cnt = count_features(datalayer, query=dataquery)
 
-        except KeyError as ke:
-            print("{} {}\n".format(py_error, ke[0]))
-            dt = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S")
-            log_file.write("{} ({}):\n".format(py_error, dt))
-            log_file.write('{}\n'.format(ke[0]))
+            print "Getting new stats..."
+
+            # Current editor
+            editor = getpass.getuser()
+
+            # Stats fields and their new values
+            field_info =[{
+                            'FieldName':ic.datecurr,
+                            'ValueToSet':today_agol
+                        },{
+                            'FieldName':ic.date1,
+                            'ValueToSet':stats[ic.datecurr]
+                        },{
+                            'FieldName':ic.date2,
+                            'ValueToSet':stats[ic.date1]
+                        },{
+                            'FieldName':ic.date3,
+                            'ValueToSet':stats[ic.date2]
+                        },{
+                            'FieldName':ic.date4,
+                            'ValueToSet':stats[ic.date3]
+                        },{
+                            'FieldName':ic.observcurr,
+                            'ValueToSet':feature_cnt
+                        },{
+                            'FieldName':ic.observ1,
+                            'ValueToSet':stats[ic.observcurr]
+                        },{
+                            'FieldName':ic.observ2,
+                            'ValueToSet':stats[ic.observ1]
+                        },{
+                            'FieldName':ic.observ3,
+                            'ValueToSet':stats[ic.observ2]
+                        },{
+                            'FieldName':ic.observ4,
+                            'ValueToSet':stats[ic.observ3]
+                        },{
+                            'FieldName':ic.last_update,
+                            'ValueToSet':today_agol
+                        },{
+                            'FieldName':ic.last_editor,
+                            'ValueToSet':editor
+                        },{
+                            'FieldName':ic.start_date,
+                            'ValueToSet':min_date
+                        },{
+                            'FieldName':ic.end_date,
+                            'ValueToSet':today_agol
+                        }]
+
+            # Update stats layer
+            print "Updating stats..."
+            update_values(statslayer, field_info, query=statsquery)
+
+            print "Done."
+
+        except (common.ArcRestHelperError),e:
+            print "error in function: %s" % e[0]['function']
+            print "error on line: %s" % e[0]['line']
+            print "error in file name: %s" % e[0]['filename']
+            print "with error message: %s" % e[0]['synerror']
+            if 'arcpyError' in e[0]:
+                print "with arcpy message: %s" % e[0]['arcpyError']
 
         except Exception as ex:
-            print("{}: {}\n".format(py_error, ex[0]))
-            dt = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S")
-            log_file.write("{} ({}):\n".format(py_error, dt))
-            log_file.write("{}\n".format(ex[0]))
+            print("{}\n".format(ex))
+            d = dt.strftime(dt.now(), "%Y-%m-%d %H:%M:%S")
+            log_file.write("{}:\n".format(d))
+            log_file.write("{}\n".format(ex))
+
 # End main function
 
 if __name__ == '__main__':

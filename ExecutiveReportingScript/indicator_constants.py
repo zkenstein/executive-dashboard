@@ -1,26 +1,25 @@
-# Credentials
-org_url             = "http://arcgis.com"   # URL of the organization containing the web map
+# Credentials - required for ArcGIS Online layers only
+org_url             = "http://www.arcgis.com"   # URL of the organization containing the web map
 org_username        = ""                    # Username & password for an account in the organization
 org_password        = ""
 
-server_url          = ""                    # If the services are hosted on a server ourside the organization
-server_username     = ""                    # Supplyt the URL to the server and the server administrator's
-server_password     = ""                    # username and password
-
 # Web Map Information
-mapid           = ""                        # Web map ID
-statslayername  = "Stats"                   # Name of layer containing the historical count dates and values
-datalayername   = ""                        # Name of the feature layer containing the features to be counted
+map_id           = "" # Web map ID
 
 # Data Layer Information
-data_service_type       = 'AGOL' # 'Server'       # Is the data layer hosted in the org_url organization ("AGOL"), or on the server_url ArcGIS Server ("Server")
-datefield               = "REQUESTDATE"           # Field in the data layer containing the date each report was created
-auto_update_date_query  = True                    # True if the script should update an existing date range filter on the data layer in the map to show only the summarized features
-report_duration         = 4                       # duration and unit of time to calculate the report start date. Leave blank to use the end date of the previous report. The report end date will always be now.
-report_time_unit        = "weeks" # minutes, hours, days, weeks
+data_service_type = 'Server'                  # Is the data layer hosted in the org_url organization ("AGOL", or "Portal"), or on ArcGIS Server ("Server")
+data_layer_name   = "Animal Complaints"           # Name of the map layer containing the features to be counted
+data_feature_class = r"" # Path to feature class containing data to load into hosted layer. Must be same schema as layer. Leave blank to not load new features.
+date_field              = "REQUESTDATE"           # Field in the data layer containing the date each report was created
+auto_update_date_query  = True                    # True if the script should update an existing date range filter on the data layer in the map to show only the summarized features.
+report_duration         = 4                       # duration and unit of time to calculate the report start date. Use "" to use the end date of the previous report. The report end date will always be now.
+report_time_unit        = "weeks"                 # hours, days, weeks
 
 # Stats Layer Information
-stats_service_type = 'AGOL'                 # Layer in the web map containing the historical counts and report dates
+stats_service_type = ""                 # Layer in the web map containing the historical counts and report dates. Valid values are 'AGOL', 'Portal', and 'Server'
+stats_layer_name  = "Stats"                 # Name of layer containing the historical count dates and values
+stats_feature_class = r""                    # Full path to the feature class containing the Performance Indicators stats features. This parameter is required when stats_service_type is 'Server'
+stats_feature_id = 0                       # OID value of the feature containing the statistics for the current performance indicator. This parameter is required when when stats_service_type is 'Server'
 
 # Stats layer field names
 date1           = u"DATE1"

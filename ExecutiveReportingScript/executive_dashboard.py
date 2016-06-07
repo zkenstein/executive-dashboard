@@ -8,7 +8,7 @@
 # Version:      Python 2.7
 #-------------------------------------------------------------------------------
 
-import json, urllib, arcrest
+import json, urllib, arcrest, re
 from arcrest.security import AGOLTokenSecurityHandler
 from arcresthelper import securityhandlerhelper
 from arcresthelper import common
@@ -25,7 +25,7 @@ m2 = "Can not access web map JSON. Please check map ID."
 m3 = "Map does not contain the specified data layer"
 m4 = "Map does not contain the specified stats layer"
 m5 = "Apply a filter to the stats layer so that exactly one record is available in the map."
-m6 = "Layer does not contain a filter that uses the provided date field."
+m6 = "Layer does not contain a filter that uses the provided date field, {0}, and the BETWEEN operator."
 m7 = "Stats layer capabilities must include 'Update'."
 
 def get_layer_properties(title, layers):
@@ -206,54 +206,24 @@ def main():
                     if layer['title'] == ic.data_layer_name:
                         try:
                             original_query = layer['layerDefinition']['definitionExpression']
-                            query_words = original_query.split(" ")
 
-                            # Get starting points of all date queries
-                            date_locations = [d for d,x in enumerate(query_words) if ic.date_field in x]
+                            #Find if the expression has a clause using the date field and Between operator
+                            match = re.search(".*?{0} BETWEEN.*?'(.*?)'.*?AND.*?'(.*?)'.*".format(ic.date_field), original_query)
+                            if match is None:
+                                raise ValueError()
 
-                            # Find the date range query
-                            for dloc in date_locations:
-                                if query_words[dloc + 1] == "BETWEEN":
-                                    query_start = dloc
-
-                                    date_length_found = False
-                                    date_length = 0
-
-                                    # Dates can span multiple list elements
-                                    # Find the # elements needed for each date
-                                    while not date_length_found:
-                                        if query_words[dloc + 2 + date_length] == 'AND':
-                                            date_length_found = True
-                                            break
-                                        date_length += 1
-                                    break
-
-                            # replace max date
-                            # preserve final ) if present
-                            if ')' in query_words[dloc + 2 + (2*date_length)]:
-                                suffix = ')'
-                            else:
-                                suffix = ""
-
-                            # Delete current max date elements and insert new max date
-                            del(query_words[dloc + 3 + date_length: dloc + 3 + (2*date_length)])
-                            query_words.insert(dloc + 3 + date_length, "'{}'{}".format(start_time, suffix))
-
-
-                            # replace min date
-                            del(query_words[dloc + 2: dloc + 2 + date_length])
-                            query_words.insert(dloc + 2, "'{}'".format(min_date))
-
-                            # ReBuild query string
-                            query = query_words[0]
-                            for i in query_words[1:]:
-                                query += " {}".format(i)
+                            #Construct a new query replacing the min and max date values with the new dates
+                            new_query = match.group()[0:match.start(1)] + min_date.strftime("%Y-%m-%d %H:%M:%S") + match.group()[match.end(1):match.start(2)] + start_time.strftime("%Y-%m-%d %H:%M:%S") + match.group()[match.end(2):]
 
                             # Update JSON with new query
-                            layer['layerDefinition']['definitionExpression'] = query
+                            layer['layerDefinition']['definitionExpression'] = new_query
 
                         except ValueError, KeyError:
-                            raise Exception(m6)
+                            d = dt.strftime(dt.now(), "%Y-%m-%d %H:%M:%S")
+                            log_file.write("{}:\n".format(d))
+                            log_file.write("{}\n".format(m6.format(ic.date_field)))
+                            print(m6.format(ic.date_field))
+                            continue
 
                 # Commit update to AGOL item
                 useritem = item.userItem

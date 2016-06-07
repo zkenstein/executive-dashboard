@@ -234,7 +234,7 @@ def main():
             datalayer = connect_to_layer(dataurl, shh)
 
             # If necessary, load new points to hosted service
-            if ic.data_feature_class and ic.data_service_type in ['AGOL', 'Portal']:
+            if ic.data_feature_class:
 
                 # only attemp append if there are new features
                 temp_fc = arcpy.CopyFeatures_management(ic.data_feature_class, temp_fc)

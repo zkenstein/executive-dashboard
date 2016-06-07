@@ -398,6 +398,4 @@ def main():
 # End main function
 
 if __name__ == '__main__':
-    argv = tuple(arcpy.GetParameterAsText(i)
-                 for i in range(arcpy.GetArgumentCount()))
-    main(*argv)
+    main()

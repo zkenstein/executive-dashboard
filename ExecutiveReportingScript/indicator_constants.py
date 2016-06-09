@@ -12,7 +12,7 @@ ags_token_url		= "" 							# ex. "http://gisserver.domain.com:6080/arcgis/tokens
 map_id           	= "" 							# Web map ID
 
 # Data Layer Information
-data_service_type 		= 'Server'					# Is the data layer hosted in the org_url organization ("AGOL", or "Portal"), or on ArcGIS Server ("Server")
+data_service_type 		= 'AGOL'					# Is the data layer hosted in the org_url organization ("AGOL", or "Portal"), or on ArcGIS Server ("Server")
 data_layer_name   		= "Animal Complaints"       # Name of the map layer containing the features to be counted
 data_feature_class 		= r"" 						# Path to feature class containing data to load into hosted layer. Must be same schema as layer. Leave blank to not load new features.
 date_field              = "REQUESTDATE"           	# Field in the data layer containing the date each report was created
@@ -21,7 +21,7 @@ report_duration         = 4                       	# Duration and unit of time t
 report_time_unit        = "weeks"                 	# minutes, hours, days, weeks
 
 # Stats Layer Information
-stats_service_type 		= "Server"                 	# Layer in the web map containing the historical counts and report dates. Valid values are 'AGOL', 'Portal', and 'Server'
+stats_service_type 		= "AGOL"                 	# Layer in the web map containing the historical counts and report dates. Valid values are 'AGOL', 'Portal', and 'Server'
 stats_layer_name  		= "Stats"                 	# Name of layer containing the historical count dates and values
 
 # Stats layer field names

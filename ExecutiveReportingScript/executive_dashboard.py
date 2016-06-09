@@ -141,18 +141,28 @@ def main():
                                               username=ic.org_username,
                                               password=ic.org_password,
                                               org_url=ic.org_url)
+
             if org_shh.valid == False:
                 raise Exception(org_shh.message)
 
-            shh = org_shh.securityhandler
+            org_sh = org_shh.securityhandler
 
             # Access map JSON
-            admin = arcrest.manageorg.Administration(securityHandler=shh)
+            admin = arcrest.manageorg.Administration(securityHandler=org_sh)
             item = admin.content.getItem(ic.map_id)
             mapjson = item.itemData()
 
             if 'error' in mapjson:
                 raise Exception(m2)
+
+            # Get security handler for ags services
+            ags_sh = None
+            if ic.ags_username is not None and ic.ags_username != "":
+                ags_sh = arcrest.AGSTokenSecurityHandler(username=ic.ags_username,
+                                     password=ic.ags_password,
+                                     token_url=ic.ags_token_url,
+                                     proxy_url=None,
+                                     proxy_port=None)
 
             print "Getting stats layer info..."
 
@@ -163,27 +173,14 @@ def main():
                 raise Exception(m4)
 
             if ic.stats_service_type in ['AGOL', 'Portal']:
-                statslayer = connect_to_layer(statsurl, shh)
+                statslayer = connect_to_layer(statsurl, org_sh)
+            else:
+                statslayer = connect_to_layer(statsurl, ags_sh)
 
-                if not count_features(statslayer, query=statsquery) == 1:
-                    raise Exception(m5)
+            if not count_features(statslayer, query=statsquery) == 1:
+                raise Exception(m5)
 
-                stats = get_attributes(statslayer, query=statsquery)
-
-            elif ic.stats_service_type == 'Server':
-                # Get field values for feature class
-                statsfields = [f.name for f in arcpy.ListFields(ic.stats_feature_class)]
-                d = arcpy.Describe(ic.stats_feature_class)
-                oid_field = d.OIDFieldName
-                sql = """{} = {}""".format(oid_field, ic.stats_feature_id)
-                with arcpy.da.SearchCursor(ic.stats_feature_class, "*", where_clause=sql) as rows:
-                    stats = {}
-                    for row in rows:
-                        values = list(row)
-                        for val in values:
-                            stats[statsfields[0]] = val
-                            statsfields.remove(statsfields[0])
-                        break
+            stats = get_attributes(statslayer, query=statsquery)
 
             # If requested, update layer query using today as max date
             if ic.auto_update_date_query:
@@ -247,106 +244,55 @@ def main():
             # Connect to the services
             print "Connecting to data layer..."
 
-            datalayer = connect_to_layer(dataurl, shh)
-
             if ic.data_service_type in ['AGOL', 'Portal']:
-                # If necessary, load new points to hosted service
-                if ic.data_feature_class:
+                datalayer = connect_to_layer(dataurl, org_sh)
+            else:
+                datalayer = connect_to_layer(dataurl, ags_sh)
 
-                    datalayer = connect_to_layer(dataurl, shh)
+            # If necessary, load new points to hosted service
+            if ic.data_feature_class:
 
-                    # only attemp append if there are new features
-                    temp_fc = arcpy.CopyFeatures_management(ic.data_feature_class, temp_fc)
-                    sr_output = datalayer.extent['spatialReference']['wkid']
-                    temp_fc_proj = arcpy.Project_management(temp_fc, proj_out, sr_output)
+                # only attemp append if there are new features
+                temp_fc = arcpy.CopyFeatures_management(ic.data_feature_class, temp_fc)
+                sr_output = datalayer.extent['spatialReference']['wkid']
+                temp_fc_proj = arcpy.Project_management(temp_fc, proj_out, sr_output)
 
-                    # Load data from layer to service
-                    datalayer.deleteFeatures(where="1=1")
-                    datalayer.addFeatures(temp_fc_proj)
-                    arcpy.Delete_management(temp_fc)
-                    arcpy.Delete_management(temp_fc_proj)
+                # Load data from layer to service
+                datalayer.deleteFeatures(where="1=1")
+                datalayer.addFeatures(temp_fc_proj)
+                arcpy.Delete_management(temp_fc)
+                arcpy.Delete_management(temp_fc_proj)
 
-                # Count the data features that meet the map query
-                print "Counting features"
-                feature_cnt = count_features(datalayer, query=dataquery)
-
-            elif ic.data_service_type == 'Server':
-                print "Counting features"
-                #temp_fl = arcpy.MakeFeatureLayer_management(ic.data_feature_class, 'temp_fl', where_clause=dataquery)
-                #result = arcpy.GetCount_management(temp_fl)
-                #feature_cnt = int(result.getOutput(0))
-                feature_cnt = 0
+            # Count the data features that meet the map query
+            print "Counting features"
+            feature_cnt = count_features(datalayer, query=dataquery)
 
             print "Getting new stats..."
 
             # Current editor
             editor = getpass.getuser()
 
-            if ic.stats_service_type in ['AGOL', 'Portal']:
-                attributes = get_attributes(statslayer, statsquery)
-                attributes[ic.datecurr] = today_agol
-                attributes[ic.date1] = stats[ic.datecurr]
-                attributes[ic.date2] = stats[ic.date1]
-                attributes[ic.date3] = stats[ic.date2]
-                attributes[ic.date4] = stats[ic.date3]
-                attributes[ic.observcurr] = feature_cnt
-                attributes[ic.observ1] = stats[ic.observcurr]
-                attributes[ic.observ2] = stats[ic.observ1]
-                attributes[ic.observ3] = stats[ic.observ2]
-                attributes[ic.observ4] = stats[ic.observ3]
-                attributes[ic.last_update] = today_agol
-                attributes[ic.last_editor] = editor
-                attributes[ic.end_date] = today_agol
-                if min_date is None:
-                    attributes[ic.start_date] = stats[ic.end_date]
-                else:
-                    attributes[ic.start_date] = get_epoch_time(min_date)        
+            attributes = get_attributes(statslayer, statsquery)
+            attributes[ic.datecurr] = today_agol
+            attributes[ic.date1] = stats[ic.datecurr]
+            attributes[ic.date2] = stats[ic.date1]
+            attributes[ic.date3] = stats[ic.date2]
+            attributes[ic.date4] = stats[ic.date3]
+            attributes[ic.observcurr] = feature_cnt
+            attributes[ic.observ1] = stats[ic.observcurr]
+            attributes[ic.observ2] = stats[ic.observ1]
+            attributes[ic.observ3] = stats[ic.observ2]
+            attributes[ic.observ4] = stats[ic.observ3]
+            attributes[ic.last_update] = today_agol
+            attributes[ic.last_editor] = editor
+            attributes[ic.end_date] = today_agol
+            if min_date is None:
+                attributes[ic.start_date] = stats[ic.end_date]
+            else:
+                attributes[ic.start_date] = get_epoch_time(min_date)        
 
-                edits = [{"attributes" : attributes}]
-                print(edits)
-                statslayer.applyEdits(updateFeatures=edits)
-
-            # update server stats layer
-            elif ic.stats_service_type == 'Server':
-                sql = """{} = {}""".format(oid_field, ic.stats_feature_id)
-                fields = [ic.datecurr, ic.date1, ic.date2, ic.date3, ic.date4,
-                          ic.observcurr, ic.observ1, ic.observ2, ic.observ3,
-                          ic.observ4, ic.last_update, ic.last_editor,
-                          ic.start_date, ic.end_date]
-
-                workspace = dirname(ic.stats_feature_class)
-                d = arcpy.Describe(workspace)
-                if not d.dataType == 'Workspace':
-                    workspace = dirname(workspace)
-
-                edit = arcpy.da.Editor(workspace)
-                edit.startEditing(False, True)
-                edit.startOperation()
-
-                with arcpy.da.UpdateCursor(ic.stats_feature_class, fields, where_clause=sql) as rows:
-                    for row in rows:
-                        print "Updating stats..."
-                        today_agol = dt.strptime(dt.isoformat(start_time), "%Y-%m-%dT%H:%M:%S.%f")
-                        row[0] = today_agol
-                        row[1] = stats[ic.datecurr]
-                        row[2] = stats[ic.date1]
-                        row[3] = stats[ic.date2]
-                        row[4] = stats[ic.date3]
-                        row[5] = feature_cnt
-                        row[6] = stats[ic.observcurr]
-                        row[7] = stats[ic.observ1]
-                        row[8] = stats[ic.observ2]
-                        row[9] = stats[ic.observ3]
-                        row[10] = today_agol
-                        row[11] = editor
-                        row[12] = dt.strptime(dt.isoformat(min_date), "%Y-%m-%dT%H:%M:%S.%f")
-                        row[13] = today_agol
-
-                        rows.updateRow(row)
-
-                edit.stopOperation()
-                edit.stopEditing(True)
-
+            edits = [{"attributes" : attributes}]
+            statslayer.applyEdits(updateFeatures=edits)
 
             print "Done."
 

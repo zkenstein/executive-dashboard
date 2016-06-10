@@ -1,6 +1,8 @@
 # Tools, notes, outputs
-__*.*
-__*
+___*.*
+___*
+*.pyc
 
 # Snap backups
 *.7z
+*.zip

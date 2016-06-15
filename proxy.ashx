@@ -383,7 +383,7 @@ public class proxy : IHttpHandler
 
             string username = usernames[iUser];
             string password = passwords[iUser];
-            responseToApp.Headers["X-UserNum"] = (++iUser).ToString();
+            if (cShowAuthXHeaders) responseToApp.Headers["X-UserNum"] = (++iUser).ToString();
 
             // Post the authentication request
             System.Net.HttpWebRequest authenticationReq =
@@ -464,8 +464,8 @@ public class proxy : IHttpHandler
             authExpiration = expiresDate.ToShortDateString() + " " + expiresDate.ToShortTimeString() + " UTC";
         }
 
-        responseToApp.Headers["X-FromCache"] = usedCache.ToString();
-        responseToApp.Headers["X-AuthExpiration"] = authExpiration;
+        if (cShowAuthXHeaders) responseToApp.Headers["X-FromCache"] = usedCache.ToString();
+        if (cShowAuthXHeaders) responseToApp.Headers["X-AuthExpiration"] = authExpiration;
 
         // Switch to SSL if desired by authentication response
         if (authSpec.ssl && 5 < thirdPartyServerURL.Length)
@@ -570,7 +570,7 @@ public class proxy : IHttpHandler
                     cacheTag, authSpec, null, expiresDate, Cache.NoSlidingExpiration);
 
                 authExpiration = expiresDate.ToShortDateString() + " " + expiresDate.ToShortTimeString() + " UTC";
-                responseToApp.Headers["X-AuthExpiration"] = authExpiration;
+                if (cShowAuthXHeaders) responseToApp.Headers["X-AuthExpiration"] = authExpiration;
             }
             else
             {
@@ -578,7 +578,7 @@ public class proxy : IHttpHandler
             }
         }
 
-        responseToApp.Headers["X-FromCache"] = usedCache.ToString();
+        if (cShowAuthXHeaders) responseToApp.Headers["X-FromCache"] = usedCache.ToString();
 
         // "Step 3: Authenticate API requests with the bearer token"
         requestToThirdPartyServer = (HttpWebRequest)WebRequest.Create(thirdPartyServerURL);

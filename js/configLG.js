@@ -90,7 +90,7 @@ dojo.declare("js.config", null, {
     AuthenticatedLinks: "http://www.arcgis.com/sharing/rest/content/groups/${0}?f=json&token=${0}",
 
     //Authenticated group id for dashboard group.
-    AuthenticatedGroup: "9c63fc64e30c4c57a3b34c4b8a3da56e",
+    AuthenticatedGroup: "bf36ec6f635e43388d8b7173d60e9aac",
 
     //Flag for retaining the webmap initial extent when changing from one webmap to another.
     LoadInitialExtentForWebmap: true,

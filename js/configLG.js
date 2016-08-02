@@ -182,8 +182,8 @@ dojo.declare("js.config", null, {
 
     //Default values to set the RSS Feed and Twitter trend.
     DefaultNewsFields: [{
-        RSSFeedName: "Chicago Tribune",
-        RSSFeedURL: "http://feeds.chicagotribune.com/chicagotribune/news/"
+        RSSFeedName: "CNN Local News",
+        RSSFeedURL: "http://rss.cnn.com/rss/cnn_us.rss"
     }, {
         TwitterTrendName: "Chicago"
     }],

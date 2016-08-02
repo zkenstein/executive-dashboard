@@ -206,7 +206,7 @@ dojo.declare("js.config", null, {
         Images: ["images/safety.png", "images/safety_hover.png"],
         isPodVisible: true
     }, {
-        Tag: "Special Events",
+        Tag: "Community Events",
         Images: ["images/special_events.png", "images/special_events_hover.png"]
     }, {
         Tag: "Health",

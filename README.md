@@ -1,4 +1,6 @@
-# executive-dashboard
+# executive-dashboard (Mature Support)
+
+***This executive dashboard repo has been moved to the [Mature Support Lifecycle Phase](http://links.esri.com/Support/ProductLifeCycle), applications built from this repo are in the Mature Support lifecycle phase.***
 
 The Executive Dashboard is a configuration of ArcGIS and JavaScript application used by government leaders to proactively view critical metrics, identify trends, raise questions, and devise new management strategies.  It supports community-wide efforts to increase accountability and transparency within government and with the citizens they serve.   The Dashboard is a single application that can be deployed by  governments and used by decision-makers on a tablet device and desktop PC.
 
